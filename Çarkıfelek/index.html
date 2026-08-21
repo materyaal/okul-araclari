@@ -1,26 +1,58 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-theme="navy">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Rastgele Öğrenci Seçici & Çok Amaçlı Çarkıfelek</title>
   <style>
-    :root {
+    /* ==========================================================
+       TEMA DEĞİŞKENLERİ (CSS Variables)
+    ========================================================== */
+    :root[data-theme="navy"] {
       --bg-main: #0b1329;
       --bg-panel: #16203c;
       --bg-card: #1f2d52;
       --bg-input: #293b68;
+      --border-color: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --canvas-bg: #16203c;
+      --canvas-ring: #1f2d52;
+    }
+
+    :root[data-theme="dark"] {
+      --bg-main: #09090b;
+      --bg-panel: #18181b;
+      --bg-card: #27272a;
+      --bg-input: #3f3f46;
+      --border-color: #52525b;
+      --text-main: #fafafa;
+      --text-muted: #a1a1aa;
+      --canvas-bg: #18181b;
+      --canvas-ring: #27272a;
+    }
+
+    :root[data-theme="light"] {
+      --bg-main: #f1f5f9;
+      --bg-panel: #ffffff;
+      --bg-card: #f8fafc;
+      --bg-input: #e2e8f0;
+      --border-color: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --canvas-bg: #e2e8f0;
+      --canvas-ring: #cbd5e1;
+    }
+
+    :root {
       --accent: #6366f1;
       --accent-hover: #4f46e5;
       --accent-danger: #f43f5e;
       --accent-danger-hover: #e11d48;
       --accent-success: #10b981;
       --accent-warning: #f59e0b;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border-color: #334155;
       --radius: 12px;
-      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
     }
 
     * {
@@ -40,31 +72,51 @@
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
 
     header {
       background-color: var(--bg-panel);
       border-bottom: 1px solid var(--border-color);
-      padding: 0.75rem 1.5rem;
+      padding: 0.75rem 1.25rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       box-shadow: var(--shadow);
       z-index: 10;
+      flex-wrap: wrap;
+      gap: 0.5rem;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
-      font-size: 1.25rem;
+      gap: 0.5rem;
+      font-size: 1.15rem;
       font-weight: 800;
-      letter-spacing: -0.5px;
-      color: #fff;
+      color: var(--text-main);
     }
 
     .brand span {
       color: var(--accent);
+    }
+
+    .theme-selector-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .theme-select {
+      background-color: var(--bg-input);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
     }
 
     .btn {
@@ -107,14 +159,15 @@
     }
 
     .btn-secondary:hover {
-      background-color: #3b5087;
+      opacity: 0.9;
     }
 
+    /* Ana Taşıyıcı: Mobilde doğal akış ve scroll için min-height kullanımı */
     .main-container {
       display: grid;
-      grid-template-columns: 1.25fr 0.75fr;
+      grid-template-columns: 1.1fr 0.9fr;
       flex: 1;
-      height: calc(100vh - 65px);
+      width: 100%;
       position: relative;
     }
 
@@ -124,17 +177,16 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      padding: 1.5rem 1rem;
       position: relative;
-      padding: 1.5rem;
-      overflow: hidden;
     }
 
     .wheel-container {
       position: relative;
-      width: min(72vh, 80vw);
-      height: min(72vh, 80vw);
-      max-width: 620px;
-      max-height: 620px;
+      width: min(65vh, 88vw);
+      height: min(65vh, 88vw);
+      max-width: 560px;
+      max-height: 560px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -144,10 +196,9 @@
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      box-shadow: 0 0 35px rgba(0,0,0,0.6), 0 0 15px rgba(99, 102, 241, 0.25);
+      box-shadow: 0 0 30px rgba(0,0,0,0.35);
     }
 
-    /* Dinamik Yaylanan Pointer (Ok) */
     .pointer {
       position: absolute;
       top: -14px;
@@ -157,7 +208,7 @@
       height: 46px;
       z-index: 5;
       transform-origin: 50% 0%;
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
       transition: transform 0.05s ease-out;
     }
 
@@ -186,22 +237,22 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 86px;
-      height: 86px;
+      width: 82px;
+      height: 82px;
       border-radius: 50%;
       background: radial-gradient(circle, #ffffff 0%, #cbd5e1 100%);
       color: #0b1329;
-      border: 6px solid #16203c;
+      border: 6px solid var(--bg-panel);
       font-weight: 850;
-      font-size: 1.05rem;
+      font-size: 1rem;
       letter-spacing: 0.5px;
       cursor: pointer;
       z-index: 6;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.15s ease, background 0.2s ease;
+      transition: transform 0.15s ease;
       touch-action: manipulation;
     }
 
@@ -210,10 +261,10 @@
     }
 
     .center-spin-btn:disabled {
-      background: #475569;
-      color: #94a3b8;
+      background: #64748b;
+      color: #cbd5e1;
       cursor: not-allowed;
-      border-color: #334155;
+      border-color: var(--border-color);
     }
 
     /* Sağ Sütun - Kontrol Paneli */
@@ -224,7 +275,6 @@
       display: flex;
       flex-direction: column;
       gap: 1rem;
-      overflow-y: auto;
     }
 
     .card {
@@ -260,7 +310,7 @@
       background-color: var(--bg-input);
       border: 1px solid var(--border-color);
       border-radius: 8px;
-      color: #fff;
+      color: var(--text-main);
       padding: 0.65rem 0.8rem;
       font-size: 0.95rem;
       outline: none;
@@ -274,7 +324,7 @@
     textarea {
       resize: vertical;
       min-height: 120px;
-      max-height: 220px;
+      max-height: 240px;
       line-height: 1.4;
       user-select: text;
       -webkit-user-select: text;
@@ -288,7 +338,7 @@
     .toggle-row {
       display: flex;
       flex-direction: column;
-      gap: 0.6rem;
+      gap: 0.65rem;
       padding: 0.2rem 0;
     }
 
@@ -362,6 +412,7 @@
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s ease;
+      padding: 1rem;
     }
 
     .modal-backdrop.active {
@@ -373,11 +424,11 @@
       background: var(--bg-panel);
       border: 2px solid var(--accent);
       border-radius: 18px;
-      padding: 2.2rem 2rem;
-      max-width: 500px;
-      width: 90%;
+      padding: 2rem 1.5rem;
+      max-width: 480px;
+      width: 100%;
       text-align: center;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.7);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.5);
       transform: scale(0.85);
       transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
@@ -396,11 +447,11 @@
     }
 
     .winner-name {
-      font-size: 2rem;
+      font-size: 1.8rem;
       font-weight: 800;
-      color: #fff;
-      margin: 1rem 0 1.8rem;
-      padding: 1.2rem;
+      color: var(--text-main);
+      margin: 1rem 0 1.5rem;
+      padding: 1rem;
       background: var(--bg-main);
       border-radius: 12px;
       border: 1px solid var(--border-color);
@@ -424,18 +475,23 @@
       z-index: 99;
     }
 
+    /* Mobil ve Tablet Uyumluluk Kuralı */
     @media (max-width: 900px) {
       .main-container {
         grid-template-columns: 1fr;
         height: auto;
+        display: flex;
+        flex-direction: column;
       }
       .controls-section {
         border-left: none;
         border-top: 1px solid var(--border-color);
+        padding-bottom: 2.5rem;
       }
       .wheel-container {
-        width: 82vw;
-        height: 82vw;
+        width: 84vw;
+        height: 84vw;
+        margin: 0.5rem auto;
       }
     }
   </style>
@@ -446,9 +502,13 @@
     <div class="brand">
       🎯 <span>Materyaal</span> Akıllı Çarkıfelek
     </div>
-    <button class="btn btn-secondary" id="fullscreenBtn" title="Tam Ekran Modu">
-      ⛶ Tam Ekran
-    </button>
+    <div class="theme-selector-box">
+      <select id="themeSelector" class="theme-select" aria-label="Tema Seçimi">
+        <option value="navy">🌌 Koyu Lacivert</option>
+        <option value="dark">🌑 Gece Siyahı</option>
+        <option value="light">☀️ Aydınlık (Açık)</option>
+      </select>
+    </div>
   </header>
 
   <div class="main-container">
@@ -498,7 +558,7 @@
       </div>
 
       <!-- Liste Giriş ve Ayarlar -->
-      <div class="card" style="flex: 1;">
+      <div class="card">
         <div class="card-title">
           <span>📋 Çark Elemanları</span>
           <span class="badge" id="itemCountBadge">0 Eleman</span>
@@ -549,7 +609,7 @@
 
   <script>
     /* ==========================================================
-       1. VERİ YAPILARI & GLOBAL DURUM
+       1. VERİ TANIMLARI & GLOBAL DURUM
     ========================================================== */
     const PRESET_TEMPLATES = {
       homework: [
@@ -608,14 +668,30 @@
     const mysteryToggle = document.getElementById('mysteryToggle');
     const resetOriginalBtn = document.getElementById('resetOriginalBtn');
     const clearBtn = document.getElementById('clearBtn');
-    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const themeSelector = document.getElementById('themeSelector');
     const winnerModal = document.getElementById('winnerModal');
     const winnerDisplay = document.getElementById('winnerDisplay');
     const modalCloseBtn = document.getElementById('modalCloseBtn');
     const modalRemoveBtn = document.getElementById('modalRemoveBtn');
 
     /* ==========================================================
-       2. WEB AUDIO API SES MOTORU
+       2. TEMA YÖNETİMİ
+    ========================================================== */
+    function initTheme() {
+      const savedTheme = localStorage.getItem('materyaal_wheel_theme') || 'navy';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      themeSelector.value = savedTheme;
+    }
+
+    themeSelector.addEventListener('change', (e) => {
+      const theme = e.target.value;
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('materyaal_wheel_theme', theme);
+      drawWheel();
+    });
+
+    /* ==========================================================
+       3. SES MOTORU (Web Audio API)
     ========================================================== */
     let audioCtx = null;
 
@@ -648,7 +724,7 @@
     function playVictoryMelody() {
       try {
         initAudio();
-        const notes = [261.63, 329.63, 392.00, 523.25, 659.25]; // C4, E4, G4, C5, E5
+        const notes = [261.63, 329.63, 392.00, 523.25, 659.25];
         notes.forEach((freq, idx) => {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
@@ -667,13 +743,17 @@
     }
 
     /* ==========================================================
-       3. ÇARK ÇİZİMİ (Canvas & Dinamik Tipografi)
+       4. ÇARK ÇİZİMİ (Canvas)
     ========================================================== */
     function drawWheel() {
       const w = canvas.width;
       const h = canvas.height;
       const center = w / 2;
       const radius = center - 30;
+      const style = getComputedStyle(document.documentElement);
+      const canvasBg = style.getPropertyValue('--canvas-bg').trim() || '#16203c';
+      const ringBg = style.getPropertyValue('--canvas-ring').trim() || '#1f2d52';
+      const textMuted = style.getPropertyValue('--text-muted').trim() || '#94a3b8';
 
       ctx.clearRect(0, 0, w, h);
 
@@ -681,13 +761,13 @@
         ctx.save();
         ctx.beginPath();
         ctx.arc(center, center, radius, 0, 2 * Math.PI);
-        ctx.fillStyle = '#16203c';
+        ctx.fillStyle = canvasBg;
         ctx.fill();
         ctx.lineWidth = 12;
-        ctx.strokeStyle = '#293b68';
+        ctx.strokeStyle = ringBg;
         ctx.stroke();
 
-        ctx.fillStyle = '#94a3b8';
+        ctx.fillStyle = textMuted;
         ctx.font = 'bold 28px system-ui';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -706,7 +786,6 @@
       for (let i = 0; i < items.length; i++) {
         const angle = i * sliceAngle;
         
-        // Dilim Arka Planı
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.arc(0, 0, radius, angle, angle + sliceAngle);
@@ -714,17 +793,15 @@
         ctx.fillStyle = PALETTE[i % PALETTE.length];
         ctx.fill();
         ctx.lineWidth = 2.5;
-        ctx.strokeStyle = '#0b1329';
+        ctx.strokeStyle = 'rgba(0,0,0,0.15)';
         ctx.stroke();
 
-        // Metin Yerleşimi
         ctx.save();
         ctx.rotate(angle + sliceAngle / 2);
         ctx.textAlign = 'right';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#ffffff';
 
-        // Adaptif Font Boyutu
         let fontSize = Math.min(26, Math.max(12, Math.floor(460 / items.length)));
         if (items.length <= 4) fontSize = 30;
         ctx.font = `700 ${fontSize}px system-ui`;
@@ -745,17 +822,16 @@
         ctx.restore();
       }
 
-      // Dış Halka Süslemesi
       ctx.restore();
       ctx.beginPath();
       ctx.arc(center, center, radius, 0, 2 * Math.PI);
       ctx.lineWidth = 16;
-      ctx.strokeStyle = '#1f2d52';
+      ctx.strokeStyle = ringBg;
       ctx.stroke();
     }
 
     /* ==========================================================
-       4. GELİŞMİŞ DÖNÜŞ FİZİĞİ & POINTER YAYLANMASI
+       5. DÖNÜŞ FİZİĞİ & ANİMASYON
     ========================================================== */
     function triggerPointerFlick() {
       pointer.style.transform = 'rotate(-18deg)';
@@ -776,7 +852,6 @@
       const targetIndex = Math.floor(Math.random() * numItems);
       lastWinner = items[targetIndex];
 
-      // İbre tam tepede (-PI/2). Dilim merkezini ibreye oturtma:
       const targetSliceCenter = (targetIndex * sliceAngle) + (sliceAngle / 2);
       let targetRot = (1.5 * Math.PI) - targetSliceCenter;
 
@@ -790,12 +865,12 @@
       const totalSpinAngle = (minRounds * 2 * Math.PI) + diff;
 
       const startAngle = currentRotation;
-      const duration = 4200 + Math.random() * 1600; // 4.2 - 5.8 saniye rastgele süre
+      const duration = 4200 + Math.random() * 1600;
       let startTime = null;
       let lastTickSlice = -1;
 
       function easeOut(t) {
-        return 1 - Math.pow(1 - t, 5); // Quintic Ease Out
+        return 1 - Math.pow(1 - t, 5);
       }
 
       function animate(currentTime) {
@@ -807,7 +882,6 @@
         currentRotation = startAngle + (totalSpinAngle * easedProgress);
         drawWheel();
 
-        // İbrenin Dilim Geçiş Tespiti
         const activeNormalizedAngle = (1.5 * Math.PI - (currentRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
         const currentSlice = Math.floor(activeNormalizedAngle / sliceAngle);
 
@@ -837,7 +911,7 @@
     }
 
     /* ==========================================================
-       5. KONFETİ MOTORU & KAZANAN MODALI
+       6. KONFETİ VE KAZANAN MODALI
     ========================================================== */
     let confettiParticles = [];
     let confettiAnimationId = null;
@@ -852,7 +926,7 @@
     function launchConfetti() {
       confettiParticles = [];
       const colors = ['#f59e0b', '#f43f5e', '#10b981', '#6366f1', '#ec4899', '#38bdf8', '#fbbf24'];
-      for (let i = 0; i < 160; i++) {
+      for (let i = 0; i < 150; i++) {
         confettiParticles.push({
           x: window.innerWidth / 2,
           y: window.innerHeight / 2,
@@ -881,7 +955,7 @@
         p.y += p.vy;
         p.vy += p.gravity;
         p.rot += p.rotSpeed;
-        p.opacity -= 0.007;
+        p.opacity -= 0.008;
 
         if (p.opacity > 0) {
           alive = true;
@@ -912,13 +986,13 @@
     }
 
     /* ==========================================================
-       6. VERİ TEMİZLEME, LİSTE YÖNETİMİ & LOCALSTORAGE
+       7. VERİ VE LİSTE YÖNETİMİ
     ========================================================== */
     function cleanAndParseInput(rawText) {
       return rawText
         .split(/[\n,]+/)
         .map(i => i.trim())
-        .filter(i => i.length > 0); // Boşluk ve boş satırları kesin temizle
+        .filter(i => i.length > 0);
     }
 
     function updateFromTextarea() {
@@ -972,7 +1046,7 @@
     }
 
     /* ==========================================================
-       7. ETKİNLİK DİNLEYİCİLERİ (Touch & Click)
+       8. ETKİNLİK BAĞLANTILARI
     ========================================================== */
     function attachFastClick(element, handler) {
       element.addEventListener('click', handler);
@@ -1050,14 +1124,6 @@
       }
     });
 
-    attachFastClick(fullscreenBtn, () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      } else {
-        document.exitFullscreen().catch(() => {});
-      }
-    });
-
     attachFastClick(modalCloseBtn, hideWinnerModal);
 
     attachFastClick(modalRemoveBtn, () => {
@@ -1067,8 +1133,8 @@
       hideWinnerModal();
     });
 
-    // İlk Yükleme
     window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
       renderSavedListsDropdown();
       setListContent(PRESET_TEMPLATES.homework);
       templatesSelect.value = 'homework';
