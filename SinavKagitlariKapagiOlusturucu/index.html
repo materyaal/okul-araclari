@@ -2,23 +2,23 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Otomatik Sınav Kapı Etiketi Oluşturucu</title>
   
   <!-- CSS Kütüphaneleri -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   
-  <!-- JS Kütüphaneleri (SheetJS, PDF.js, html2pdf.js) -->
+  <!-- JS Kütüphaneleri (SheetJS & PDF.js) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
-    if (window.pdfjsLib) {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    }
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   </script>
+  <!-- Mobil cihazlarda window.print() güvenilir çalışmadığı için doğrudan PDF üretimi -->
+  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 
   <style>
+    /* Temel Değişkenler ve Dinamik Font Boyutları */
     :root {
       --card-border-color: #000000;
       --card-header-bg: #f8f9fa;
@@ -52,6 +52,7 @@
       --card-accent-color: #1b4332;
     }
 
+    /* Gereksiz İç Kaydırma Çubuklarını Sıfırlama */
     html, body {
       margin: 0;
       padding: 6px;
@@ -61,47 +62,11 @@
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       color: #333;
       box-sizing: border-box;
-      touch-action: manipulation;
     }
 
     .main-wrapper {
       max-width: 980px;
       margin: 0 auto;
-    }
-
-    /* Dokunmatik Hedef Standartları (44x44px) */
-    .touch-btn {
-      min-height: 44px;
-      min-width: 44px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .kart-sil-btn {
-      position: absolute;
-      top: -12px;
-      right: -12px;
-      background: #dc3545;
-      color: #fff;
-      border: 3px solid #fff;
-      border-radius: 50%;
-      width: 44px;
-      height: 44px;
-      font-size: 18px;
-      font-weight: bold;
-      line-height: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      z-index: 10;
-      transition: transform 0.15s;
-    }
-    .kart-sil-btn:hover {
-      transform: scale(1.1);
-      background: #bb2d3b;
     }
 
     /* Canlı Önizleme Alanı */
@@ -120,104 +85,92 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
     }
 
-    /* A4 Sayfa Responsive Oranı (Ekran Modu) */
-    @media screen {
-      .a4-sayfa {
-        background: #ffffff;
-        border: 1px solid #dcdcdc;
-        padding: 3% 4%;
-        margin: 0 auto;
-        width: 100%;
-        max-width: 210mm;
-        aspect-ratio: 210 / 297;
-        height: auto;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
-        border-radius: 4px;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        gap: 2%;
-      }
-
-      .sinif-kart {
-        border: 2.5px solid var(--card-border-color);
-        background: #fff;
-        display: flex;
-        flex: 1 1 31%;
-        min-height: 0;
-        box-sizing: border-box;
-        position: relative;
-        border-radius: 2px;
-      }
+    /* A4 Sayfa Mimarisi */
+    .a4-sayfa {
+      background: #ffffff;
+      border: 1px solid #dcdcdc;
+      padding: 7mm 9mm;
+      margin: 0;
+      width: 210mm;
+      height: 297mm;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex-shrink: 0;
+      transform-origin: top left;
     }
 
-    /* Yazdırma Modu */
-    @media print {
-      body {
-        background: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-      }
-
-      .no-print, .kart-sil-btn {
-        display: none !important;
-      }
-
-      .preview-card-wrapper {
-        background: none !important;
-        border: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-      }
-
-      #printArea {
-        width: 100%;
-        margin: 0;
-        padding: 0;
-      }
-
-      @page {
-        size: A4 portrait;
-        margin: 0;
-      }
-
-      .a4-sayfa {
-        width: 210mm !important;
-        height: 297mm !important;
-        padding: 7mm 9mm !important;
-        margin: 0 !important;
-        border: none !important;
-        box-shadow: none !important;
-        border-radius: 0 !important;
-        page-break-after: always;
-        break-after: page;
-        box-sizing: border-box !important;
-        aspect-ratio: auto !important;
-        display: flex !important;
-        flex-direction: column !important;
-        justify-content: space-between !important;
-      }
-
-      .sinif-kart {
-        height: 87mm !important;
-        flex: none !important;
-        border: 2.5px solid var(--card-border-color) !important;
-        break-inside: avoid;
-        page-break-inside: avoid;
-        display: flex !important;
-      }
-
-      [contenteditable="true"] {
-        background: transparent !important;
-        box-shadow: none !important;
-      }
+    /* Mobilde/dar ekranlarda A4 sayfasının oranını bozmadan küçültülmesi için
+       JS tarafından ölçeklenen sarmalayıcı. Sayfanın gerçek 210mm/297mm boyutu
+       korunur, sadece görsel olarak transform: scale() ile küçültülür. */
+    .a4-scaler {
+      width: 100%;
+      max-width: 210mm;
+      margin: 0 auto 20px auto;
+      overflow: hidden;
+      position: relative;
     }
 
-    /* Kart İçi Düzen */
+    /* PDF dışa aktarma sırasında ekran öğelerini (sil butonu, kenar boşlukları vb.) gizle */
+    body.pdf-exporting .no-print,
+    body.pdf-exporting .kart-sil-btn {
+      display: none !important;
+    }
+    body.pdf-exporting .a4-scaler {
+      max-width: none !important;
+      overflow: visible !important;
+    }
+    body.pdf-exporting .a4-sayfa {
+      transform: none !important;
+      box-shadow: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+    }
+
+    /* Sınav Kapı Kartı */
+    .sinif-kart {
+      border: 2.5px solid var(--card-border-color);
+      background: #fff;
+      display: flex;
+      height: 87mm;
+      box-sizing: border-box;
+      position: relative;
+      border-radius: 2px;
+      transition: border-color 0.2s;
+    }
+
+    .kart-sil-btn {
+      position: absolute;
+      top: -9px;
+      right: -9px;
+      background: #dc3545;
+      color: #fff;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      font-size: 13px;
+      font-weight: bold;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+      z-index: 10;
+      transition: transform 0.15s, background-color 0.15s;
+    }
+    .kart-sil-btn:hover {
+      transform: scale(1.15);
+      background: #bb2d3b;
+    }
+
+    /* Sol Bilgi Tablosu */
     .sol-tablo {
       width: 72%;
       border-right: 2.5px solid var(--card-border-color);
@@ -257,7 +210,7 @@
       display: flex;
       align-items: center;
       color: #000 !important;
-      min-height: 26px;
+      min-height: 28px;
       word-break: break-word;
       line-height: 1.15;
       white-space: pre-wrap;
@@ -266,16 +219,17 @@
     .satir-ders-adi .deger { font-size: var(--font-ders-adi) !important; }
     .satir-tarih-saat .deger { font-size: var(--font-tarih-saat) !important; }
     .satir-sinif .deger { font-size: var(--font-sinif) !important; }
-    .satir-ogretmen .deger { font-size: var(--font-ogretmen) !important; }
+    .satir-ogretmen .deger { font-size: var(--font-ogretmen) !important; color: #000 !important; }
     .satir-kelebek .deger { font-size: var(--font-kelebek) !important; }
     .satir-girmeyenler .deger { font-size: var(--font-girmeyenler) !important; }
 
+    /* Sağ Bölüm */
     .sag-panel {
       width: 28%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
       padding: 6px 4px;
       background: #ffffff;
       box-sizing: border-box;
@@ -287,7 +241,6 @@
       align-items: center;
       justify-content: center;
       width: 100%;
-      margin-bottom: 4px;
     }
     .kart-logo {
       max-height: 36px;
@@ -308,6 +261,28 @@
       justify-content: center;
     }
 
+    .kart-qr-kapsayici {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+    }
+    .kart-qr {
+      width: 44px;
+      height: 44px;
+      border: 1px solid #ccc;
+      padding: 1px;
+      background: #fff;
+    }
+    .kart-qr-yazi {
+      font-size: 6.5pt;
+      font-weight: 700;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
     [contenteditable="true"] {
       outline: none;
       transition: background-color 0.2s, box-shadow 0.2s;
@@ -322,33 +297,91 @@
         box-shadow: inset 0 0 0 2px #0d6efd;
       }
     }
+
+    /* Baskı Ayarları */
+    @media print {
+      body {
+        background: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      .no-print, .kart-sil-btn {
+        display: none !important;
+      }
+
+      .preview-card-wrapper {
+        background: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      #printArea {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+
+      .a4-scaler {
+        width: auto !important;
+        max-width: none !important;
+        height: auto !important;
+        overflow: visible !important;
+        margin: 0 !important;
+      }
+
+      .a4-sayfa {
+        width: 210mm;
+        height: 297mm;
+        padding: 7mm 9mm;
+        margin: 0;
+        border: none;
+        box-shadow: none;
+        border-radius: 0;
+        page-break-after: always;
+        break-after: page;
+        box-sizing: border-box;
+        transform: none !important;
+      }
+
+      .sinif-kart {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      [contenteditable="true"] {
+        background: transparent !important;
+        box-shadow: none !important;
+      }
+    }
   </style>
 </head>
 <body>
 
 <div class="main-wrapper">
-  <!-- CDN Yükleme Hatası Bildirimi -->
-  <div id="cdnErrorBanner" class="alert alert-danger py-2 px-3 mb-3 d-none no-print" role="alert">
-    <strong>⚠️ Kütüphane Yükleme Uyarısı:</strong> PDF/Excel işleme modülleri internet kesintisi nedeniyle yüklenemedi. Manuel sekmesini kullanarak doğrudan aralık ile etiket üretebilirsiniz.
-  </div>
-
   <!-- KONTROL FORMU -->
   <div class="bg-white p-3 p-md-4 rounded-3 shadow-sm mb-3 no-print border">
     
-    <!-- Yöntem Seçici -->
+    <!-- Yöntem Seçimi -->
     <div class="card mb-3 border-2 border-primary shadow-sm">
       <div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center py-2 px-3 gap-2 border-bottom">
         <span class="fw-bold text-dark fs-6">📌 Sınıf Belirleme Yöntemi:</span>
         
         <div class="btn-group" role="group" aria-label="Sınıf Yöntemi">
           <input type="radio" class="btn-check" name="yontemSecim" id="yontemDosya" autocomplete="off" checked>
-          <label class="btn btn-outline-primary fw-bold px-3 py-2 touch-btn" for="yontemDosya" style="cursor: pointer;">
+          <label class="btn btn-outline-primary fw-bold px-3 py-2" for="yontemDosya" style="cursor: pointer;">
             📁 1. Yöntem: Dosyadan Oku (PDF / Excel)
           </label>
 
           <input type="radio" class="btn-check" name="yontemSecim" id="yontemManuel" autocomplete="off">
-          <label class="btn btn-outline-primary fw-bold px-3 py-2 touch-btn" for="yontemManuel" style="cursor: pointer;">
-            ✍️ 2. Yöntem: Manuel Toplu Sınıf (9A-9K vb.)
+          <label class="btn btn-outline-primary fw-bold px-3 py-2" for="yontemManuel" style="cursor: pointer;">
+            ✍️ 2. Yöntem: Manuel Toplu Sınıf Girişi (9A-9K vb.)
           </label>
         </div>
       </div>
@@ -366,7 +399,7 @@
             <label for="logoFile" class="form-label fw-bold">Okul Logosu Yükle (.png, .jpg, .svg)</label>
             <div class="input-group">
               <input type="file" id="logoFile" class="form-control" accept="image/*" />
-              <button type="button" id="logoSilBtn" class="btn btn-danger fw-bold touch-btn" title="Kayıtlı Logoyu Sil" style="display: none;">
+              <button type="button" id="logoSilBtn" class="btn btn-danger fw-bold" title="Kayıtlı Logoyu Sil" style="display: none;">
                 🗑️ Logoyu Kaldır
               </button>
             </div>
@@ -382,12 +415,12 @@
 
           <div class="d-flex flex-wrap gap-1 mb-2">
             <span class="small text-muted align-self-center me-1">Hızlı Şablonlar:</span>
-            <button type="button" class="btn btn-sm btn-outline-dark py-1 px-2 small fw-semibold touch-btn" onclick="window.materyaalAralikEkle('9A-9K')">+ 9A-9K</button>
-            <button type="button" class="btn btn-sm btn-outline-dark py-1 px-2 small fw-semibold touch-btn" onclick="window.materyaalAralikEkle('10A-10S')">+ 10A-10S</button>
-            <button type="button" class="btn btn-sm btn-outline-dark py-1 px-2 small fw-semibold touch-btn" onclick="window.materyaalAralikEkle('11C-11H')">+ 11C-11H</button>
-            <button type="button" class="btn btn-sm btn-outline-dark py-1 px-2 small fw-semibold touch-btn" onclick="window.materyaalAralikEkle('12A-12L')">+ 12A-12L</button>
-            <button type="button" class="btn btn-sm btn-primary py-1 px-2 small fw-bold touch-btn" onclick="window.materyaalAralikEkle('9A-9K, 10A-10S, 11C-11H, 12A-12L')">+ Tüm Okul (9-12)</button>
-            <button type="button" class="btn btn-sm btn-outline-danger py-1 px-2 small ms-auto fw-semibold touch-btn" id="manuelTemizleBtn">Temizle</button>
+            <button type="button" class="btn btn-sm btn-outline-dark py-1 px-2 small fw-semibold" onclick="window.materyaalAralikEkle('9A-9K')">+ 9A-9K</button>
+            <button type="button" class="btn btn-sm btn-outline-dark py-1 px-2 small fw-semibold" onclick="window.materyaalAralikEkle('10A-10S')">+ 10A-10S</button>
+            <button type="button" class="btn btn-sm btn-outline-dark py-1 px-2 small fw-semibold" onclick="window.materyaalAralikEkle('11C-11H')">+ 11C-11H</button>
+            <button type="button" class="btn btn-sm btn-outline-dark py-1 px-2 small fw-semibold" onclick="window.materyaalAralikEkle('12A-12L')">+ 12A-12L</button>
+            <button type="button" class="btn btn-sm btn-primary py-1 px-2 small fw-bold" onclick="window.materyaalAralikEkle('9A-9K, 10A-10S, 11C-11H, 12A-12L')">+ Tüm Okul (9-12)</button>
+            <button type="button" class="btn btn-sm btn-outline-danger py-1 px-2 small ms-auto fw-semibold" id="manuelTemizleBtn">Temizle</button>
           </div>
 
           <textarea id="manuelSiniflarText" class="form-control font-monospace" rows="2" placeholder="Örn: 9A-9K, 10A-10S, 11C-11H, 12A-12L, 9MES, 10AÇIK..."></textarea>
@@ -416,14 +449,14 @@
 
       <!-- FONT AYARLARI -->
       <div class="col-12">
-        <button type="button" id="fontAyarToggleBtn" class="btn btn-sm btn-outline-secondary w-100 fw-bold py-2 shadow-sm touch-btn">
+        <button type="button" id="fontAyarToggleBtn" class="btn btn-sm btn-outline-secondary w-100 fw-bold py-2 shadow-sm">
           🔤 Kart Yazı Boyutlarını Özelleştir (Her Alan İçin Ayrı Font Ayarı) ▾
         </button>
 
         <div id="fontAyarPaneli" class="mt-2 p-3 bg-light border rounded shadow-sm" style="display: none;">
           <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
             <span class="fw-bold text-dark small">Kutucukların Yazı Boyutunu Anında Değiştirin:</span>
-            <button type="button" id="fontSifirlaBtn" class="btn btn-xs btn-outline-danger py-1 px-3 fw-bold small touch-btn">Varsayılana Sıfırla</button>
+            <button type="button" id="fontSifirlaBtn" class="btn btn-xs btn-outline-danger py-1 px-3 fw-bold small">Varsayılana Sıfırla</button>
           </div>
 
           <div class="row g-3">
@@ -433,9 +466,9 @@
                 <span id="lblDersAdi" class="badge bg-primary">12pt</span>
               </div>
               <div class="input-group input-group-sm">
-                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsDersAdi', -0.5)">-</button>
+                <button class="btn btn-outline-secondary" type="button" onclick="window.materyaalFontAdim('fsDersAdi', -0.5)">-</button>
                 <input type="range" id="fsDersAdi" class="form-range form-control px-2" min="8" max="22" value="12" step="0.5">
-                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsDersAdi', 0.5)">+</button>
+                <button class="btn btn-outline-secondary" type="button" onclick="window.materyaalFontAdim('fsDersAdi', 0.5)">+</button>
               </div>
             </div>
 
@@ -445,9 +478,9 @@
                 <span id="lblSinif" class="badge bg-primary">12.5pt</span>
               </div>
               <div class="input-group input-group-sm">
-                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsSinif', -0.5)">-</button>
+                <button class="btn btn-outline-secondary" type="button" onclick="window.materyaalFontAdim('fsSinif', -0.5)">-</button>
                 <input type="range" id="fsSinif" class="form-range form-control px-2" min="8" max="22" value="12.5" step="0.5">
-                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsSinif', 0.5)">+</button>
+                <button class="btn btn-outline-secondary" type="button" onclick="window.materyaalFontAdim('fsSinif', 0.5)">+</button>
               </div>
             </div>
 
@@ -457,9 +490,9 @@
                 <span id="lblOgretmen" class="badge bg-primary">12pt</span>
               </div>
               <div class="input-group input-group-sm">
-                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsOgretmen', -0.5)">-</button>
+                <button class="btn btn-outline-secondary" type="button" onclick="window.materyaalFontAdim('fsOgretmen', -0.5)">-</button>
                 <input type="range" id="fsOgretmen" class="form-range form-control px-2" min="8" max="22" value="12" step="0.5">
-                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsOgretmen', 0.5)">+</button>
+                <button class="btn btn-outline-secondary" type="button" onclick="window.materyaalFontAdim('fsOgretmen', 0.5)">+</button>
               </div>
             </div>
 
@@ -469,9 +502,9 @@
                 <span id="lblTarihSaat" class="badge bg-primary">11pt</span>
               </div>
               <div class="input-group input-group-sm">
-                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsTarihSaat', -0.5)">-</button>
+                <button class="btn btn-outline-secondary" type="button" onclick="window.materyaalFontAdim('fsTarihSaat', -0.5)">-</button>
                 <input type="range" id="fsTarihSaat" class="form-range form-control px-2" min="7" max="18" value="11" step="0.5">
-                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsTarihSaat', 0.5)">+</button>
+                <button class="btn btn-outline-secondary" type="button" onclick="window.materyaalFontAdim('fsTarihSaat', 0.5)">+</button>
               </div>
             </div>
 
@@ -481,9 +514,9 @@
                 <span id="lblKelebek" class="badge bg-primary">11pt</span>
               </div>
               <div class="input-group input-group-sm">
-                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsKelebek', -0.5)">-</button>
+                <button class="btn btn-outline-secondary" type="button" onclick="window.materyaalFontAdim('fsKelebek', -0.5)">-</button>
                 <input type="range" id="fsKelebek" class="form-range form-control px-2" min="7" max="18" value="11" step="0.5">
-                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsKelebek', 0.5)">+</button>
+                <button class="btn btn-outline-secondary" type="button" onclick="window.materyaalFontAdim('fsKelebek', 0.5)">+</button>
               </div>
             </div>
 
@@ -493,9 +526,9 @@
                 <span id="lblGirmeyenler" class="badge bg-primary">10.5pt</span>
               </div>
               <div class="input-group input-group-sm">
-                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsGirmeyenler', -0.5)">-</button>
+                <button class="btn btn-outline-secondary" type="button" onclick="window.materyaalFontAdim('fsGirmeyenler', -0.5)">-</button>
                 <input type="range" id="fsGirmeyenler" class="form-range form-control px-2" min="7" max="18" value="10.5" step="0.5">
-                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsGirmeyenler', 0.5)">+</button>
+                <button class="btn btn-outline-secondary" type="button" onclick="window.materyaalFontAdim('fsGirmeyenler', 0.5)">+</button>
               </div>
             </div>
 
@@ -505,9 +538,9 @@
                 <span id="lblEtiketBaslik" class="badge bg-primary">10pt</span>
               </div>
               <div class="input-group input-group-sm">
-                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsEtiketBaslik', -0.5)">-</button>
+                <button class="btn btn-outline-secondary" type="button" onclick="window.materyaalFontAdim('fsEtiketBaslik', -0.5)">-</button>
                 <input type="range" id="fsEtiketBaslik" class="form-range form-control px-2" min="7" max="16" value="10" step="0.5">
-                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsEtiketBaslik', 0.5)">+</button>
+                <button class="btn btn-outline-secondary" type="button" onclick="window.materyaalFontAdim('fsEtiketBaslik', 0.5)">+</button>
               </div>
             </div>
 
@@ -517,9 +550,9 @@
                 <span id="lblSagSinif" class="badge bg-primary">46pt</span>
               </div>
               <div class="input-group input-group-sm">
-                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsSagSinif', -2)">-</button>
+                <button class="btn btn-outline-secondary" type="button" onclick="window.materyaalFontAdim('fsSagSinif', -2)">-</button>
                 <input type="range" id="fsSagSinif" class="form-range form-control px-2" min="20" max="75" value="46" step="1">
-                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsSagSinif', 2)">+</button>
+                <button class="btn btn-outline-secondary" type="button" onclick="window.materyaalFontAdim('fsSagSinif', 2)">+</button>
               </div>
             </div>
           </div>
@@ -582,7 +615,7 @@
             <small class="text-muted fw-normal">(Ders Adı, Sınıf ve Görevli Öğretmen ana iskelettir)</small>
           </label>
           <div class="row g-2">
-            <div class="col-md-4 col-12">
+            <div class="col-md-3 col-6">
               <div class="form-check form-switch p-2 bg-white border rounded">
                 <input class="form-check-input ms-0 me-2" type="checkbox" id="tarihSaatGoster" style="cursor: pointer;">
                 <label class="form-check-label fw-bold small" for="tarihSaatGoster" style="cursor: pointer;">
@@ -590,7 +623,7 @@
                 </label>
               </div>
             </div>
-            <div class="col-md-4 col-12">
+            <div class="col-md-3 col-6">
               <div class="form-check form-switch p-2 bg-white border rounded">
                 <input class="form-check-input ms-0 me-2" type="checkbox" id="kelebekAktif" style="cursor: pointer;">
                 <label class="form-check-label fw-bold small" for="kelebekAktif" style="cursor: pointer;">
@@ -598,11 +631,19 @@
                 </label>
               </div>
             </div>
-            <div class="col-md-4 col-12">
+            <div class="col-md-3 col-6">
               <div class="form-check form-switch p-2 bg-white border rounded">
                 <input class="form-check-input ms-0 me-2" type="checkbox" id="girmeyenlerGoster" checked style="cursor: pointer;">
                 <label class="form-check-label fw-bold small" for="girmeyenlerGoster" style="cursor: pointer;">
                   Sınava Girmeyenler Satırı
+                </label>
+              </div>
+            </div>
+            <div class="col-md-3 col-6">
+              <div class="form-check form-switch p-2 bg-white border rounded">
+                <input class="form-check-input ms-0 me-2" type="checkbox" id="qrKodAktif" checked style="cursor: pointer;">
+                <label class="form-check-label fw-bold small" for="qrKodAktif" style="cursor: pointer;">
+                  Karekod (QR Kod) Alanı
                 </label>
               </div>
             </div>
@@ -634,34 +675,29 @@
     <!-- Aksiyon Butonları -->
     <div class="d-flex flex-wrap align-items-center justify-content-between mt-4 pt-3 border-top gap-2">
       <div>
-        <button type="button" id="olusturBtn" class="btn btn-primary px-4 py-2 fw-bold me-2 touch-btn">Şablonları Oluştur</button>
-        <button type="button" id="manuelKartBtn" class="btn btn-outline-secondary px-3 py-2 fw-bold touch-btn">+ Boş Yedek Kart Ekle</button>
+        <button type="button" id="olusturBtn" class="btn btn-primary px-4 py-2 fw-bold me-2">Şablonları Oluştur</button>
+        <button type="button" id="manuelKartBtn" class="btn btn-outline-secondary px-3 py-2 fw-bold">+ Boş Yedek Kart Ekle</button>
       </div>
       
       <div class="d-flex flex-wrap gap-2">
-        <button type="button" id="taslakKaydetBtn" class="btn btn-outline-warning text-dark px-3 py-2 fw-bold touch-btn">💾 Taslağı Kaydet</button>
-        <button type="button" id="taslakYukleBtn" class="btn btn-outline-info text-dark px-3 py-2 fw-bold touch-btn">📂 Kayıtlı Taslağı Yükle</button>
-        <button type="button" id="pdfIndirBtn" class="btn btn-danger px-3 py-2 fw-bold touch-btn" style="display:none;">📥 PDF İndir</button>
-        <button type="button" id="yazdirBtn" class="btn btn-success px-4 py-2 fw-bold touch-btn" style="display:none;">🖨️ Yazdır</button>
+        <button type="button" id="taslakKaydetBtn" class="btn btn-outline-warning text-dark px-3 py-2 fw-bold">💾 Taslağı Kaydet</button>
+        <button type="button" id="taslakYukleBtn" class="btn btn-outline-info text-dark px-3 py-2 fw-bold">📂 Kayıtlı Taslağı Yükle</button>
+        <button type="button" id="yazdirBtn" class="btn btn-success px-4 py-2 fw-bold" style="display:none;">🖨️ Yazdır / PDF Kaydet</button>
+        <button type="button" id="pdfIndirBtn" class="btn btn-outline-success px-4 py-2 fw-bold" style="display:none;">📱 PDF İndir (Mobil için)</button>
       </div>
     </div>
   </div>
 
   <!-- CANLI BASKI VE ÖNİZLEME ALANI -->
   <div class="preview-card-wrapper" id="previewCardSection" style="display: none;">
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary no-print gap-2">
+    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary no-print">
       <h5 class="fw-bold text-dark m-0 d-flex align-items-center gap-2">
         <span>📄 Canlı A4 Baskı Önizlemesi</span>
         <span id="onizlemeBilgiRozet" class="badge bg-primary fs-6">0 Sayfa / 0 Kart</span>
       </h5>
-      <div class="d-flex gap-2">
-        <button type="button" class="btn btn-danger fw-bold px-3 touch-btn" onclick="document.getElementById('pdfIndirBtn').click()">
-          📥 PDF İndir
-        </button>
-        <button type="button" class="btn btn-success fw-bold px-3 touch-btn" onclick="window.print()">
-          🖨️ Yazdır
-        </button>
-      </div>
+      <button type="button" class="btn btn-success fw-bold px-4" onclick="window.print()">
+        🖨️ Hemen Yazdır / PDF Kaydet
+      </button>
     </div>
 
     <div class="print-preview-container">
@@ -677,10 +713,19 @@
 (function () {
   'use strict';
 
-  window.addEventListener('DOMContentLoaded', () => {
-    if (typeof XLSX === 'undefined' || typeof pdfjsLib === 'undefined') {
-      const banner = document.getElementById('cdnErrorBanner');
-      if (banner) banner.classList.remove('d-none');
+  // --- CDN KÜTÜPHANE YÜKLEME KONTROLÜ ---
+  // İnternet bağlantısı zayıfsa Bootstrap/SheetJS/PDF.js CDN'den yüklenemeyebilir.
+  // Sessizce bozulmak yerine kullanıcıya görünür bir uyarı gösterilir.
+  window.addEventListener('load', function () {
+    const eksikler = [];
+    if (typeof XLSX === 'undefined') eksikler.push('Excel okuma (SheetJS)');
+    if (typeof pdfjsLib === 'undefined') eksikler.push('PDF okuma (PDF.js)');
+    if (typeof bootstrap === 'undefined') eksikler.push('Arayüz (Bootstrap)');
+    if (eksikler.length > 0) {
+      const uyari = document.createElement('div');
+      uyari.className = 'alert alert-danger m-3 fw-bold';
+      uyari.innerText = '⚠️ Bazı bileşenler yüklenemedi (' + eksikler.join(', ') + '). İnternet bağlantınızı kontrol edip sayfayı yenileyin.';
+      document.body.insertBefore(uyari, document.body.firstChild);
     }
   });
 
@@ -734,6 +779,7 @@
     tarihSaatGoster: document.getElementById('tarihSaatGoster'),
     kelebekAktif: document.getElementById('kelebekAktif'),
     girmeyenlerGoster: document.getElementById('girmeyenlerGoster'),
+    qrKodAktif: document.getElementById('qrKodAktif'),
     ogretmenAyar: document.getElementById('ogretmenAyar'),
     sabitOgretmenIsim: document.getElementById('sabitOgretmenIsim'),
     listeKutusu: document.getElementById('listeKutusu'),
@@ -742,8 +788,8 @@
     manuelKartBtn: document.getElementById('manuelKartBtn'),
     taslakKaydetBtn: document.getElementById('taslakKaydetBtn'),
     taslakYukleBtn: document.getElementById('taslakYukleBtn'),
-    pdfIndirBtn: document.getElementById('pdfIndirBtn'),
     yazdirBtn: document.getElementById('yazdirBtn'),
+    pdfIndirBtn: document.getElementById('pdfIndirBtn'),
     previewCardSection: document.getElementById('previewCardSection'),
     onizlemeBilgiRozet: document.getElementById('onizlemeBilgiRozet'),
     printArea: document.getElementById('printArea'),
@@ -756,6 +802,7 @@
   const DRAFT_KEY = 'materyaal_kapietiketi_draft_cards';
   const LOGO_KEY = 'materyaal_kapietiketi_logo';
 
+  // --- İFRAME DİNAMİK YÜKSEKLİK SİNYALİ ---
   function notifyParentHeight() {
     try {
       const height = document.documentElement.scrollHeight || document.body.scrollHeight;
@@ -767,6 +814,35 @@
   if (window.ResizeObserver) {
     new ResizeObserver(notifyParentHeight).observe(document.body);
   }
+
+  // --- MOBİL/DAR EKRAN İÇİN A4 SAYFA ÖLÇEKLEME ---
+  // A4 sayfaları gerçek 210mm x 297mm boyutunda kalır (yazdırma bunu gerektirir),
+  // ama ekranda dar bir konteynerin içine sığmıyorsa transform: scale() ile
+  // oranı bozmadan küçültülür. Bu sayede mobilde sayfa görünümü kırpılmaz/taşmaz.
+  function scaleA4Pages() {
+    const mmToPx = 96 / 25.4;
+    const pageWidthPx = 210 * mmToPx;
+    const pageHeightPx = 297 * mmToPx;
+
+    document.querySelectorAll('.a4-sayfa').forEach(function (page) {
+      let scaler = page.parentElement;
+      if (!scaler || !scaler.classList.contains('a4-scaler')) {
+        scaler = document.createElement('div');
+        scaler.className = 'a4-scaler';
+        page.parentNode.insertBefore(scaler, page);
+        scaler.appendChild(page);
+      }
+
+      const containerWidth = scaler.parentElement ? scaler.parentElement.clientWidth : pageWidthPx;
+      const availableWidth = Math.min(containerWidth, pageWidthPx);
+      const scale = Math.max(0.1, Math.min(1, availableWidth / pageWidthPx));
+
+      page.style.transform = 'scale(' + scale + ')';
+      scaler.style.height = Math.ceil(pageHeightPx * scale) + 'px';
+    });
+  }
+
+  window.addEventListener('resize', scaleA4Pages);
 
   // --- FONT PANELİ ---
   elements.fontAyarToggleBtn.addEventListener('click', function () {
@@ -940,6 +1016,7 @@
       tarihSaatGoster: elements.tarihSaatGoster.checked,
       kelebekAktif: elements.kelebekAktif.checked,
       girmeyenlerGoster: elements.girmeyenlerGoster.checked,
+      qrKodAktif: elements.qrKodAktif.checked,
       ogretmenAyar: elements.ogretmenAyar.value,
       sabitOgretmenIsim: elements.sabitOgretmenIsim.value,
       ogretmenListesi: elements.ogretmenListesi.value,
@@ -988,6 +1065,7 @@
       if (s.tarihSaatGoster !== undefined) elements.tarihSaatGoster.checked = s.tarihSaatGoster;
       if (s.kelebekAktif !== undefined) elements.kelebekAktif.checked = s.kelebekAktif;
       if (s.girmeyenlerGoster !== undefined) elements.girmeyenlerGoster.checked = s.girmeyenlerGoster;
+      if (s.qrKodAktif !== undefined) elements.qrKodAktif.checked = s.qrKodAktif;
       if (s.manuelSiniflarText !== undefined) {
         elements.manuelSiniflarText.value = s.manuelSiniflarText;
         updateClassPreview();
@@ -1046,37 +1124,29 @@
     return parcalar.join(' ').trim();
   }
 
-  // --- LOGO SIKIŞTIRMA VE KAYDETME ---
-  function compressImageAndSave(file, maxWidth, maxHeight, quality, callback) {
+  // --- LOGO YÜKLEME VE SİLME ---
+  // Mobil tarayıcılarda (özellikle iOS Safari, gizli sekme) localStorage kotası
+  // çok düşük olabilir. Bu yüzden logo, ham haliyle değil, canvas ile küçültülüp
+  // sıkıştırılmış (max 300px genişlik, JPEG %80 kalite) olarak saklanır.
+  function compressImageToDataUrl(file, maxWidth, quality, callback) {
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (evt) {
       const img = new Image();
-      img.onload = function() {
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > maxWidth) {
-            height = Math.round((height * maxWidth) / width);
-            width = maxWidth;
-          }
-        } else {
-          if (height > maxHeight) {
-            width = Math.round((width * maxHeight) / height);
-            height = maxHeight;
-          }
-        }
-
+      img.onload = function () {
+        const scale = Math.min(1, maxWidth / img.width);
         const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-
-        const compressedBase64 = canvas.toDataURL('image/png', quality);
-        callback(compressedBase64);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        try {
+          callback(canvas.toDataURL('image/jpeg', quality));
+        } catch (e) {
+          callback(evt.target.result);
+        }
       };
-      img.src = e.target.result;
+      img.onerror = function () { callback(evt.target.result); };
+      img.src = evt.target.result;
     };
     reader.readAsDataURL(file);
   }
@@ -1085,14 +1155,16 @@
     const file = e.target.files[0];
     if (!file) return;
 
-    compressImageAndSave(file, 300, 300, 0.85, function(compressedBase64) {
-      state.uploadedLogoBase64 = compressedBase64;
+    elements.logoStatus.innerHTML = '<span class="text-info fw-bold">Logo işleniyor...</span>';
+
+    compressImageToDataUrl(file, 300, 0.82, function (dataUrl) {
+      state.uploadedLogoBase64 = dataUrl;
       try {
-        localStorage.setItem(LOGO_KEY, compressedBase64);
-        elements.logoStatus.innerHTML = '<span class="text-success fw-bold">✓ Logo kalıcı hafızaya kaydedildi!</span>';
+        localStorage.setItem(LOGO_KEY, state.uploadedLogoBase64);
+        elements.logoStatus.innerHTML = '<span class="text-success fw-bold">✓ Logo başarıyla yüklendi ve kaydedildi!</span>';
       } catch (err) {
-        console.warn("LocalStorage kotası aşıldı:", err);
-        elements.logoStatus.innerHTML = '<span class="text-warning fw-bold">⚠️ Tarayıcı hafıza kotası aşıldı. Logo oturum süresince geçerlidir.</span>';
+        console.warn("Logo hafızaya sığmadı:", err);
+        elements.logoStatus.innerHTML = '<span class="text-warning fw-bold">⚠️ Logo bu oturumda kullanılıyor ama tarayıcı hafızasına kaydedilemedi (depolama alanı dolu). Sayfayı kapatırsanız tekrar yüklemeniz gerekebilir.</span>';
       }
       elements.logoSilBtn.style.display = 'inline-block';
       if (state.activeCards.length > 0) renderAllCards();
@@ -1121,7 +1193,7 @@
     notifyParentHeight();
   });
 
-  [elements.dersAdi, elements.sinavTarihi, elements.gercekSaat, elements.sinavGunu, elements.sinavSaati, elements.sinifFiltre, elements.tarihSaatGoster, elements.kelebekAktif, elements.girmeyenlerGoster, elements.sabitOgretmenIsim, elements.ogretmenListesi].forEach(el => {
+  [elements.dersAdi, elements.sinavTarihi, elements.gercekSaat, elements.sinavGunu, elements.sinavSaati, elements.sinifFiltre, elements.tarihSaatGoster, elements.kelebekAktif, elements.girmeyenlerGoster, elements.qrKodAktif, elements.sabitOgretmenIsim, elements.ogretmenListesi].forEach(el => {
     el.addEventListener('input', saveSettingsToLocalStorage);
     el.addEventListener('change', saveSettingsToLocalStorage);
   });
@@ -1396,7 +1468,6 @@
     if (state.activeCards.length === 0) {
       elements.printArea.innerHTML = '';
       elements.yazdirBtn.style.display = 'none';
-      elements.pdfIndirBtn.style.display = 'none';
       elements.previewCardSection.style.display = 'none';
       notifyParentHeight();
       return;
@@ -1409,8 +1480,8 @@
 
     let htmlOutput = `
       <div class="no-print d-flex justify-content-between align-items-center mb-3 px-2">
-        <small class="text-secondary">✍️ Kutucuklara dokunarak içerikleri düzenleyebilirsiniz. Sağ üstteki <strong>(×)</strong> butonundan kart silebilirsiniz.</small>
-        <button type="button" class="btn btn-sm btn-outline-primary fw-bold touch-btn" onclick="window.materyaalHizliKartEkle()">+ Yedek Kart Ekle</button>
+        <small class="text-secondary">✍️ Kutucukların üzerine tıklayarak içerikleri anında düzenleyebilirsiniz. Sağ üstteki <strong>(×)</strong> butonundan kartı silebilirsiniz.</small>
+        <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="window.materyaalHizliKartEkle()">+ Yedek Kart Ekle</button>
       </div>`;
 
     for (let i = 0; i < state.activeCards.length; i += 3) {
@@ -1423,7 +1494,7 @@
           tarihSaatHTML = `
             <div class="satir satir-tarih-saat">
               <div class="etiket">TARİH / SAAT</div>
-              <div class="deger" contenteditable="true" autocorrect="off" autocapitalize="sentences" spellcheck="false" inputmode="text" oninput="window.materyaalGuncelle('${kart.id}', 'tarihSaatMetni', this.innerText)">${escapeHtml(kart.tarihSaatMetni)}</div>
+              <div class="deger" contenteditable="true" oninput="window.materyaalGuncelle('${kart.id}', 'tarihSaatMetni', this.innerText)">${escapeHtml(kart.tarihSaatMetni)}</div>
             </div>`;
         }
 
@@ -1432,7 +1503,7 @@
           ogretmenHTML = `
             <div class="satir satir-ogretmen">
               <div class="etiket">GÖREVLİ ÖĞRETMEN</div>
-              <div class="deger text-primary" contenteditable="true" autocorrect="off" autocapitalize="sentences" spellcheck="false" inputmode="text" title="Tıklayıp Düzenle" oninput="window.materyaalGuncelle('${kart.id}', 'ogretmenAdi', this.innerText)">${escapeHtml(kart.ogretmenAdi)}</div>
+              <div class="deger text-primary" contenteditable="true" title="Tıklayıp Düzenle" oninput="window.materyaalGuncelle('${kart.id}', 'ogretmenAdi', this.innerText)">${escapeHtml(kart.ogretmenAdi)}</div>
             </div>`;
         }
 
@@ -1441,7 +1512,7 @@
           kelebekHTML = `
             <div class="satir satir-kelebek">
               <div class="etiket">SIRA / ÖĞRENCİ NO</div>
-              <div class="deger" contenteditable="true" autocorrect="off" autocapitalize="sentences" spellcheck="false" inputmode="text" placeholder="Örn: 101 - 145" oninput="window.materyaalGuncelle('${kart.id}', 'kelebekBilgisi', this.innerText)">${escapeHtml(kart.kelebekBilgisi || "")}</div>
+              <div class="deger" contenteditable="true" placeholder="Örn: 101 - 145" oninput="window.materyaalGuncelle('${kart.id}', 'kelebekBilgisi', this.innerText)">${escapeHtml(kart.kelebekBilgisi || "")}</div>
             </div>`;
         }
 
@@ -1450,13 +1521,24 @@
           girmeyenlerHTML = `
             <div class="satir satir-girmeyenler">
               <div class="etiket">SINAVA GİRMEYENLER</div>
-              <div class="deger" contenteditable="true" autocorrect="off" autocapitalize="sentences" spellcheck="false" inputmode="text" oninput="window.materyaalGuncelle('${kart.id}', 'girmeyenler', this.innerText)">${escapeHtml(kart.girmeyenler || "")}</div>
+              <div class="deger" contenteditable="true" oninput="window.materyaalGuncelle('${kart.id}', 'girmeyenler', this.innerText)">${escapeHtml(kart.girmeyenler || "")}</div>
             </div>`;
         }
 
         let logoHTML = "";
         if (state.uploadedLogoBase64) {
           logoHTML = `<div class="kart-logo-kapsayici"><img src="${state.uploadedLogoBase64}" class="kart-logo" alt="Okul Logo" /></div>`;
+        }
+
+        let qrHTML = "";
+        if (kart.qrGoster) {
+          const qrMetni = encodeURIComponent(`${kart.sinifAdi} - ${kart.dersAdi} | MATERYAAL`);
+          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${qrMetni}`;
+          qrHTML = `
+            <div class="kart-qr-kapsayici">
+              <img src="${qrUrl}" class="kart-qr" alt="QR Kod" onerror="this.style.visibility='hidden'" />
+              <span class="kart-qr-yazi">SINAV KODU</span>
+            </div>`;
         }
 
         htmlOutput += `
@@ -1466,12 +1548,12 @@
             <div class="sol-tablo">
               <div class="satir satir-ders-adi">
                 <div class="etiket">DERSİN ADI</div>
-                <div class="deger" contenteditable="true" autocorrect="off" autocapitalize="sentences" spellcheck="false" inputmode="text" oninput="window.materyaalGuncelle('${kart.id}', 'dersAdi', this.innerText)">${escapeHtml(kart.dersAdi)}</div>
+                <div class="deger" contenteditable="true" oninput="window.materyaalGuncelle('${kart.id}', 'dersAdi', this.innerText)">${escapeHtml(kart.dersAdi)}</div>
               </div>
               ${tarihSaatHTML}
               <div class="satir satir-sinif">
                 <div class="etiket">SINIF</div>
-                <div class="deger" contenteditable="true" autocorrect="off" autocapitalize="sentences" spellcheck="false" inputmode="text" oninput="window.materyaalGuncelle('${kart.id}', 'sinifAdi', this.innerText)">${escapeHtml(kart.sinifAdi)}</div>
+                <div class="deger" contenteditable="true" oninput="window.materyaalGuncelle('${kart.id}', 'sinifAdi', this.innerText)">${escapeHtml(kart.sinifAdi)}</div>
               </div>
               ${ogretmenHTML}
               ${kelebekHTML}
@@ -1480,7 +1562,8 @@
 
             <div class="sag-panel">
               ${logoHTML}
-              <div class="sag-sinif-etiket" contenteditable="true" autocorrect="off" autocapitalize="sentences" spellcheck="false" inputmode="text" oninput="window.materyaalGuncelle('${kart.id}', 'sinifAdi', this.innerText)">${escapeHtml(kart.sinifAdi)}</div>
+              <div class="sag-sinif-etiket" contenteditable="true" oninput="window.materyaalGuncelle('${kart.id}', 'sinifAdi', this.innerText)">${escapeHtml(kart.sinifAdi)}</div>
+              ${qrHTML}
             </div>
           </div>`;
       });
@@ -1491,10 +1574,10 @@
     elements.printArea.innerHTML = htmlOutput;
     elements.yazdirBtn.style.display = 'inline-block';
     elements.pdfIndirBtn.style.display = 'inline-block';
+    scaleA4Pages();
     notifyParentHeight();
   }
 
-  // Global Kart İşlemleri
   window.materyaalKartSil = function (cardId) {
     state.activeCards = state.activeCards.filter(c => c.id !== cardId);
     renderAllCards();
@@ -1509,7 +1592,7 @@
     elements.manuelKartBtn.click();
   };
 
-  // --- KARTLARI OLUŞTUR ---
+  // --- KARTLARI OLUŞTUR (Zoraki Ekran Kaydırması Kaldırıldı) ---
   elements.olusturBtn.addEventListener('click', function () {
     saveSettingsToLocalStorage();
 
@@ -1524,6 +1607,7 @@
     const tarihSaatGoster = elements.tarihSaatGoster.checked;
     const kelebekAktif = elements.kelebekAktif.checked;
     const girmeyenlerGoster = elements.girmeyenlerGoster.checked;
+    const qrKodAktif = elements.qrKodAktif.checked;
     
     const tarihSaatMetni = buildTarihSaatMetni(elements.sinavTarihi.value, elements.gercekSaat.value, saat);
 
@@ -1546,7 +1630,7 @@
     }
 
     if (targetClasses.length === 0) {
-      alert("Lütfen önce bir ders programı dosyası (PDF/Excel) yükleyin veya 'Manuel Toplu Sınıf' kutusuna sınıf aralıklarını yazın.");
+      alert("Lütfen önce bir ders programı dosyası (PDF/Excel) yükleyin veya 'Manuel Toplu Sınıf Girişi' kutusuna sınıf aralıklarını yazın.");
       return;
     }
 
@@ -1583,6 +1667,7 @@
         kelebekGoster: kelebekAktif,
         kelebekBilgisi: "",
         girmeyenlerGoster: girmeyenlerGoster,
+        qrGoster: qrKodAktif,
         girmeyenler: ""
       });
     });
@@ -1607,6 +1692,7 @@
       kelebekGoster: elements.kelebekAktif.checked,
       kelebekBilgisi: '',
       girmeyenlerGoster: elements.girmeyenlerGoster.checked,
+      qrGoster: elements.qrKodAktif.checked,
       girmeyenler: ''
     };
 
@@ -1622,7 +1708,7 @@
     }
     localStorage.setItem(DRAFT_KEY, JSON.stringify(state.activeCards));
     saveSettingsToLocalStorage();
-    alert("✓ Taslak ve yaptığınız tüm düzenlemeler tarayıcı hafızasına kaydedildi!");
+    alert("✓ Taslak ve yaptığınız tüm elle düzenlemeler tarayıcı hafızasına kaydedildi!");
   });
 
   elements.taslakYukleBtn.addEventListener('click', function () {
@@ -1640,52 +1726,52 @@
     }
   });
 
-  // --- İSTEMCİ TARAFLI PDF İNDİR ---
-  elements.pdfIndirBtn.addEventListener('click', function () {
-    const printElement = document.getElementById('printArea');
-    if (!printElement || !printElement.innerHTML.trim()) {
-      alert("İndirilecek şablon bulunamadı.");
-      return;
-    }
-
-    const dersAdi = (elements.dersAdi.value.trim() || 'Sinav').replace(/[^a-zA-Z0-9çğıöşüÇĞİÖŞÜ_]/g, '_');
-    
-    const clone = printElement.cloneNode(true);
-    clone.querySelectorAll('.no-print, .kart-sil-btn').forEach(el => el.remove());
-
-    const opt = {
-      margin: 0,
-      filename: `${dersAdi}_Kapi_Etiketleri.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    if (window.html2pdf) {
-      const btn = elements.pdfIndirBtn;
-      const originalText = btn.innerText;
-      btn.innerText = '⏳ Hazırlanıyor...';
-      btn.disabled = true;
-
-      html2pdf().set(opt).from(clone).save().then(() => {
-        btn.innerText = originalText;
-        btn.disabled = false;
-      }).catch(err => {
-        console.error("PDF oluşturma hatası:", err);
-        btn.innerText = originalText;
-        btn.disabled = false;
-        window.print();
-      });
-    } else {
-      window.print();
-    }
-  });
-
   // --- YAZDIRMA ---
   elements.yazdirBtn.addEventListener('click', () => {
     window.print();
   });
 
+  // --- MOBİL İÇİN DOĞRUDAN PDF ÜRETİMİ ---
+  // Mobil tarayıcılarda (özellikle iOS Safari) window.print() ve @page kuralları
+  // güvenilir çalışmadığı için html2pdf.js ile ekran görüntüsü tabanlı,
+  // client-side bir PDF üretilir. Hiçbir veri sunucuya gönderilmez.
+  elements.pdfIndirBtn.addEventListener('click', function () {
+    if (typeof html2pdf === 'undefined') {
+      alert('PDF motoru yüklenemedi. İnternet bağlantınızı kontrol edip tekrar deneyin.');
+      return;
+    }
+    if (state.activeCards.length === 0) {
+      alert('Önce şablonları oluşturun.');
+      return;
+    }
+
+    const originalText = elements.pdfIndirBtn.innerHTML;
+    elements.pdfIndirBtn.disabled = true;
+    elements.pdfIndirBtn.innerHTML = '⏳ PDF Hazırlanıyor...';
+    document.body.classList.add('pdf-exporting');
+
+    const opt = {
+      margin: 0,
+      filename: 'sinav-kapi-etiketleri.pdf',
+      image: { type: 'jpeg', quality: 0.95 },
+      html2canvas: { scale: 2, useCORS: true, allowTaint: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css'], after: '.a4-sayfa' }
+    };
+
+    html2pdf().set(opt).from(elements.printArea).save()
+      .catch(function (err) {
+        console.error(err);
+        alert('PDF oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
+      })
+      .finally(function () {
+        document.body.classList.remove('pdf-exporting');
+        elements.pdfIndirBtn.disabled = false;
+        elements.pdfIndirBtn.innerHTML = originalText;
+      });
+  });
+
+  // Başlangıç Yüklemesi
   loadSettingsFromLocalStorage();
   setTimeout(notifyParentHeight, 500);
 
