@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" class="h-auto bg-transparent">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -20,13 +20,16 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg);
+    html, body {
+      background: transparent !important;
       color: var(--text);
-      padding: 12px;
-      min-height: 100vh;
+      padding: 6px;
+      height: auto !important;
+      min-height: auto !important;
+      overflow-x: hidden !important;
+      overflow-y: visible !important;
       -webkit-font-smoothing: antialiased;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
 
     .container {
@@ -40,7 +43,7 @@
 
     @media (max-width: 992px) {
       .container { grid-template-columns: 1fr; }
-      body { padding: 8px; }
+      body { padding: 4px; }
     }
 
     .card {
@@ -272,7 +275,6 @@
       border: 1px solid var(--border);
     }
 
-    /* Çıktılarda (Yazdırma ve PDF) Butonları Gizle ve Tabloyu Optimize Et */
     @media print {
       body { background: #fff; padding: 0; }
       .sidebar { display: none; }
@@ -339,8 +341,6 @@
 
     <!-- Sağ Program Tablosu ve Üst Aksiyonlar -->
     <main class="card sheet-card" id="sheetCard">
-      
-      <!-- Aksiyon Butonları (Yazdırma/PDF'de gizlenir) -->
       <div class="action-bar" id="actionBar">
         <button class="btn btn-primary" id="autofillBtn">🪄 Akıllı Otomatik Yerleştir</button>
         <button class="btn btn-outline" id="pdfBtn">📄 PDF İndir</button>
@@ -364,6 +364,39 @@
       <div class="legend-container" id="legend"></div>
     </main>
   </div>
+
+<!-- Otomatik Yükseklik Gönderici (postMessage) -->
+<script>
+  function sendHeightToParent() {
+    var docHeight = Math.max(
+      document.body.scrollHeight,
+      document.documentElement.scrollHeight,
+      document.body.offsetHeight,
+      document.documentElement.offsetHeight,
+      document.body.clientHeight,
+      document.documentElement.clientHeight
+    );
+
+    window.parent.postMessage({
+      type: 'setHeight',
+      height: docHeight
+    }, '*');
+  }
+
+  window.addEventListener('load', function() {
+    sendHeightToParent();
+    setTimeout(sendHeightToParent, 200);
+    setTimeout(sendHeightToParent, 600);
+  });
+
+  window.addEventListener('resize', sendHeightToParent);
+
+  if (window.ResizeObserver) {
+    new ResizeObserver(function() {
+      sendHeightToParent();
+    }).observe(document.body);
+  }
+</script>
 
 <script>
   const STORAGE_KEY = 'ders-programi-v6';
@@ -416,7 +449,10 @@
     } catch { return defaultState(); }
   })();
 
-  function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  function saveState() { 
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); 
+    setTimeout(sendHeightToParent, 50);
+  }
 
   function togglePanel(header) {
     const body = header.nextElementSibling;
@@ -428,6 +464,7 @@
       body.style.display = 'none';
       arrow.textContent = '▶';
     }
+    setTimeout(sendHeightToParent, 100);
   }
 
   function fmt(mins) {
@@ -498,12 +535,14 @@
         renderSubjectList(); renderLegend(); renderTable(); renderPresetChips(); renderHeader();
       });
     });
+    setTimeout(sendHeightToParent, 50);
   }
 
   function renderLegend() {
     document.getElementById('legend').innerHTML = state.subjects.map(s => `
       <div class="legend-item"><span class="color-dot" style="background: ${s.color};"></span><span>${s.name}</span></div>
     `).join('');
+    setTimeout(sendHeightToParent, 50);
   }
 
   function renderTable() {
@@ -539,6 +578,7 @@
         renderTable();
       });
     });
+    setTimeout(sendHeightToParent, 50);
   }
 
   function renderPresets() {
@@ -571,6 +611,7 @@
         renderSubjectList(); renderLegend(); renderTable(); renderPresetChips(); renderHeader();
       });
     });
+    setTimeout(sendHeightToParent, 50);
   }
 
   function syncInputs() {
@@ -644,7 +685,6 @@
 
     document.getElementById('printBtn').addEventListener('click', () => window.print());
 
-    // PDF İndirme (Aksiyon çubuğunu geçici gizleyip kusursuz çıktı alır)
     document.getElementById('pdfBtn').addEventListener('click', () => {
       const bar = document.getElementById('actionBar');
       bar.style.display = 'none';
@@ -657,10 +697,10 @@
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
       }).from(el).save().then(() => {
         bar.style.display = 'grid';
+        sendHeightToParent();
       });
     });
 
-    // Word İndirme (Tabloyu ve ders renklerini eksiksiz aktarır)
     document.getElementById('docBtn').addEventListener('click', () => {
       const slots = computeSlots();
       const rows = slots.map((slot, si) => {
@@ -740,6 +780,7 @@
     renderHeader();
     renderTable();
     renderLegend();
+    setTimeout(sendHeightToParent, 150);
   }
 
   initListeners();
