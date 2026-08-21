@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ders Programı Oluşturucu</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #eef2ff;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --radius: 12px;
+      --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 12px;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1380px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    @media (max-width: 992px) {
+      .container { grid-template-columns: 1fr; }
+      body { padding: 8px; }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 14px;
+    }
+
+    .sidebar { display: flex; flex-direction: column; gap: 14px; }
+
+    .panel-group {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .panel-header {
+      background: #f8fafc;
+      padding: 10px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .panel-body {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label { font-size: 11.5px; font-weight: 600; color: var(--text); }
+    
+    input, select {
+      width: 100%;
+      height: 42px;
+      padding: 0 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    .theme-grid { display: flex; gap: 6px; }
+    .theme-btn {
+      flex: 1;
+      height: 32px;
+      border-radius: 6px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      background: var(--btn-bg);
+    }
+    .theme-btn.active { border-color: var(--text); transform: scale(1.05); }
+
+    .subject-input-group { display: flex; gap: 6px; }
+    .subject-input-group input[type="color"] { width: 42px; height: 42px; padding: 2px; cursor: pointer; flex-shrink: 0; }
+    .subject-input-group input[type="number"] { width: 60px; flex-shrink: 0; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      height: 42px;
+      padding: 0 12px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 8px;
+      border: 1.5px solid transparent;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { opacity: 0.92; }
+    .btn-outline { background: #fff; border-color: var(--border); color: var(--text); }
+    .btn-outline:hover { background: var(--bg); }
+    .btn-danger { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+
+    /* Aksiyon Çubuğu */
+    .action-bar {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    @media (max-width: 768px) {
+      .action-bar { grid-template-columns: 1fr 1fr; }
+      .action-bar .btn-primary { grid-column: span 2; }
+    }
+
+    .chip-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .chip {
+      font-size: 11.5px;
+      padding: 6px 10px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .chip:hover { border-color: var(--primary); color: var(--primary); }
+    .chip.added { opacity: 0.4; background: #e2e8f0; cursor: default; }
+
+    .subject-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+
+    .subject-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      background: var(--bg);
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .subject-item-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .subject-item-left span:nth-child(2) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .color-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .del-btn { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 14px; padding: 4px 8px; }
+    .del-btn:hover { color: #dc2626; }
+
+    /* Program Tablosu Tasarımı */
+    .sheet-card {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 16px;
+    }
+
+    .sheet-header-box {
+      border-bottom: 2px solid var(--primary-light);
+      padding-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .sheet-header-box h1 { font-size: 17px; font-weight: 800; color: var(--text); }
+    .sheet-header-box p { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+    .sheet-badge { font-size: 11px; font-weight: 700; color: var(--primary); background: var(--primary-light); padding: 4px 8px; border-radius: 99px; }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 580px;
+      font-size: 12px;
+      background: #fff;
+    }
+
+    th, td { border: 1px solid var(--border); padding: 4px; text-align: center; }
+    th { background: #f8fafc; font-weight: 700; color: var(--text-muted); font-size: 11px; padding: 8px 4px; }
+    .time-col { font-weight: 700; font-size: 10.5px; background: #f8fafc; color: var(--text-muted); white-space: nowrap; width: 80px; }
+    
+    .cell-select {
+      width: 100%;
+      height: 38px;
+      padding: 0 2px;
+      border: 1.5px solid transparent;
+      border-radius: 6px;
+      font-size: 11.5px;
+      background: transparent;
+      cursor: pointer;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .cell-select:focus {
+      border-color: var(--primary);
+      background: #fff !important;
+      color: var(--text) !important;
+    }
+
+    .legend-container { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 4px; }
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 600;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
+
+    /* Çıktılarda (Yazdırma ve PDF) Butonları Gizle ve Tabloyu Optimize Et */
+    @media print {
+      body { background: #fff; padding: 0; }
+      .sidebar { display: none; }
+      .container { display: block; }
+      .card { border: none; box-shadow: none; padding: 0; }
+      .action-bar { display: none !important; }
+      .cell-select { border: none; appearance: none; -webkit-appearance: none; background: transparent !important; }
+      .table-container { border: none; overflow: visible; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Sol Kontrol Paneli -->
+    <aside class="card sidebar">
+      <div class="panel-group">
+        <div class="panel-header" onclick="togglePanel(this)">📌 Temel Bilgiler <span>▼</span></div>
+        <div class="panel-body">
+          <div class="field"><label>Program Başlığı</label><input type="text" id="titleInput"></div>
+          <div class="grid-2">
+            <div class="field"><label>Sınıf / Şube</label><input type="text" id="classInput"></div>
+            <div class="field"><label>Öğretmen</label><input type="text" id="teacherInput" placeholder="İsim"></div>
+          </div>
+          <div class="field"><label>Tema Rengi</label><div class="theme-grid" id="themeGrid"></div></div>
+        </div>
+      </div>
+
+      <div class="panel-group">
+        <div class="panel-header" onclick="togglePanel(this)">⏰ Saat & Teneffüs <span>▼</span></div>
+        <div class="panel-body">
+          <div class="grid-2">
+            <div class="field"><label>Başlangıç</label><input type="time" id="startTimeInput"></div>
+            <div class="field"><label>Ders Sayısı</label><input type="number" id="numSlotsInput" min="1" max="12"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Ders (dk)</label><input type="number" id="lessonDurationInput" min="20" max="90" step="5"></div>
+            <div class="field"><label>Teneffüs (dk)</label><input type="number" id="breakDurationInput" min="0" max="60" step="5"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Öğle Arası (Sıra)</label><input type="number" id="lunchAfterInput" min="0" max="12"></div>
+            <div class="field"><label>Öğle (dk)</label><input type="number" id="lunchDurationInput" min="0" max="120" step="5"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-group">
+        <div class="panel-header" onclick="togglePanel(this)">📚 Dersler & Şablonlar <span>▼</span></div>
+        <div class="panel-body">
+          <div class="subject-input-group">
+            <input type="text" id="subjectName" placeholder="Özel Ders..." style="flex:1;">
+            <input type="number" id="subjectHours" min="1" max="20" value="2">
+            <input type="color" id="subjectColor" value="#4f46e5">
+            <button class="btn btn-primary" id="addSubjectBtn" style="width: 42px; padding:0;">+</button>
+          </div>
+          <div class="field">
+            <select id="presetCategory"></select>
+            <div class="chip-container" id="presetChips" style="margin-top:6px;"></div>
+          </div>
+          <ul class="subject-list" id="subjectList"></ul>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Sağ Program Tablosu ve Üst Aksiyonlar -->
+    <main class="card sheet-card" id="sheetCard">
+      
+      <!-- Aksiyon Butonları (Yazdırma/PDF'de gizlenir) -->
+      <div class="action-bar" id="actionBar">
+        <button class="btn btn-primary" id="autofillBtn">🪄 Akıllı Otomatik Yerleştir</button>
+        <button class="btn btn-outline" id="pdfBtn">📄 PDF İndir</button>
+        <button class="btn btn-outline" id="docBtn">📝 Word İndir</button>
+        <button class="btn btn-outline" id="printBtn">🖨️ Yazdır</button>
+        <button class="btn btn-danger" id="resetBtn">↺ Sıfırla</button>
+      </div>
+
+      <div class="sheet-header-box">
+        <div>
+          <h1 id="sheetTitle">Haftalık Ders Programı</h1>
+          <p id="sheetSubtitle">9-A</p>
+        </div>
+        <div class="sheet-badge" id="totalHoursBadge">0 Saat</div>
+      </div>
+
+      <div class="table-container">
+        <table id="scheduleTable"></table>
+      </div>
+
+      <div class="legend-container" id="legend"></div>
+    </main>
+  </div>
+
+<script>
+  const STORAGE_KEY = 'ders-programi-v6';
+  const DAYS = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma'];
+  const THEMES = [{ color: '#4f46e5' }, { color: '#2563eb' }, { color: '#059669' }, { color: '#d97706' }, { color: '#e11d48' }, { color: '#475569' }];
+  const PALETTE = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16', '#f97316'];
+
+  const PRESETS = {
+    'Lise (Ortak Dersler)': [
+      ['Türk Dili ve Edebiyatı', 5], ['Matematik', 6], ['Fizik', 2], ['Kimya', 2], ['Biyoloji', 2],
+      ['Tarih', 2], ['Coğrafya', 2], ['Felsefe', 2], ['Din Kültürü', 2], ['İngilizce', 4], ['Beden Eğitimi', 2]
+    ],
+    'Lise (Seçmeli Sayısal)': [
+      ['Seçmeli Matematik', 6], ['İleri Fizik', 4], ['İleri Kimya', 4], ['İleri Biyoloji', 4], ['Astronomi', 2]
+    ],
+    'İlkokul / Ortaokul': [
+      ['Türkçe', 5], ['Matematik', 5], ['Hayat Bilgisi', 4], ['Fen Bilimleri', 4],
+      ['Sosyal Bilgiler', 3], ['İngilizce', 4], ['Din Kültürü', 2], ['Beden Eğitimi', 2]
+    ]
+  };
+
+  function uid() { return Math.random().toString(36).substring(2, 9); }
+
+  function defaultState() {
+    return {
+      title: 'Haftalık Ders Programı',
+      classLevel: '9-A',
+      teacherName: '',
+      primaryColor: '#4f46e5',
+      startTime: '08:30',
+      lessonDuration: 40,
+      breakDuration: 10,
+      lunchAfter: 4,
+      lunchDuration: 45,
+      numSlots: 8,
+      subjects: [
+        { id: uid(), name: 'Türk Dili ve Edebiyatı', color: '#ef4444', weeklyHours: 5 },
+        { id: uid(), name: 'Matematik', color: '#3b82f6', weeklyHours: 6 },
+        { id: uid(), name: 'Fizik', color: '#8b5cf6', weeklyHours: 2 },
+        { id: uid(), name: 'İngilizce', color: '#ec4899', weeklyHours: 4 }
+      ],
+      schedule: {}
+    };
+  }
+
+  let state = (() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : defaultState();
+    } catch { return defaultState(); }
+  })();
+
+  function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+  function togglePanel(header) {
+    const body = header.nextElementSibling;
+    const arrow = header.querySelector('span');
+    if (body.style.display === 'none') {
+      body.style.display = 'flex';
+      arrow.textContent = '▼';
+    } else {
+      body.style.display = 'none';
+      arrow.textContent = '▶';
+    }
+  }
+
+  function fmt(mins) {
+    const h = String(Math.floor(mins / 60)).padStart(2, '0');
+    const m = String(mins % 60).padStart(2, '0');
+    return `${h}:${m}`;
+  }
+
+  function computeSlots() {
+    const slots = [];
+    const [h, m] = state.startTime.split(':').map(Number);
+    let cursor = h * 60 + m;
+    for (let i = 0; i < state.numSlots; i++) {
+      const start = cursor;
+      const end = start + state.lessonDuration;
+      slots.push({ start: fmt(start), end: fmt(end) });
+      cursor = end + (i + 1 === state.lunchAfter ? state.lunchDuration : state.breakDuration);
+    }
+    return slots;
+  }
+
+  function applyPrimaryColor(color) {
+    document.documentElement.style.setProperty('--primary', color);
+    document.documentElement.style.setProperty('--primary-light', `${color}18`);
+  }
+
+  function renderThemes() {
+    const container = document.getElementById('themeGrid');
+    container.innerHTML = THEMES.map(t => 
+      `<button class="theme-btn ${state.primaryColor === t.color ? 'active' : ''}" data-color="${t.color}" style="--btn-bg: ${t.color};"></button>`
+    ).join('');
+    container.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.primaryColor = btn.dataset.color;
+        applyPrimaryColor(state.primaryColor);
+        saveState();
+        renderThemes();
+      });
+    });
+  }
+
+  function renderHeader() {
+    document.getElementById('sheetTitle').textContent = state.title || 'Ders Programı';
+    document.getElementById('sheetSubtitle').textContent = state.classLevel + (state.teacherName ? ` • ${state.teacherName}` : '');
+    const totalHours = state.subjects.reduce((sum, s) => sum + (s.weeklyHours || 0), 0);
+    document.getElementById('totalHoursBadge').textContent = `Toplam: ${totalHours} Saat`;
+  }
+
+  function renderSubjectList() {
+    const list = document.getElementById('subjectList');
+    list.innerHTML = state.subjects.map(s => `
+      <li class="subject-item">
+        <div class="subject-item-left">
+          <span class="color-dot" style="background: ${s.color};"></span>
+          <span>${s.name}</span>
+          <span style="color: var(--text-muted); font-size: 11px; font-weight: 600;">(${s.weeklyHours}s)</span>
+        </div>
+        <button class="del-btn" data-id="${s.id}">✕</button>
+      </li>
+    `).join('');
+
+    list.querySelectorAll('.del-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        state.subjects = state.subjects.filter(s => s.id !== id);
+        Object.keys(state.schedule).forEach(k => { if (state.schedule[k] === id) delete state.schedule[k]; });
+        saveState();
+        renderSubjectList(); renderLegend(); renderTable(); renderPresetChips(); renderHeader();
+      });
+    });
+  }
+
+  function renderLegend() {
+    document.getElementById('legend').innerHTML = state.subjects.map(s => `
+      <div class="legend-item"><span class="color-dot" style="background: ${s.color};"></span><span>${s.name}</span></div>
+    `).join('');
+  }
+
+  function renderTable() {
+    const slots = computeSlots();
+    let html = `<thead><tr><th class="time-col">Saat</th>${DAYS.map(d => `<th>${d}</th>`).join('')}</tr></thead><tbody>`;
+
+    slots.forEach((slot, si) => {
+      html += `<tr><td class="time-col">${slot.start}<br><span style="font-weight:400;color:#94a3b8;">${slot.end}</span></td>`;
+      DAYS.forEach(day => {
+        const key = `${day}-${si}`;
+        const subjId = state.schedule[key] || '';
+        const subj = state.subjects.find(s => s.id === subjId);
+        const bgStyle = subj ? `background-color: ${subj.color}15; color: ${subj.color}; border: 1.5px solid ${subj.color}40;` : '';
+
+        html += `<td>
+          <select data-key="${key}" class="cell-select" style="${bgStyle}">
+            <option value="">-</option>
+            ${state.subjects.map(s => `<option value="${s.id}" ${s.id === subjId ? 'selected' : ''}>${s.name}</option>`).join('')}
+          </select>
+        </td>`;
+      });
+      html += `</tr>`;
+    });
+
+    html += `</tbody>`;
+    const table = document.getElementById('scheduleTable');
+    table.innerHTML = html;
+
+    table.querySelectorAll('.cell-select').forEach(sel => {
+      sel.addEventListener('change', e => {
+        state.schedule[e.target.dataset.key] = e.target.value || null;
+        saveState();
+        renderTable();
+      });
+    });
+  }
+
+  function renderPresets() {
+    const catSelect = document.getElementById('presetCategory');
+    if (!catSelect.dataset.filled) {
+      catSelect.innerHTML = Object.keys(PRESETS).map(c => `<option value="${c}">${c}</option>`).join('');
+      catSelect.dataset.filled = '1';
+      catSelect.addEventListener('change', renderPresetChips);
+    }
+    renderPresetChips();
+  }
+
+  function renderPresetChips() {
+    const cat = document.getElementById('presetCategory').value || Object.keys(PRESETS)[0];
+    const list = PRESETS[cat] || [];
+    const existing = new Set(state.subjects.map(s => s.name));
+
+    document.getElementById('presetChips').innerHTML = list.map(([name, hours]) => {
+      const added = existing.has(name);
+      return `<button type="button" class="chip ${added ? 'added' : ''}" data-name="${name}" data-hours="${hours}" ${added ? 'disabled' : ''}>${added ? '✓ ' : '+ '}${name} <small>(${hours}s)</small></button>`;
+    }).join('');
+
+    document.querySelectorAll('.chip:not(.added)').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const name = btn.dataset.name;
+        const hours = parseInt(btn.dataset.hours, 10);
+        const color = PALETTE[state.subjects.length % PALETTE.length];
+        state.subjects.push({ id: uid(), name, color, weeklyHours: hours });
+        saveState();
+        renderSubjectList(); renderLegend(); renderTable(); renderPresetChips(); renderHeader();
+      });
+    });
+  }
+
+  function syncInputs() {
+    document.getElementById('titleInput').value = state.title;
+    document.getElementById('classInput').value = state.classLevel;
+    document.getElementById('teacherInput').value = state.teacherName;
+    document.getElementById('startTimeInput').value = state.startTime;
+    document.getElementById('numSlotsInput').value = state.numSlots;
+    document.getElementById('lessonDurationInput').value = state.lessonDuration;
+    document.getElementById('breakDurationInput').value = state.breakDuration;
+    document.getElementById('lunchAfterInput').value = state.lunchAfter;
+    document.getElementById('lunchDurationInput').value = state.lunchDuration;
+  }
+
+  function initListeners() {
+    const bindInput = (id, prop, cb) => {
+      document.getElementById(id).addEventListener('input', e => {
+        state[prop] = e.target.value;
+        saveState();
+        if (cb) cb();
+      });
+    };
+
+    bindInput('titleInput', 'title', renderHeader);
+    bindInput('classInput', 'classLevel', renderHeader);
+    bindInput('teacherInput', 'teacherName', renderHeader);
+
+    const bindNumber = (id, prop, min, max) => {
+      document.getElementById(id).addEventListener('change', e => {
+        let val = parseInt(e.target.value, 10) || min;
+        val = Math.max(min, Math.min(max, val));
+        state[prop] = val;
+        e.target.value = val;
+        saveState();
+        renderTable();
+      });
+    };
+
+    document.getElementById('startTimeInput').addEventListener('change', e => {
+      state.startTime = e.target.value || '08:30';
+      saveState();
+      renderTable();
+    });
+
+    bindNumber('numSlotsInput', 'numSlots', 1, 12);
+    bindNumber('lessonDurationInput', 'lessonDuration', 20, 90);
+    bindNumber('breakDurationInput', 'breakDuration', 0, 60);
+    bindNumber('lunchAfterInput', 'lunchAfter', 0, 12);
+    bindNumber('lunchDurationInput', 'lunchDuration', 0, 120);
+
+    document.getElementById('addSubjectBtn').addEventListener('click', () => {
+      const nameInput = document.getElementById('subjectName');
+      const name = nameInput.value.trim();
+      const hours = parseInt(document.getElementById('subjectHours').value, 10) || 1;
+      const color = document.getElementById('subjectColor').value;
+      if (!name) return;
+
+      state.subjects.push({ id: uid(), name, color, weeklyHours: hours });
+      saveState();
+      nameInput.value = '';
+      renderSubjectList(); renderLegend(); renderTable(); renderPresetChips(); renderHeader();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      if (confirm('Tüm program sıfırlansın mı?')) {
+        state = defaultState();
+        saveState();
+        init();
+      }
+    });
+
+    document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+    // PDF İndirme (Aksiyon çubuğunu geçici gizleyip kusursuz çıktı alır)
+    document.getElementById('pdfBtn').addEventListener('click', () => {
+      const bar = document.getElementById('actionBar');
+      bar.style.display = 'none';
+      const el = document.getElementById('sheetCard');
+      html2pdf().set({
+        margin: 8,
+        filename: `${(state.title || 'Ders_Programi').replace(/\s+/g, '_')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+      }).from(el).save().then(() => {
+        bar.style.display = 'grid';
+      });
+    });
+
+    // Word İndirme (Tabloyu ve ders renklerini eksiksiz aktarır)
+    document.getElementById('docBtn').addEventListener('click', () => {
+      const slots = computeSlots();
+      const rows = slots.map((slot, si) => {
+        const cells = DAYS.map(day => {
+          const subj = state.subjects.find(s => s.id === state.schedule[`${day}-${si}`]);
+          const bg = subj ? `${subj.color}25` : '#ffffff';
+          const fg = subj ? subj.color : '#000000';
+          const label = subj ? subj.name : '';
+          return `<td style="padding:10px;border:1px solid #cbd5e1;text-align:center;background:${bg};color:${fg};font-weight:bold;font-family:sans-serif;">${label}</td>`;
+        }).join('');
+        return `<tr><td style="padding:10px;border:1px solid #cbd5e1;font-weight:bold;font-family:sans-serif;background:#f8fafc;text-align:center;">${slot.start}<br><span style="font-weight:normal;font-size:10px;color:#64748b;">${slot.end}</span></td>${cells}</tr>`;
+      }).join('');
+
+      const html = `<html><meta charset="utf-8"><body>
+        <h2 style="font-family:sans-serif;color:#0f172a;margin-bottom:4px;">${state.title}</h2>
+        <p style="font-family:sans-serif;color:#64748b;margin-bottom:14px;">${state.classLevel}${state.teacherName ? ' • ' + state.teacherName : ''}</p>
+        <table style="border-collapse:collapse;width:100%;text-align:center;">
+          <thead>
+            <tr>
+              <th style="padding:10px;border:1px solid #cbd5e1;background:#f1f5f9;font-family:sans-serif;">Saat</th>
+              ${DAYS.map(d => `<th style="padding:10px;border:1px solid #cbd5e1;background:#f1f5f9;font-family:sans-serif;">${d}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table></body></html>`;
+
+      const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${(state.title || 'Ders_Programi').replace(/\s+/g, '_')}.doc`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('autofillBtn').addEventListener('click', () => {
+      state.schedule = {};
+      const numSlots = state.numSlots;
+      const subjects = JSON.parse(JSON.stringify(state.subjects));
+      let blocks = [];
+      subjects.forEach(s => {
+        let rem = s.weeklyHours;
+        while(rem >= 2) { blocks.push({ id: s.id, size: 2 }); rem -= 2; }
+        if(rem === 1) blocks.push({ id: s.id, size: 1 });
+      });
+      blocks.sort(() => Math.random() - 0.5).sort((a, b) => b.size - a.size);
+
+      blocks.forEach(block => {
+        let placed = false;
+        const shuffledDays = [...DAYS].sort(() => Math.random() - 0.5);
+        for (const day of shuffledDays) {
+          for (let si = 0; si <= numSlots - block.size; si++) {
+            let canFit = true;
+            for (let k = 0; k < block.size; k++) {
+              if (state.schedule[`${day}-${si + k}`]) { canFit = false; break; }
+            }
+            if (canFit) {
+              for (let k = 0; k < block.size; k++) state.schedule[`${day}-${si + k}`] = block.id;
+              placed = true;
+              break;
+            }
+          }
+          if (placed) break;
+        }
+      });
+      saveState();
+      renderTable();
+    });
+  }
+
+  function init() {
+    applyPrimaryColor(state.primaryColor || '#4f46e5');
+    syncInputs();
+    renderThemes();
+    renderPresets();
+    renderSubjectList();
+    renderHeader();
+    renderTable();
+    renderLegend();
+  }
+
+  initListeners();
+  init();
+</script>
+</body>
+</html>
