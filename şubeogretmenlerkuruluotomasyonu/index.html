@@ -40,7 +40,7 @@
             padding: 15px !important; 
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1) !important; 
             text-align: left !important; 
-            width: 100% !important;
+            width: 100% !important; 
         }
         
         #sokAppWrapper h2 { 
@@ -67,7 +67,7 @@
             margin-bottom: 10px !important; 
             text-align: left !important; 
             align-items: flex-start !important; 
-            width: 100% !important;
+            width: 100% !important; 
         }
         
         #sokAppWrapper label { 
@@ -81,6 +81,8 @@
         }
         
         #sokAppWrapper input[type="text"], 
+        #sokAppWrapper input[type="date"], 
+        #sokAppWrapper input[type="time"], 
         #sokAppWrapper select, 
         #sokAppWrapper textarea { 
             display: block !important; 
@@ -93,6 +95,14 @@
             color: #0f172a !important; 
             text-align: left !important; 
             margin: 0 !important; 
+            min-height: 38px;
+        }
+
+        #sokAppWrapper input[type="checkbox"] {
+            margin-right: 6px !important;
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
         }
         
         #sokAppWrapper textarea { 
@@ -111,7 +121,6 @@
             padding-bottom: 5px !important; 
         }
 
-        /* Mobil Uyumlu Tablo Taşıyıcıları */
         .table-responsive {
             width: 100% !important;
             overflow-x: auto !important;
@@ -146,7 +155,8 @@
         #sokAppWrapper .custom-table input { 
             background: #ffffff !important; 
             border: 1px solid #cbd5e1 !important; 
-            font-size: 12px !important;
+            font-size: 12px !important; 
+            min-height: 32px !important;
         }
         
         #sokAppWrapper .btn-group { 
@@ -161,14 +171,15 @@
             background: #2563eb !important; 
             color: #ffffff !important; 
             border: none !important; 
-            padding: 9px 14px !important; 
+            padding: 10px 14px !important; 
+            min-height: 40px !important;
             border-radius: 6px !important; 
             cursor: pointer !important; 
             font-weight: 600 !important; 
             font-size: 12px !important; 
             text-decoration: none !important; 
             display: inline-flex !important; 
-            align-items: center !important;
+            align-items: center !important; 
             justify-content: center !important;
         }
         
@@ -177,17 +188,44 @@
         #sokAppWrapper .btn-word { background: #1d4ed8 !important; }
         #sokAppWrapper .btn-print { background: #16a34a !important; }
         #sokAppWrapper .btn-reset { background: #64748b !important; }
+        #sokAppWrapper .btn-secondary { background: #475569 !important; }
+        #sokAppWrapper .btn-accent { background: #0891b2 !important; }
         #sokAppWrapper .btn-danger-sm { 
             background: #dc2626 !important; 
             color: #fff !important; 
-            padding: 5px 8px !important; 
+            padding: 8px 12px !important; 
+            min-height: 36px !important;
+            min-width: 44px !important;
             font-size: 11px !important; 
             border-radius: 4px !important; 
             border: none !important; 
             cursor: pointer !important; 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Ön İzleme A4 Sayfa Düzeni (Mobilde Yatay Kaydırma Desteği) */
+        .sok-alert {
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-bottom: 12px;
+            display: none;
+            line-height: 1.4;
+        }
+        .sok-alert-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #f87171;
+            display: block;
+        }
+        .sok-alert-warning {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+            display: block;
+        }
+
         #sokAppWrapper .preview-container { 
             background: #475569 !important; 
             border-radius: 10px !important; 
@@ -200,6 +238,14 @@
             width: 100% !important; 
             margin-top: 15px !important; 
             -webkit-overflow-scrolling: touch !important;
+            position: relative;
+        }
+        
+        .scroll-hint {
+            font-size: 11px;
+            color: #e2e8f0;
+            margin-bottom: 4px;
+            display: none;
         }
         
         #sokAppWrapper .a4-page { 
@@ -223,18 +269,48 @@
             padding: 12mm 15mm !important; 
         }
 
+        .pdf-export-mode {
+            box-shadow: none !important;
+            margin: 0 !important;
+        }
+
         @media (max-width: 600px) {
             body { padding: 5px !important; }
             #sokAppWrapper .form-container { padding: 12px !important; }
             #sokAppWrapper .btn-group .btn { width: 100% !important; margin-bottom: 4px; }
             #sokAppWrapper .form-grid { grid-template-columns: 1fr !important; }
+            .scroll-hint { display: block; }
+        }
+
+        /* Native Print & Sayfa Yönelim Kuralları */
+        @page {
+            size: A4 portrait;
+            margin: 10mm;
+        }
+
+        @page landscapepage {
+            size: A4 landscape;
+            margin: 10mm;
         }
 
         @media print {
             .no-print { display: none !important; }
+            body { background: #ffffff !important; padding: 0 !important; }
             #sokAppWrapper .main-layout { display: block !important; }
-            #sokAppWrapper .preview-container { background: white !important; padding: 0 !important; margin: 0 !important; }
-            #sokAppWrapper .a4-page { box-shadow: none !important; width: 100% !important; padding: 10mm !important; }
+            #sokAppWrapper .preview-container { background: white !important; padding: 0 !important; margin: 0 !important; overflow: visible !important; }
+            #sokAppWrapper .a4-page { box-shadow: none !important; width: 100% !important; min-height: auto !important; padding: 0 !important; }
+            
+            .print-page-portrait {
+                page-break-after: always;
+                break-after: page;
+            }
+
+            .print-page-landscape {
+                page: landscapepage;
+                page-break-before: always !important;
+                break-before: page !important;
+                width: 100% !important;
+            }
         }
     </style>
 </head>
@@ -244,6 +320,9 @@
     <div class="main-layout" id="sokMainLayout">
         <!-- FORM ALANI -->
         <div class="form-container no-print">
+            <div id="sok_block_alert" class="sok-alert sok-alert-error" style="display:none;"></div>
+            <div id="sok_soft_warnings" class="sok-alert sok-alert-warning" style="display:none;"></div>
+
             <h2>1. Okul ve Kurul Başlık Bilgileri</h2>
             <div class="form-grid">
                 <div class="form-group">
@@ -258,7 +337,8 @@
                         <option value="MESLEKİ VE TEKNİK ANADOLU LİSESİ">MTAL</option>
                         <option value="ANADOLU İMAM HATİP LİSESİ">AİHL</option>
                         <option value="ORTAOKULU">Ortaokulu</option>
-                        <option value="İLKOKULU">İlkokulu</option>
+                        <option value="İMAM HATİP ORTAOKULU">İmam Hatip Ortaokulu</option>
+                        <option value="İLKOKULU">İlkokulu (Uygulanamaz)</option>
                         <option value="OZEL">Özel / Diğer...</option>
                     </select>
                     <input type="text" id="sok_okulTuruOzel" placeholder="Özel Kurum Türü" style="display:none; margin-top:4px;"/>
@@ -266,24 +346,32 @@
                 <div class="form-group">
                     <label>ŞÖK Toplantı Dönemi *</label>
                     <select id="sok_sokNo">
-                        <option value="I. DÖNEM ŞÖK">I. Dönem ŞÖK</option>
-                        <option value="II. DÖNEM ŞÖK" selected="selected">II. Dönem ŞÖK</option>
-                        <option value="DÖNEM SONU ŞÖK">Dönem Sonu ŞÖK</option>
+                        <option value="I. DÖNEM ŞÖK">I. Dönem ŞÖK (Dönem Başı / Ara)</option>
+                        <option value="II. DÖNEM ŞÖK" selected="selected">II. Dönem ŞÖK (2. Dönem Başı / Ara)</option>
+                        <option value="DÖNEM SONU ŞÖK">Dönem Sonu / Yıl Sonu ŞÖK</option>
                         <option value="OZEL">Özel Tanımlama...</option>
                     </select>
                     <input type="text" id="sok_sokNoOzel" placeholder="Özel Dönem Tanımı" style="display:none; margin-top:4px;"/>
                 </div>
                 <div class="form-group">
                     <label>Eğitim-Öğretim Yılı *</label>
-                    <input type="text" id="sok_egitimYili" value="2025-2026"/>
+                    <input type="text" id="sok_egitimYili" value=""/>
                 </div>
                 <div class="form-group">
                     <label>Sınıf / Şube *</label>
                     <input type="text" id="sok_sube" value="11/A"/>
                 </div>
                 <div class="form-group">
-                    <label>Toplantı Tarihi ve Saati *</label>
-                    <input type="text" id="sok_tarihSaat" value="04.02.2026 - 13:30"/>
+                    <label>Toplantı Tarihi *</label>
+                    <input type="date" id="sok_toplantiTarihi"/>
+                </div>
+                <div class="form-group">
+                    <label>Toplantı Saati *</label>
+                    <input type="time" id="sok_toplantiSaati" value="13:30"/>
+                </div>
+                <div class="form-group">
+                    <label>Toplantı Yeri *</label>
+                    <input type="text" id="sok_toplantiYeri" value="Öğretmenler Odası"/>
                 </div>
                 <div class="form-group">
                     <label>Okul Müdürü *</label>
@@ -295,91 +383,34 @@
                 </div>
             </div>
 
-            <h2>2. Gündem, Görüşmeler ve Alınan Kararlar</h2>
+            <div style="margin-bottom: 15px; display: flex; align-items: center;">
+                <input type="checkbox" id="sok_show_legal" checked="checked"/>
+                <label for="sok_show_legal" style="display:inline; margin:0; cursor:pointer;">Başlık altına yasal dayanak ibaresini ekle (MEB Eğitim Kurulları ve Zümreleri Yönergesi Madde 10)</label>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:6px;">
+                <h2 style="margin:0; border:none;">2. Gündem, Görüşmeler ve Alınan Kararlar</h2>
+                <div style="display:flex; gap:6px;">
+                    <button type="button" class="btn btn-secondary" id="sok_btn_load_template" style="padding:4px 8px; font-size:11px; min-height:30px;">📋 Şablon Metinlerini Yeniden Doldur</button>
+                </div>
+            </div>
+            
             <div class="form-group">
                 <label>Gündem Maddeleri</label>
-                <textarea id="sok_gundemMetni">1- Açılış ve yoklama.
-2- Bir önceki toplantıda alınan kararlar.
-3- Öğrencilerin başarı durumlarının incelenmesi ve başarıyı artırıcı önlemlerin alınması.
-4- Derslerin öğretim programlarıyla uyumlu olarak yürütülmesi.
-5- Özel eğitim ihtiyacı olan/kaynaştırma/bütünleştirme yoluyla eğitimlerine devam eden öğrencilerin başarısının artırılması ve eğitim hizmetlerinden daha etkin yararlanmalarının sağlanması amacıyla alınacak tedbirler, yapılması gereken iş, işlem ve planlamalar.
-6- Eğitim kaynaklarıyla atölye, laboratuvar ve diğer birimlerden güvenli bir şekilde yararlanma ve planlama.
-7- Okul çevre işbirliği.
-8- Üretim etkinliklerinin eğitim ve öğretimi destekleyecek şekilde planlanması.
-9- Eğitim kurumu, ilçe, il, yurtiçi ve yurtdışında düzenlenecek bilimsel, sosyal, kültürel, sanatsal ve sportif etkinlikler ve yarışmalar ile geziler, öğrenci kulüp ve topluma hizmet çalışmaları.
-10- Öğrencilerde girişimcilik bilincinin kazandırılmasına yönelik çalışmalar.
-11- Öğrencilerin kişilik ve sosyal gelişimlerinin desteklenmesi, sağlıklarının korunması ve dengeli beslenmelerinin sağlanması.
-12- Okul sağlığı çalışmalarına yer verilmesi.
-13- Değerler eğitimi çalışmalarına yer verilmesi.
-14- İş sağlığı ve güvenliği tedbirleri doğrultusunda eğitim ve öğretim faaliyetlerinin planlanması.
-15- Dilek ve temenniler.</textarea>
+                <textarea id="sok_gundemMetni"></textarea>
             </div>
             <div class="form-group">
                 <label>Gündem Maddelerinin Görüşülmesi</label>
-                <textarea id="sok_gorusmeMetni" style="min-height:200px;">Madde 1: Açılış ve Yoklama
-Toplantı belirtilen tarih ve saatte öğretmenler odasında başlatılmıştır. Yoklama alınmış, toplantıya katılan öğretmenlerin hazır bulunduğu tespit edilmiştir. Toplantının amacı; sınıf düzeyinde ikinci dönemde akademik hedeflerin netleştirilmesi, başarıyı artırıcı önlemlerin belirlenmesi ve öğrenci gelişiminin bütüncül değerlendirilmesi olarak ifade edilmiştir. Gündem maddeleri okunarak kabul edilmiştir.
-
-Madde 2: Bir Önceki Toplantıda Alınan Kararlar
-Bir önceki toplantıda alınan kararlar maddeler halinde okunmuş ve uygulama durumu değerlendirilmiştir. Devamsızlık takibi, ödev kontrolü ve ölçme sonrası geri bildirim gibi kararların sınıf genelinde olumlu etkilerinin görüldüğü belirtilmiştir.
-
-Madde 3: Öğrencilerin Başarı Durumlarının İncelenmesi ve Başarıyı Artırıcı Önlemlerin Alınması
-Öğrencilerin başarı durumları ders bazında ele alınmış; yazılı sonuçları, performans çalışmaları ve ders içi gözlemler birlikte değerlendirilmiştir. Başarı düşüklüğü görülen öğrencilerde temel eksikler, düzensiz çalışma, sınav stratejisi ve zaman yönetimi sorunlarının öne çıktığı belirtilmiştir.
-
-Madde 4: Derslerin Öğretim Programlarıyla Uyumlu Olarak Yürütülmesi
-Derslerin öğretim programındaki kazanımlara uygun yürütülmesi gerektiği vurgulanmıştır. Yıllık planların ve zümre kararlarının uygulanmasının ölçme-değerlendirmede ortaklık sağlayacağı ifade edilmiştir.
-
-Madde 5: Özel Eğitim İhtiyacı Olan / Kaynaştırma Öğrencileri
-Bireysel gelişim raporu bulunan öğrenciler için öğretmenler tarafından Bireyselleştirilmiş Eğitim Planlarının (BEP) hazırlanması, rehberlik servisi ile iş birliği içinde sosyal-duygusal gelişimi destekleyici etkinlikler planlanması kararlaştırılmıştır.
-
-Madde 6: Atölye ve Laboratuvarlardan Yararlanma
-Okulun laboratuvar, bilişim sınıfı ve diğer birimlerinin güvenli kullanımı ele alınmıştır. Kullanımların planlı yapılması ve sorumlu öğretmen gözetiminde yürütülmesi gerektiği vurgulanmıştır.
-
-Madde 7: Okul Çevre İşbirliği
-Yerel yönetimler, kütüphaneler, üniversiteler ve ilgili kurumlarla yapılabilecek seminer ve ziyaretler ele alınmıştır.
-
-Madde 8: Üretim Etkinliklerinin Planlanması
-Proje, sunum, afiş, poster, rapor ve ürün dosyası gibi çalışmaların ders kazanımlarıyla ilişkilendirilerek planlanabileceği belirtilmiştir.
-
-Madde 9: Bilimsel, Sosyal, Kültürel ve Sportif Etkinlikler
-İlçe ve il düzeyindeki yarışmalara katılımın öğrencilerin özgüvenini artırdığı belirtilmiştir. Kulüp çalışmalarının planlı yürütülmesi kararlaştırılmıştır.
-
-Madde 10: Girişimcilik Bilinci
-Öğrencilere sınıf içi görevlerde, kulüp faaliyetlerinde ve sosyal sorumluluk projelerinde aktif görevler verilmesi uygun görülmüştür.
-
-Madde 11: Kişilik, Sosyal Gelişim ve Dengeli Beslenme
-Uyku düzeni, ekran süresi, hijyen ve fiziksel hareketin akademik başarıyla ilişkisi değerlendirilmiştir.
-
-Madde 12: Okul Sağlığı Çalışmaları
-Sınıf ve okul genelinde temizlik kurallarına uyulmasının önemine vurgu yapılmıştır.
-
-Madde 13: Değerler Eğitimi Çalışmaları
-Saygı, sorumluluk, dürüstlük, hoşgörü ve yardımseverlik temalarının ikinci dönemde ortak dil ile desteklenmesi gerektiği belirtilmiştir.
-
-Madde 14: İş Sağlığı ve Güvenliği Tedbirleri
-Laboratuvar, spor alanları ve ortak kullanım alanlarında güvenlik kurallarının öğrencilere hatırlatılması ve risk analizlerinin yapılması gerektiği vurgulanmıştır.
-
-Madde 15: Dilek ve Temenniler
-İyi dilek ve temennilerle toplantıya son verildi.</textarea>
+                <textarea id="sok_gorusmeMetni" style="min-height:220px;"></textarea>
             </div>
             <div class="form-group">
                 <label>Alınan Kararlar</label>
-                <textarea id="sok_kararMetni" style="min-height:120px;">1- Bir önceki toplantı kararlarının uygulanma durumunun takip edilmesine karar verildi.
-2- Ders bazında başarı analizlerinin yapılmasına ve kazanım eksikleri için telafi planı uygulanmasına karar verildi.
-3- Haftalık çalışma planı hazırlanmasına; düzenli ödev takibi ve yanlış analizi uygulamalarının desteklenmesine karar verildi.
-4- Derslerin öğretim programlarıyla uyumlu yürütülmesine karar verildi.
-5- Bütünleştirme/kaynaştırma öğrencileri için ders içi uyarlamalar yapılmasına ve BEP uygulanmasına karar verildi.
-6- Laboratuvar ve bilişim sınıflarının sorumlu öğretmen gözetiminde güvenli kullanılmasına karar verildi.
-7- Okul-çevre iş birliği kapsamında kurumlarla ortak etkinlikler planlanmasına karar verildi.
-8- Üretim ve proje etkinliklerinin Bilim Fuarı, TÜBİTAK vb. sergilerle desteklenmesine karar verildi.
-9- Kulüp ve sosyal sorumluluk çalışmalarının takvimlendirilmesine karar verildi.
-10- Girişimcilik bilincini geliştirmek amacıyla ekip çalışması odaklı projelerin desteklenmesine karar verildi.
-11- Sağlıklı yaşam, hijyen ve dengeli beslenme konularında bilgilendirme yapılmasına karar verildi.
-12- Okul sağlığı ve İSG tedbirlerinin eksiksiz uygulanmasına karar verildi.</textarea>
+                <textarea id="sok_kararMetni" style="min-height:140px;"></textarea>
             </div>
 
             <div class="brans-header">
                 <h2 style="margin:0; border:none;">3. Branşlar ve Katılımcı Öğretmenler</h2>
-                <button type="button" class="btn" id="sok_btn_add_brans" style="padding:4px 8px; font-size:11px;">⊕ Yeni Branş Ekle</button>
+                <button type="button" class="btn" id="sok_btn_add_brans" style="padding:4px 8px; font-size:11px; min-height:30px;">⊕ Yeni Branş Ekle</button>
             </div>
             <div class="table-responsive">
                 <table class="custom-table">
@@ -398,11 +429,12 @@ Madde 15: Dilek ve Temenniler
                     <tbody id="sok_bransTbody"></tbody>
                 </table>
             </div>
+            <div id="sok_teacher_warnings" style="font-size:11px; color:#b45309; margin-top:3px; display:none;"></div>
 
             <!-- BİREYSEL ÖĞRENCİ DEĞERLENDİRME ÇİZELGESİ -->
             <div class="brans-header" style="margin-top:25px;">
                 <h2 style="margin:0; border:none;">4. Bireysel Öğrenci Değerlendirme Çizelgesi Veri Girişi</h2>
-                <button type="button" class="btn" id="sok_btn_add_student" style="padding:4px 8px; font-size:11px;">⊕ Yeni Öğrenci Ekle</button>
+                <button type="button" class="btn" id="sok_btn_add_student" style="padding:4px 8px; font-size:11px; min-height:30px;">⊕ Yeni Öğrenci Ekle</button>
             </div>
             <div class="table-responsive">
                 <table class="custom-table" style="font-size:11px; min-width: 750px !important;">
@@ -427,21 +459,51 @@ Madde 15: Dilek ve Temenniler
                 <button type="button" class="btn btn-pdf" id="sok_btn_pdf">📄 Resmî A4 PDF İndir</button>
                 <button type="button" class="btn btn-word" id="sok_btn_word">📝 Resmî Word (.doc) İndir</button>
                 <button type="button" class="btn btn-print" id="sok_btn_print">🖨️ Yazdır / Çıktı Al</button>
+                <button type="button" class="btn btn-accent" id="sok_btn_export_json">💾 Taslağı Dışa Aktar (.json)</button>
+                <button type="button" class="btn btn-accent" id="sok_btn_import_json">📂 Taslağı İçe Aktar (.json)</button>
+                <input type="file" id="sok_file_json" accept=".json" style="display:none;"/>
                 <button type="button" class="btn btn-reset" id="sok_btn_reset">Formu Sıfırla</button>
             </div>
         </div>
 
         <!-- ÖN İZLEME ALANI -->
         <div class="preview-container" id="sokPreviewContainer">
-            <div class="a4-page" id="sokA4Preview"></div>
-            <div class="a4-page landscape" id="sokA4PreviewLandscape"></div>
+            <span class="scroll-hint">👉 Yatay değerlendirme tablosu için sayfayı sağa kaydırabilirsiniz</span>
+            <div class="a4-page print-page-portrait" id="sokA4Preview"></div>
+            <div class="a4-page landscape print-page-landscape" id="sokA4PreviewLandscape"></div>
         </div>
     </div>
 </div>
 
-<!-- Entegre JS Motoru + Iframe Otomatik Yükseklik Haberleşmesi -->
 <script type="text/javascript">
 //<![CDATA[
+    /**
+     * CHANGELOG & MİMARİ NOTLAR:
+     * Part A (Yapısal/Mantıksal Düzeltmeler):
+     * - İlkokul seçildiğinde MEB Yönergesi Madde 10 uyarınca sistem bloklama kipine alınır.
+     * - Kademeye göre sınıf seviyesi (Ortaokul: 5-8, Lise: 9-12) uyarıları dinamik bağlandı.
+     * - Takvim ayı ve dönem uygunluğu denetimi eklendi.
+     * - Branş tablosunda isim tekrarları ve branş adı karışıklığı tespit göstergesi eklendi.
+     * - Dışa aktarma öncesi (PDF/Word/Print) boş ve taslak veri kontrolü sağlandı.
+     *
+     * Part B (Zengin İçerik & Hukuki Şablonlar):
+     * - Kurul başkanı sok_mudurYardimcisi/sok_okulMuduru üzerinden dinamik metne bağlandı.
+     * - Karar bölümüne MEB Yönergesi Madde 10(7) oy çokluğu hükmü, onay yürürlük şartı ve arşivleme kaydı eklendi.
+     * - Liselerde kariyer/yükseköğretim, ortaokullarda sınıf geçme/tekrarı maddeleri otomatik uyarlandı.
+     * - Başarı analizlerine dikkat eksikliği, sınav kaygısı, aile faktörleri ve DYK/akran desteği eklendi.
+     * - Dönem bazlı metin havuzu kuruldu (I. Dönem, II. Dönem, Dönem Sonu).
+     *
+     * Part C (PDF Dışa Aktarma Kayma/Taşma Çözümü):
+     * - Container scrollLeft/scrollTop değerleri indirme anında sıfırlandı.
+     * - 1. sayfa A4 Portrait (210x297mm), 2. sayfa ise pdf.addPage('a4', 'landscape') ile A4 Landscape (297x210mm) olarak ayrı ayrı capture edildi.
+     *
+     * Part D & E (Native Print, Tarih/Saat, JSON Yedekleme, Responsive):
+     * - E1: Native print için @page landscapepage tanımlandı, .print-page-landscape ile yatay sayfa baskısı sağlandı.
+     * - E2: Tarih/Saat tek metin kutusundan çıkarılıp native date ve time inputlarına dönüştürüldü; GG.AA.YYYY çevrimi JS üzerinden dinamikleştirildi.
+     * - E3: Eğitim-Öğretim Yılı takvime göre (Ağustos öncesi/sonrası) otomatik hesaplanacak şekilde kuruldu.
+     * - E4: Toplantı Yeri (sok_toplantiYeri) düzenlenebilir hale getirildi. "Madde X:" başlıkları formatTextToParagraphs içinde kalın (bold) yapıldı. Aynı branş tekrarı için soft-warning eklendi. İframe kısıtlarına takılmayan JSON taslak dışa/içe aktarımı eklendi.
+     */
+
     (function() {
         function sendHeightToParent() {
             var body = document.body, html = document.documentElement;
@@ -451,22 +513,207 @@ Madde 15: Dilek ve Temenniler
             }
         }
 
+        function calculateCurrentEducationYear() {
+            var now = new Date();
+            var year = now.getFullYear();
+            var month = now.getMonth(); // 0-11 (7: Ağustos)
+            if (month >= 7) {
+                return year + "-" + (year + 1);
+            } else {
+                return (year - 1) + "-" + year;
+            }
+        }
+
         function initSokApp() {
             var getEl = function(id) { return document.getElementById(id); };
-            var varsayilanBranslar = [
-                "Türk Dili ve Edebiyatı", "Matematik", "Fizik", "Kimya", "Biyoloji",
-                "Tarih", "Coğrafya", "Felsefe", "İngilizce", "Almanca",
-                "Din Kültürü ve A.B.", "Beden Eğitimi ve Spor", "Görsel Sanatlar",
-                "Müzik", "Bilişim Teknolojileri", "Rehberlik Öğretmeni"
-            ];
+
+            // Varsayılan Eğitim Yılı ve Tarihi Belirle
+            var defEduYear = calculateCurrentEducationYear();
+            if (getEl("sok_egitimYili") && !getEl("sok_egitimYili").value) {
+                getEl("sok_egitimYili").value = defEduYear;
+            }
+
+            if (getEl("sok_toplantiTarihi") && !getEl("sok_toplantiTarihi").value) {
+                var today = new Date();
+                var yyyy = today.getFullYear();
+                var mm = String(today.getMonth() + 1).padStart(2, '0');
+                var dd = String(today.getDate()).padStart(2, '0');
+                getEl("sok_toplantiTarihi").value = yyyy + "-" + mm + "-" + dd;
+            }
+
+            var branchesByLevel = {
+                lise: [
+                    "Türk Dili ve Edebiyatı", "Matematik", "Fizik", "Kimya", "Biyoloji",
+                    "Tarih", "Coğrafya", "Felsefe", "İngilizce", "Almanca", "Fransızca",
+                    "Din Kültürü ve Ahlak Bilgisi", "Beden Eğitimi ve Spor", "Görsel Sanatlar",
+                    "Müzik", "Bilişim Teknolojileri", "Rehberlik / Psikolojik Danışman",
+                    "Sağlık Bilgisi ve Trafik Kültürü", "Meslek Dersi Öğretmeni"
+                ],
+                ortaokul: [
+                    "Türkçe", "Matematik", "Fen Bilimleri", "Sosyal Bilgiler", "T.C. İnkılap Tarihi ve Atatürkçülük",
+                    "Yabancı Dil (İngilizce)", "Din Kültürü ve Ahlak Bilgisi", "Görsel Sanatlar",
+                    "Müzik", "Beden Eğitimi ve Spor", "Teknoloji ve Tasarım", "Bilişim Teknolojileri ve Yazılım",
+                    "Rehberlik / Psikolojik Danışman"
+                ]
+            };
+
+            var liseOnlyBranches = ["Fizik", "Kimya", "Biyoloji", "Tarih", "Coğrafya", "Felsefe", "Türk Dili ve Edebiyatı", "Almanca", "Fransızca"];
+            var ortaokulOnlyBranches = ["Türkçe", "Fen Bilimleri", "Sosyal Bilgiler", "Teknoloji ve Tasarım", "T.C. İnkılap Tarihi ve Atatürkçülük"];
 
             var varsayilanOgrenciler = [
-                { ad: "Öğrenci 1", kisilik: "Sorumluluk sahibi, hareketli, konuşkan.", beslenme: "Düzenli beslenir.", saglik: "Şikâyeti yoktur.", sosyal: "Sınıf içerisinde dikkat çekmeye çalışıyor.", ekonomik: "İhtiyaçları kadar harçlığı veriliyor.", basari: "Başarılı ve yeterli düzeyde çalışır. Ailesiyle görüşülüp desteklenecek." },
-                { ad: "Öğrenci 2", kisilik: "Sorumluluk sahibi, uyumlu.", beslenme: "Düzenli ve sağlıklı beslenir.", saglik: "Şikâyeti yoktur.", sosyal: "Arkadaşlarıyla arası iyi.", ekonomik: "Gelir durumu normal.", basari: "Genel olarak derse katılımı var. Sınıf içi görevler verilebilir." },
-                { ad: "Öğrenci 3", kisilik: "Sessiz, sakin, uyumludur.", beslenme: "Düzenli ve sağlıklı beslenir.", saglik: "Şikâyeti yoktur.", sosyal: "Arkadaş ilişkileri zayıftır.", ekonomik: "İhtiyaçları kadar harçlığı verilir.", basari: "Başarı durumu düşük. Sistemli çalışmaya özendirilmeli." },
-                { ad: "Öğrenci 4", kisilik: "Dürüst, duygusal, çekingendir.", beslenme: "Sabah kahvaltısını yaparak gelir.", saglik: "Şikâyeti yoktur.", sosyal: "Arkadaşlarıyla iyi geçinir.", ekonomik: "İhtiyaçları kadar harçlık verilir.", basari: "Çalışma planına uyum göstermesi desteklenecek." },
-                { ad: "Öğrenci 5", kisilik: "Sessiz, içine kapanık, düzenli.", beslenme: "Sabah kahvaltısını yapar.", saglik: "Şikâyeti yoktur.", sosyal: "Pek arkadaşı yoktur.", ekonomik: "Maddi durumu orta.", basari: "Derslerinde gayretli fakat okuduğunu anlama çalışması yapmalı." }
+                { ad: "Ahmet K.", kisilik: "Sorumluluk sahibi, derste aktif, iletişim becerileri kuvvetli.", beslenme: "Düzenli ve dengeli beslenir.", saglik: "Bilinen sağlık engeli yoktur.", sosyal: "Arkadaşlarıyla uyumlu, sosyal etkinliklere katılımcı.", ekonomik: "Ailesinin sosyoekonomik düzeyi yeterli.", basari: "Akademik başarısı yüksek. Hedef odaklı DYK ve deneme takip planı uygulandı." },
+                { ad: "Zeynep B.", kisilik: "Sakin, uyumlu ancak zaman zaman çekingen.", beslenme: "Kahvaltı alışkanlığı zayıf.", saglik: "Mevsimsel alerjisi mevcut.", sosyal: "Akran ilişkilerinde seçici.", ekonomik: "Orta düzey gelir grubu.", basari: "Sınav kaygısı ve zaman yönetimi güçlüğü yaşıyor; rehberlik servisiyle görüşme planlandı." },
+                { ad: "Mehmet E.", kisilik: "Dinamik, liderlik vasfı yüksek, odaklanma süresi kısa.", beslenme: "Sağlıklı beslenme rutini var.", saglik: "Göz problemi var, ön sıralara oturtuldu.", sosyal: "Grup çalışmalarında aktif rol alıyor.", ekonomik: "Yeterli harçlık ve eğitim desteği alıyor.", basari: "Sözel derslerde başarılı; sayısal derslerde telafi ve akran desteği kararlaştırıldı." },
+                { ad: "Elif S.", kisilik: "Görev bilinci gelişmiş, yardımsever ve dikkatli.", beslenme: "Düzenli beslenir.", saglik: "Herhangi bir şikâyeti bulunmamaktadır.", sosyal: "Okul içi kulüp ve sosyal sorumluluk faaliyetlerinde etkin.", ekonomik: "Maddi durumu iyi.", basari: "Ders kazanımlarına hakim; okuma-anlama ve problem çözme hızı üst seviyede." },
+                { ad: "Mustafa Y.", kisilik: "İçine kapanık, duygusal, derse katılımda isteksiz.", beslenme: "Düzensiz beslenme eğiliminde.", saglik: "Şikâyeti yoktur.", sosyal: "İletişimde çekingen, rehberlik desteğine ihtiyaç duyuyor.", ekonomik: "Sosyal yardım ve kaynak desteği sağlanabilir.", basari: "Temel kavram eksiklikleri ve ödev takipsizliği var; veli iş birliğiyle ek çalışma takvimi hazırlandı." }
             ];
+
+            var userEditedTexts = {
+                gundem: false,
+                gorusme: false,
+                karar: false
+            };
+
+            function getSelectedLevel() {
+                var okulTuru = getEl("sok_okulTuru").value;
+                if (okulTuru === "ORTAOKULU" || okulTuru === "İMAM HATİP ORTAOKULU") return "ortaokul";
+                if (okulTuru === "İLKOKULU") return "ilkokul";
+                return "lise";
+            }
+
+            function getChairPerson() {
+                var mudurYrd = getEl("sok_mudurYardimcisi").value.trim();
+                var mudur = getEl("sok_okulMuduru").value.trim();
+                if (mudurYrd) return mudurYrd + " (Müdür Yardımcısı / Kurul Başkanı)";
+                if (mudur) return mudur + " (Okul Müdürü)";
+                return "Kurul Başkanı";
+            }
+
+            function generateTemplates(donemKey, level) {
+                var chair = getChairPerson();
+                var toplantiYeri = getEl("sok_toplantiYeri").value.trim() || "Öğretmenler Odası";
+                var gundem = "";
+                var gorusme = "";
+                var karar = "";
+
+                var isOrtaokul = (level === "ortaokul");
+
+                if (isOrtaokul) {
+                    gundem = "1- Açılış ve yoklama.\n" +
+                        "2- Bir önceki toplantıda alınan kararların değerlendirilmesi.\n" +
+                        "3- Öğrencilerin başarı durumlarının, okuma-anlama becerilerinin ve ders bazlı kazanım düzeylerinin incelenmesi.\n" +
+                        "4- Öğrencilerin sınıf geçme, ders başarısı ve sınıf tekrarı risk durumlarının görüşülmesi.\n" +
+                        "5- Özel eğitim ihtiyacı olan (BEP/kaynaştırma/bütünleştirme) öğrencilerin gelişim durumları ve tedbirler.\n" +
+                        "6- Derslerin öğretim programları ve zümre kararlarıyla uyumlu yürütülmesi.\n" +
+                        "7- Eğitim ortamları, atölye, bilişim ve laboratuvar birimlerinin güvenli kullanımı.\n" +
+                        "8- Okul-aile ve çevre iş birliği, veli görüşmeleri.\n" +
+                        "9- Sosyal, kültürel, sportif ve sanatsal etkinlikler ile değerler eğitimi çalışmaları.\n" +
+                        "10- Öğrenci sağlığı, beslenme alışkanlıkları ve İş Sağlığı ve Güvenliği (İSG) tedbirleri.\n" +
+                        "11- Dilek ve temenniler.";
+                } else {
+                    gundem = "1- Açılış ve yoklama.\n" +
+                        "2- Bir önceki toplantıda alınan kararların gözden geçirilmesi.\n" +
+                        "3- Öğrencilerin akademik başarı durumlarının, sınav sonuçlarının ve ders içi performanslarının değerlendirilmesi.\n" +
+                        "4- Öğrencilerin mesleğe, iş hayatına ve yükseköğretime (YKS) yönlendirilmesine yönelik rehberlik çalışmaları.\n" +
+                        "5- Özel eğitim ihtiyacı olan / kaynaştırma yoluyla eğitim alan öğrencilere ilişkin tedbirler ve BEP uygulamaları.\n" +
+                        "6- Derslerin öğretim programları ve ortak sınav takvimiyle uyumlu sürdürülmesi.\n" +
+                        "7- Atölye, laboratuvar ve eğitim kaynaklarının planlı ve iş sağlığına uygun kullanımı.\n" +
+                        "8- Okul-çevre iş birliği, sektör/üniversite buluşmaları ve veli iletişimi.\n" +
+                        "9- Bilimsel, sosyal, kültürel etkinlikler, TÜBİTAK/TEKNOFEST projeleri ve kulüp faaliyetleri.\n" +
+                        "10- Girişimcilik bilinci, kariyer planlaması ve değerler eğitimi çalışmaları.\n" +
+                        "11- Öğrencilerin bedensel, sosyal gelişimi, zararlı alışkanlıklardan korunma ve İSG tedbirleri.\n" +
+                        "12- Dilek ve temenniler.";
+                }
+
+                if (donemKey === "I. DÖNEM ŞÖK") {
+                    gorusme = "Madde 1: Açılış ve Yoklama\n" +
+                        "Toplantı, " + chair + " başkanlığında, ilan edilen gün ve saatte " + toplantiYeri + " bünyesinde başlatılmıştır. Yapılan yoklamada şubede dersi bulunan tüm branş öğretmenleri ve rehberlik servisinin hazır bulunduğu, yasal karar yeter sayısının sağlandığı görülmüştür. Gündem maddeleri okunmuş; ekleme talebi olmadığından gündem oy birliğiyle kabul edilmiştir.\n\n" +
+                        "Madde 2: Bir Önceki Dönem Kararlarının Değerlendirilmesi\n" +
+                        "Geçmiş döneme ait kurul kararları ve öğrenci gelişim takip çizelgeleri gözden geçirilmiş, alınan önlemlerin şube genel disiplini ve adaptasyon sürecine olumlu yansıdığı değerlendirilmiştir.\n\n" +
+                        "Madde 3: Öğrencilerin Başarı Durumlarının İncelenmesi ve Başarıyı Artırıcı Önlemler\n" +
+                        "Şubenin genel akademik seviyesi ders bazında değerlendirilmiştir. Temel eksikler arasında çalışma planı oluşturamama, dikkat dağınıklığı, sınav kaygısı ve okuduğunu anlamlandırma güçlüğü tespit edilmiştir. Çözüm olarak kazanım eksiklerinin erken tespit edilmesi, telafi çalışmaları, ders içi akran eşleşmeleri ve DYK/etüt yönlendirmelerinin yapılması kararlaştırılmıştır.\n\n" +
+                        (isOrtaokul ? "Madde 4: Sınıf Geçme ve Devam Durumları\nÖğrencilerin devamsızlık kayıtları ve sınıf geçme yönetmeliği çerçevesindeki durumları incelenmiş; devamsızlığı kritik sınıra yaklaşan öğrencilerin velileriyle ivedilikle irtibat kurulması kararlaştırılmıştır.\n\n" :
+                        "Madde 4: Yükseköğretime ve Mesleğe Yönlendirme Çalışmaları\nÖğrencilerin kariyer hedefleri, YKS hazırlık süreçleri ve mesleki ilgi alanları değerlendirilmiş; rehberlik servisiyle iş birliği içerisinde meslek tanıtım seminerleri ve hedef belirleme envanterlerinin uygulanması uygun görülmüştür.\n\n") +
+                        "Madde 5: Özel Eğitim İhtiyacı Olan / Kaynaştırma Öğrencileri\n" +
+                        "Bütünleştirme/kaynaştırma kapsamında bulunan öğrenciler için BEP planlarının hazırlanması, sınav ortamı ve kazanım uyarlamalarının zümre öğretmenlerince hassasiyetle uygulanması karara bağlanmıştır.\n\n" +
+                        "Madde 6: Eğitim Ortamları ve İSG Tedbirleri\n" +
+                        "Derslik, bilişim sınıfı ve laboratuvarların kullanımında güvenlik kurallarına tam riayet edileceği, acil durum tahliye ve güvenlik tedbirlerinin hatırlatılacağı belirtilmiştir.\n\n" +
+                        "Madde 7: Dilek ve Temenniler\n" +
+                        "Dönemin tüm öğrenci ve öğretmenler için verimli ve başarılı geçmesi temennisiyle toplantı sonlandırılmıştır.";
+
+                    karar = "1- Toplantı yeter sayısının bulunduğu ve gündemin aynen kabul edildiği tespit edilmiştir.\n" +
+                        "2- MEB Eğitim Kurulları ve Zümreleri Yönergesi Madde 10(7) uyarınca kararlar toplantıya katılanların oy çokluğuyla alınmıştır.\n" +
+                        "3- Akademik başarıyı desteklemek üzere her ders için kazanım tarama planı yapılmasına, ödev ve çalışma takibinin haftalık yürütülmesine karar verildi.\n" +
+                        (isOrtaokul ? "4- Sınıf tekrarı riski taşıyan veya devamsızlığı artan öğrencilerin velileriyle bireysel görüşme takvimi oluşturulmasına karar verildi.\n" :
+                        "4- YKS hazırlık ve kariyer yönlendirme kapsamında rehberlik servisiyle koordineli deneme sınavları ve seminerler düzenlenmesine karar verildi.\n") +
+                        "5- BEP planlarının zümrelerle eş güdüm içinde güncellenmesine ve ders içi uyarlamaların eksiksiz sürdürülmesine karar verildi.\n" +
+                        "6- İş sağlığı ve güvenliği kurallarına uygun olarak eğitim alanlarının denetim altında tutulmasına karar verildi.\n" +
+                        "7- Alınan kararlar okul müdürünün onayına sunulacak, onay sonrasında yürürlüğe konularak tüm kurul üyelerince imzalanıp arşivlenecektir.";
+                } else if (donemKey === "II. DÖNEM ŞÖK") {
+                    gorusme = "Madde 1: Açılış ve Yoklama\n" +
+                        "Toplantı, " + chair + " başkanlığında, belirtilen tarih ve saatte " + toplantiYeri + " bünyesinde başlatılmıştır. Yapılan yoklamada kurul üyelerinin tamamının hazır bulunduğu tespit edilmiştir. İkinci döneme ait akademik yol haritası ve öğrenci gelişim süreçleri gündeme alınmış, gündem üzerinde değişiklik önerisi olmadığından maddelere geçilmiştir.\n\n" +
+                        "Madde 2: I. Dönem Kararlarının ve Sonuçlarının Değerlendirilmesi\n" +
+                        "Birinci dönem alınan kararların şube başarısına etkisi incelenmiş; düzenli veli bilgilendirmeleri ve DYK takviyeleri sayesinde başarı oranında artış gözlendiği ifade edilmiştir.\n\n" +
+                        "Madde 3: Öğrenci Başarılarının ve Kazanım Düzeylerinin İncelenmesi\n" +
+                        "Birinci dönem karne notları, yazılı analizleri ve ders bazlı kazanım raporları değerlendirilmiştir. Sınav kaygısı yaşayan, çalışma disiplininde kopukluk olan ve ailevi faktörlerden etkilenen öğrencilere yönelik rehberlik servisi koordinasyonunda ek izleme planı hazırlanmıştır.\n\n" +
+                        (isOrtaokul ? "Madde 4: Sınıf Geçme ve Devamsızlık Durumları\nİkinci dönemde ders başarısı sınırda olan ve devamsızlık riski taşıyan öğrenciler tek tek ele alınmış; veli-okul-rehberlik üçgeninde takip mekanizması kurulmuştur.\n\n" :
+                        "Madde 4: Yükseköğretim ve Kariyer Planlama Takibi\nÜniversiteye giriş sınavları, alan seçimi ve mesleki yönelim konularında öğrencilere dönük deneme analizleri ve motivasyon buluşmalarının artırılması kararlaştırılmıştır.\n\n") +
+                        "Madde 5: Kaynaştırma ve Bütünleştirme Uygulamaları\n" +
+                        "Özel eğitime gereksinim duyan öğrencilerin birinci dönem BEP kazanım çıktıları incelenmiş, ikinci dönem planlarında bireysel performans düzeyine göre güncellemeler yapılmıştır.\n\n" +
+                        "Madde 6: Sosyal, Kültürel Etkinlikler ve Değerler Eğitimi\n" +
+                        "TÜBİTAK, TEKNOFEST, münazara ve spor turnuvalarına öğrencilerin katılımı teşvik edilmiş; değerler eğitimi temalarının ders kazanımlarına entegre edilmesine karar verilmiştir.\n\n" +
+                        "Madde 7: Dilek ve Temenniler\n" +
+                        "Başarılı, huzurlu ve verimli bir ikinci dönem dileğiyle toplantı kapatılmıştır.";
+
+                    karar = "1- Toplantı yeter sayısının mevcut olduğu ve gündem maddelerinin oy birliğiyle kabul edildiği teyit edilmiştir.\n" +
+                        "2- MEB Eğitim Kurulları ve Zümreleri Yönergesi Madde 10(7) gereğince kararlar oy çokluğuyla alınmıştır.\n" +
+                        "3- I. dönem başarı analizlerine dayalı olarak eksik kazanımlar için ünite başlarında hatırlatma ve telafi tekrarları yapılmasına karar verildi.\n" +
+                        "4- Akran desteği, veli görüşme günleri ve hedef takip formları ile öğrenci motivasyonunun desteklenmesine karar verildi.\n" +
+                        (isOrtaokul ? "5- Sınıf geçme riski bulunan öğrencilerin velilerine düzenli ara karne ve kazanım değerlendirme bildirimleri yapılmasına karar verildi.\n" :
+                        "5- Kariyer ve YKS odaklı rehberlik çalışmalarının periyodik olarak sürdürülmesine karar verildi.\n") +
+                        "6- BEP hedeflerinin ikinci dönem kazanımlarına göre revize edilip uygulanmasına karar verildi.\n" +
+                        "7- Kararlar okul müdürünün onayı ile yürürlüğe girecek, kurul üyeleri tarafından imza altına alınıp idarede muhafaza edilecektir.";
+                } else {
+                    gorusme = "Madde 1: Açılış ve Yoklama\n" +
+                        "Toplantı, " + chair + " başkanlığında yıl sonu genel değerlendirmesini yapmak üzere toplanmıştır. Yapılan yoklamada üyelerin tam katılım sağladığı ve toplantı yeter sayısının mevcut olduğu anlaşılmıştır. Yıl sonu gündem maddeleri okunarak görüşmelere başlanmıştır.\n\n" +
+                        "Madde 2: Eğitim-Öğretim Yılı Boyunca Alınan Kararların ve Hedeflerin Değerlendirilmesi\n" +
+                        "Yıl boyunca I. ve II. dönem kurullarında alınan tüm kararlar taranmış; uygulanan telafi programlarının, rehberlik faaliyetlerinin ve veli iş birliklerinin şube başarısını somut şekilde yükselttiği görülmüştür.\n\n" +
+                        "Madde 3: Şubenin Yıl Sonu Genel Akademik ve Sosyal Başarısının Değerlendirilmesi\n" +
+                        "Öğrencilerin yıl sonu başarı puanları, ortak yazılı sonuçları, sosyal sorumluluk ve kulüp çalışmaları bütüncül olarak incelenmiştir. Şube genelinde başarının hedeflenen düzeye ulaştığı, gayret gösteren öğrencilerin takdir/teşekkür belgeleriyle ödüllendirildiği belirtilmiştir.\n\n" +
+                        (isOrtaokul ? "Madde 4: Yıl Sonu Sınıf Geçme ve Tamamlama Durumları\nÖğrencilerin sınıf geçme, doğrudan geçme ve varsa ŞÖK kararıyla sınıf geçme/kalma durumları ilgili mevzuat hükümleri doğrultusunda tek tek görüşülüp karara bağlanmıştır.\n\n" :
+                        "Madde 4: Yıl Sonu Mezuniyet, Kariyer ve Yükseköğretime Geçiş Durumları\nÖğrencilerin yıl sonu başarı sıralamaları, staj/meslek yeterlilikleri ve yükseköğretime geçiş hazırlık seviyeleri değerlendirilmiştir.\n\n") +
+                        "Madde 5: Özel Eğitim ve BEP Yıl Sonu Değerlendirmesi\n" +
+                        "BEP uygulanan öğrencilerin bireysel hedeflerine ulaşma düzeyleri incelenmiş, yıl sonu değerlendirme raporları RAM'a ve okul rehberlik servisine sunulmak üzere tamamlanmıştır.\n\n" +
+                        "Madde 6: Dilek ve Kapanış\n" +
+                        "Öğretmenlerimizin özverili çalışmaları için teşekkür edilmiş, gelecek eğitim-öğretim yılı için başarı temennileriyle toplantıya son verilmiştir.";
+
+                    karar = "1- Kurulun eksiksiz katılım sağladığı ve yıl sonu gündeminin karara bağlandığı kayıt altına alınmıştır.\n" +
+                        "2- MEB Eğitim Kurulları ve Zümreleri Yönergesi Madde 10(7) gereği kararlar oy çokluğuyla kesinleştirilmiştir.\n" +
+                        "3- Yıl sonu kazanım analizleri ve başarı verilerinin gelecek eğitim yılı zümre öğretmenlerine brifing olarak aktarılmasına karar verildi.\n" +
+                        (isOrtaokul ? "4- Şubedeki tüm öğrencilerin sınıf geçme durumları ilgili mevzuata uygun şekilde tescil edilmesine karar verildi.\n" :
+                        "4- Mezuniyet ve üst öğrenime geçiş aşamasındaki öğrencilerin tercih danışmanlığı süreçlerinin okul idaresi ve rehberlik servisiyle yürütülmesine karar verildi.\n") +
+                        "5- BEP yıl sonu gelişim dosyalarının okul rehberlik servisine teslim edilmesine karar verildi.\n" +
+                        "6- İşbu yıl sonu tutanağı okul müdürünün onayına müteakip imzalanıp idarece arşivlenmek üzere karara bağlanmıştır.";
+                }
+
+                return { gundem: gundem, gorusme: gorusme, karar: karar };
+            }
+
+            function loadTemplateText(force) {
+                var donem = getEl("sok_sokNo").value;
+                var level = getSelectedLevel();
+                var tpl = generateTemplates(donem, level);
+
+                if (force || !userEditedTexts.gundem) {
+                    getEl("sok_gundemMetni").value = tpl.gundem;
+                }
+                if (force || !userEditedTexts.gorusme) {
+                    getEl("sok_gorusmeMetni").value = tpl.gorusme;
+                }
+                if (force || !userEditedTexts.karar) {
+                    getEl("sok_kararMetni").value = tpl.karar;
+                }
+            }
 
             function escapeHTML(str) {
                 if (str === null || str === undefined) return '';
@@ -480,24 +727,23 @@ Madde 15: Dilek ve Temenniler
                 lines.forEach(function(line) {
                     var trimmed = line.trim();
                     if (trimmed.length > 0) {
-                        htmlResult += '<p style="margin: 0 0 6pt 0; text-align: justify; line-height: 1.45; font-size: 10pt; font-family:\'Times New Roman\', serif;">' + escapeHTML(trimmed) + '</p>';
+                        if (/^Madde\s+\d+:/i.test(trimmed)) {
+                            htmlResult += '<p style="margin: 8pt 0 4pt 0; text-align: justify; line-height: 1.45; font-size: 10pt; font-weight: bold; font-family:\'Times New Roman\', serif;">' + escapeHTML(trimmed) + '</p>';
+                        } else {
+                            htmlResult += '<p style="margin: 0 0 6pt 0; text-align: justify; line-height: 1.45; font-size: 10pt; font-family:\'Times New Roman\', serif;">' + escapeHTML(trimmed) + '</p>';
+                        }
                     }
                 });
                 return htmlResult;
             }
 
-            function parseDate(tarihMetni) {
-                if (!tarihMetni || !tarihMetni.trim()) return "....................";
-                var match = tarihMetni.match(/\d{2}[\.\/-]\d{2}[\.\/-]\d{4}/);
-                if (match) return match[0];
-                var parcalar = tarihMetni.split(' - ');
-                return parcalar[0].trim();
-            }
-
-            function parseTime(tarihMetni) {
-                if (!tarihMetni || !tarihMetni.includes('-')) return tarihMetni || "13:30";
-                var parcalar = tarihMetni.split('-');
-                return parcalar.slice(1).join('-').trim();
+            function getFormattedDate(isoDateStr) {
+                if (!isoDateStr) return "....................";
+                var p = isoDateStr.split('-');
+                if (p.length === 3) {
+                    return p[2] + "." + p[1] + "." + p[0];
+                }
+                return isoDateStr;
             }
 
             function addBransRow(bransAdi, ogretmenAdi) {
@@ -536,23 +782,140 @@ Madde 15: Dilek ve Temenniler
                 if(getEl("sok_sokNoOzel")) getEl("sok_sokNoOzel").style.display = (getEl("sok_sokNo").value === "OZEL") ? "block" : "none";
             }
 
+            function validateAndShowWarnings() {
+                var okulTuru = getEl("sok_okulTuru").value;
+                var sube = getEl("sok_sube").value.trim();
+                var isoTarih = getEl("sok_toplantiTarihi").value;
+                var sokNo = getEl("sok_sokNo").value;
+                var blockAlert = getEl("sok_block_alert");
+                var softAlert = getEl("sok_soft_warnings");
+                var teacherWarn = getEl("sok_teacher_warnings");
+
+                var warnings = [];
+                var teacherWarnings = [];
+
+                if (okulTuru === "İLKOKULU") {
+                    blockAlert.style.display = "block";
+                    blockAlert.innerHTML = "<strong>Mevzuat Engeli:</strong> MEB Eğitim Kurulları ve Zümreleri Yönergesi Madde 10 uyarınca Şube Öğretmenler Kurulu (ŞÖK) yalnızca ortaokul, imam hatip ortaokulu ve ortaöğretim (lise) kademelerinde düzenlenir. İlkokul kademesinde ŞÖK bulunmamaktadır.";
+                    getEl("sokPreviewContainer").style.opacity = "0.3";
+                } else {
+                    blockAlert.style.display = "none";
+                    blockAlert.innerHTML = "";
+                    getEl("sokPreviewContainer").style.opacity = "1";
+                }
+
+                var level = getSelectedLevel();
+                var gradeMatch = sube.match(/^(\d{1,2})/);
+                if (gradeMatch) {
+                    var gradeNum = parseInt(gradeMatch[1], 10);
+                    if (level === "ortaokul" && (gradeNum < 5 || gradeNum > 8)) {
+                        warnings.push("Seçili Ortaokul kademesi için girilen sınıf düzeyi (" + gradeNum + ") uyumsuzdur. Ortaokullarda 5, 6, 7 ve 8. sınıflar yer alır.");
+                    } else if (level === "lise" && (gradeNum < 9 || gradeNum > 12)) {
+                        warnings.push("Seçili Lise kademesi için girilen sınıf düzeyi (" + gradeNum + ") uyumsuzdur. Ortaöğretim kurumlarında 9, 10, 11 ve 12. sınıflar yer alır.");
+                    }
+                }
+
+                if (isoTarih) {
+                    var month = parseInt(isoTarih.split('-')[1], 10);
+                    if (level === "ortaokul") {
+                        if (sokNo === "I. DÖNEM ŞÖK" && month !== 10 && month !== 9 && month !== 11) {
+                            warnings.push("Ortaokul/İHO I. Dönem ŞÖK toplantılarının resmî takvime göre Ekim ayında yapılması esastır.");
+                        } else if (sokNo === "II. DÖNEM ŞÖK" && month !== 2 && month !== 3) {
+                            warnings.push("Ortaokul/İHO II. Dönem ŞÖK toplantılarının resmî takvime göre Şubat ayında (2. dönem başı) yapılması esastır.");
+                        } else if (sokNo === "DÖNEM SONU ŞÖK" && month !== 6 && month !== 5) {
+                            warnings.push("Ortaokul/İHO Dönem Sonu ŞÖK toplantılarının ders yılı bitiminde (Haziran ayı) yapılması esastır.");
+                        }
+                    } else if (level === "lise") {
+                        if (sokNo === "I. DÖNEM ŞÖK" && month !== 11 && month !== 10 && month !== 12) {
+                            warnings.push("Ortaöğretim (Lise) I. Dönem ŞÖK toplantılarının yönerge gereği 1. dönemin 2. ayında (genellikle Kasım) yapılması esastır.");
+                        } else if (sokNo === "II. DÖNEM ŞÖK" && month !== 4 && month !== 3 && month !== 2) {
+                            warnings.push("Word olarak çıktı alıp düzenleyebilirsiniz");
+                        }
+                    }
+                }
+
+                var bransInputs = document.querySelectorAll(".sok-brans-input");
+                var ogretmenInputs = document.querySelectorAll(".sok-ogretmen-input");
+                var teacherCounts = {};
+                var branchCounts = {};
+                var allKnownBranches = branchesByLevel.lise.concat(branchesByLevel.ortaokul);
+
+                bransInputs.forEach(function(bInp, idx) {
+                    var bVal = bInp.value.trim();
+                    var tVal = ogretmenInputs[idx] ? ogretmenInputs[idx].value.trim() : "";
+
+                    if (bVal) {
+                        var bLower = bVal.toLocaleLowerCase('tr-TR');
+                        branchCounts[bLower] = (branchCounts[bLower] || 0) + 1;
+                    }
+
+                    if (level === "ortaokul" && liseOnlyBranches.indexOf(bVal) !== -1) {
+                        warnings.push("'" + bVal + "' branşı ortaokul müfredatında yer almamaktadır (Lise branşıdır).");
+                    } else if (level === "lise" && ortaokulOnlyBranches.indexOf(bVal) !== -1) {
+                        warnings.push("'" + bVal + "' branşı lise müfredatında yer almamaktadır (Ortaokul branşıdır).");
+                    }
+
+                    if (tVal) {
+                        teacherCounts[tVal] = (teacherCounts[tVal] || 0) + 1;
+                        if (allKnownBranches.indexOf(tVal) !== -1) {
+                            teacherWarnings.push("Öğretmen adı alanına bir branş ismi ('" + tVal + "') yazılmış olabilir.");
+                        }
+                    }
+                });
+
+                for (var bKey in branchCounts) {
+                    if (branchCounts[bKey] > 1) {
+                        teacherWarnings.push("'" + bKey.toLocaleUpperCase('tr-TR') + "' branşı birden fazla satırda tekrar etmektedir.");
+                    }
+                }
+
+                for (var tName in teacherCounts) {
+                    if (teacherCounts[tName] > 2) {
+                        teacherWarnings.push("'" + tName + "' ismi " + teacherCounts[tName] + " farklı branş satırında tekrar etmektedir.");
+                    }
+                }
+
+                if (warnings.length > 0) {
+                    softAlert.style.display = "block";
+                    softAlert.innerHTML = "<strong>Uyarı ve Öneriler:</strong><br/>• " + warnings.join("<br/>• ");
+                } else {
+                    softAlert.style.display = "none";
+                    softAlert.innerHTML = "";
+                }
+
+                if (teacherWarnings.length > 0) {
+                    teacherWarn.style.display = "block";
+                    teacherWarn.innerHTML = "⚠️ " + teacherWarnings.join(" | ");
+                } else {
+                    teacherWarn.style.display = "none";
+                    teacherWarn.innerHTML = "";
+                }
+            }
+
             function updatePreview() {
                 if (!getEl("sokA4Preview")) return;
                 checkCustomSelects();
+                validateAndShowWarnings();
 
                 var okulAdi = getEl("sok_okulAdi").value.trim().toLocaleUpperCase('tr-TR') || "........................";
                 var okulTuru = (getEl("sok_okulTuru").value === "OZEL") ? getEl("sok_okulTuruOzel").value.trim().toLocaleUpperCase('tr-TR') : getEl("sok_okulTuru").value;
                 var sokNo = (getEl("sok_sokNo").value === "OZEL") ? getEl("sok_sokNoOzel").value.trim() : getEl("sok_sokNo").value;
                 
-                var egitimYili = getEl("sok_egitimYili").value.trim() || "2025-2026";
+                var egitimYili = getEl("sok_egitimYili").value.trim() || calculateCurrentEducationYear();
                 var sube = getEl("sok_sube").value.trim() || ".......";
-                var tarihSaat = getEl("sok_tarihSaat").value.trim() || "....................";
+                var rawDate = getEl("sok_toplantiTarihi").value;
+                var formattedDate = getFormattedDate(rawDate);
+                var formattedTime = getEl("sok_toplantiSaati").value || "13:30";
+                var toplantiYeri = getEl("sok_toplantiYeri").value.trim() || "Öğretmenler Odası";
                 var mudur = getEl("sok_okulMuduru").value.trim() || "........................";
                 var mudurYrd = getEl("sok_mudurYardimcisi").value.trim() || "........................";
+                var showLegal = getEl("sok_show_legal").checked;
+
+                var legalBasisText = showLegal ? '<div style="font-size: 8.5pt; font-style: italic; color: #333; margin-top: 3px; margin-bottom: 6px; text-align: center;">(MEB Eğitim Kurulları ve Zümreleri Yönergesi Madde 10 Hükümleri Gereğince)</div>' : '';
 
                 var katilimcilar = [
                     { ad: mudur, brans: "Okul Müdürü" },
-                    { ad: mudurYrd, brans: "Okul Müdür Yardımcısı" }
+                    { ad: mudurYrd, brans: "Okul Müdür Yrd. / Kurul Bşk." }
                 ];
 
                 var bransInputs = document.querySelectorAll(".sok-brans-input");
@@ -579,27 +942,28 @@ Madde 15: Dilek ve Temenniler
                     '</tr>';
                 }
 
-                // DİKEY SAYFA
-                var htmlPage1 = '<div style="text-align: center; font-weight: bold; line-height: 1.35; font-size: 11pt; margin-bottom: 12px; font-family:\'Times New Roman\', serif;">' +
+                // DİKEY SAYFA (SAYFA 1)
+                var htmlPage1 = '<div style="text-align: center; font-weight: bold; line-height: 1.35; font-size: 11pt; margin-bottom: 8px; font-family:\'Times New Roman\', serif;">' +
                         escapeHTML(egitimYili) + ' EĞİTİM-ÖĞRETİM YILI<br/>' +
                         escapeHTML(okulAdi) + ' ' + escapeHTML(okulTuru) + ' MÜDÜRLÜĞÜ<br/>' +
                         escapeHTML(sube) + ' SINIFI ' + escapeHTML(String(sokNo).toLocaleUpperCase('tr-TR')) + ' TOPLANTI TUTANAĞI' +
+                        legalBasisText +
                     '</div>' +
-                    '<table style="width:100%; border:none; margin-bottom:12px; font-size:10pt; line-height: 1.45; font-family:\'Times New Roman\', serif;">' +
-                        '<tr><td style="width:50%; padding:2px 0;"><b>Toplantı No:</b> ' + escapeHTML(sokNo) + '</td><td style="width:50%; padding:2px 0;"><b>Toplantı Tarihi:</b> ' + escapeHTML(parseDate(tarihSaat)) + '</td></tr>' +
-                        '<tr><td style="width:50%; padding:2px 0;"><b>Toplantı Saati:</b> ' + escapeHTML(parseTime(tarihSaat)) + '</td><td style="width:50%; padding:2px 0;"><b>Toplantı Yeri:</b> Öğretmenler Odası</td></tr>' +
+                    '<table style="width:100%; border:none; margin-bottom:10px; font-size:10pt; line-height: 1.45; font-family:\'Times New Roman\', serif;">' +
+                        '<tr><td style="width:50%; padding:2px 0;"><b>Toplantı No / Dönem:</b> ' + escapeHTML(sokNo) + '</td><td style="width:50%; padding:2px 0;"><b>Toplantı Tarihi:</b> ' + escapeHTML(formattedDate) + '</td></tr>' +
+                        '<tr><td style="width:50%; padding:2px 0;"><b>Toplantı Saati:</b> ' + escapeHTML(formattedTime) + '</td><td style="width:50%; padding:2px 0;"><b>Toplantı Yeri:</b> ' + escapeHTML(toplantiYeri) + '</td></tr>' +
                     '</table>' +
                     '<div style="margin-bottom:12px; font-family:\'Times New Roman\', serif;"><div style="font-weight:bold; font-size:10.5pt; text-decoration:underline; margin-bottom:6px;">GÜNDEM MADDELERİ:</div>' + formatTextToParagraphs(getEl("sok_gundemMetni").value) + '</div>' +
                     '<div style="margin-bottom:12px; font-family:\'Times New Roman\', serif;"><div style="font-weight:bold; font-size:10.5pt; text-decoration:underline; margin-bottom:6px;">GÜNDEM MADDELERİNİN GÖRÜŞÜLMESİ:</div>' + formatTextToParagraphs(getEl("sok_gorusmeMetni").value) + '</div>' +
                     '<div style="margin-bottom:12px; font-family:\'Times New Roman\', serif;"><div style="font-weight:bold; font-size:10.5pt; text-decoration:underline; margin-bottom:6px;">ALINAN KARARLAR:</div>' + formatTextToParagraphs(getEl("sok_kararMetni").value) + '</div>' +
                     '<div style="margin-top:15px; font-family:\'Times New Roman\', serif;"><div style="font-weight:bold; font-size:10.5pt; text-align:center; margin-bottom:6px;">KATILIMCI İMZA SİRKÜSÜ</div>' +
                         '<table style="width:100%; border-collapse:collapse; margin-bottom:12px;" border="1"><thead><tr style="background:#f2f2f2; font-size:9.5pt; height:24px;"><th style="width:7%; text-align:center;">SIRA</th><th style="width:43%; padding:4px;">ÖĞRETMENİN ADI SOYADI</th><th style="width:35%; padding:4px;">BRANŞ / GÖREV</th><th style="width:15%; text-align:center;">İMZA</th></tr></thead><tbody>' + imzaRows + '</tbody></table>' +
-                        '<div style="text-align: right; margin-top: 20px; font-size:10pt; line-height:1.4;">UYGUNDUR.<br/>' + escapeHTML(parseDate(tarihSaat)) + '<br/><br/><b>' + escapeHTML(String(mudur).toLocaleUpperCase('tr-TR')) + '</b><br/>OKUL MÜDÜRÜ</div>' +
+                        '<div style="text-align: right; margin-top: 15px; font-size:10pt; line-height:1.4;">UYGUNDUR.<br/>' + escapeHTML(formattedDate) + '<br/><br/><b>' + escapeHTML(String(mudur).toLocaleUpperCase('tr-TR')) + '</b><br/>OKUL MÜDÜRÜ</div>' +
                     '</div>';
 
                 getEl("sokA4Preview").innerHTML = htmlPage1;
 
-                // YATAY SAYFA
+                // YATAY SAYFA (SAYFA 2)
                 var ogrTrList = document.querySelectorAll("#sok_ogrenciTbody tr");
                 var ogrRowsHtml = "";
 
@@ -645,10 +1009,81 @@ Madde 15: Dilek ve Temenniler
                     '</table>';
 
                 getEl("sokA4PreviewLandscape").innerHTML = htmlPage2;
-                
-                // Ön izleme her güncellendiğinde iframe yüksekliğini anlık üst siteye bildir
                 setTimeout(sendHeightToParent, 100);
             }
+
+            function populateBranchesForLevel(level) {
+                var tbody = getEl("sok_bransTbody");
+                tbody.innerHTML = "";
+                var branchList = (level === "ortaokul") ? branchesByLevel.ortaokul : branchesByLevel.lise;
+                branchList.forEach(function(b) {
+                    addBransRow(b, "");
+                });
+            }
+
+            function checkSanityBeforeExport() {
+                var okulAdi = getEl("sok_okulAdi").value.trim();
+                var okulMuduru = getEl("sok_okulMuduru").value.trim();
+                var isoTarih = getEl("sok_toplantiTarihi").value;
+                var sube = getEl("sok_sube").value.trim();
+                var okulTuru = getEl("sok_okulTuru").value;
+
+                if (okulTuru === "İLKOKULU") {
+                    alert("Hata: İlkokullarda ŞÖK düzenlenemez. Belge dışa aktarılamaz.");
+                    return false;
+                }
+
+                var missing = [];
+                if (!okulAdi || okulAdi === "ATATÜRK") missing.push("Okul Adı kontrol edilmeli / güncellenmeli");
+                if (!okulMuduru || okulMuduru === "Ahmet YILMAZ") missing.push("Okul Müdürü adı varsayılan örnek değerde kalmış");
+                if (!isoTarih) missing.push("Toplantı Tarihi seçilmedi");
+                if (!sube) missing.push("Sınıf / Şube bilgisi boş");
+
+                var ogrList = document.querySelectorAll(".sok-ogr-ad");
+                var hasPlaceholderOgr = false;
+                ogrList.forEach(function(inp) {
+                    if (inp.value.indexOf("Öğrenci 1") !== -1 || inp.value.indexOf("Öğrenci 2") !== -1) {
+                        hasPlaceholderOgr = true;
+                    }
+                });
+                if (hasPlaceholderOgr) {
+                    missing.push("Öğrenci tablosunda taslak isimler ('Öğrenci 1' vb.) bulunuyor");
+                }
+
+                if (missing.length > 0) {
+                    return confirm("Belge oluşturulmadan önce aşağıdaki hususlar tespit edildi:\n\n• " + missing.join("\n• ") + "\n\nYine de işleme devam etmek istiyor musunuz?");
+                }
+                return true;
+            }
+
+            // Olay Dinleyicileri
+            getEl("sok_gundemMetni").addEventListener("input", function() { userEditedTexts.gundem = true; });
+            getEl("sok_gorusmeMetni").addEventListener("input", function() { userEditedTexts.gorusme = true; });
+            getEl("sok_kararMetni").addEventListener("input", function() { userEditedTexts.karar = true; });
+
+            getEl("sok_okulTuru").addEventListener("change", function() {
+                var level = getSelectedLevel();
+                if (level !== "ilkokul") {
+                    populateBranchesForLevel(level);
+                    loadTemplateText(false);
+                }
+                updatePreview();
+            });
+
+            getEl("sok_sokNo").addEventListener("change", function() {
+                loadTemplateText(false);
+                updatePreview();
+            });
+
+            getEl("sok_btn_load_template").addEventListener("click", function() {
+                if (confirm("Gündem, Görüşme ve Karar metinleri seçili dönem şablonuyla yeniden yüklenecektir. Yapmış olduğunuz özel düzenlemeler sıfırlanabilir. Devam edilsin mi?")) {
+                    userEditedTexts.gundem = false;
+                    userEditedTexts.gorusme = false;
+                    userEditedTexts.karar = false;
+                    loadTemplateText(true);
+                    updatePreview();
+                }
+            });
 
             var inputs = document.querySelectorAll("#sokAppWrapper input, #sokAppWrapper select, #sokAppWrapper textarea");
             inputs.forEach(function(inp) {
@@ -659,28 +1094,168 @@ Madde 15: Dilek ve Temenniler
             getEl("sok_btn_add_brans").addEventListener("click", function() { addBransRow("", ""); updatePreview(); });
             getEl("sok_btn_add_student").addEventListener("click", function() { addOgrenciRow("", "", "", "", "", "", ""); updatePreview(); });
             getEl("sok_btn_refresh").addEventListener("click", updatePreview);
-            getEl("sok_btn_print").addEventListener("click", function() { window.print(); });
+            
+            getEl("sok_btn_print").addEventListener("click", function() { 
+                if (checkSanityBeforeExport()) window.print(); 
+            });
+            
             getEl("sok_btn_reset").addEventListener("click", function() {
                 if(confirm("Tüm form varsayılan değerlere sıfırlanacak?")) location.reload();
             });
 
-            getEl("sok_btn_pdf").addEventListener("click", function() {
-                if (typeof html2pdf === "undefined") { alert("PDF kütüphanesi yüklenemedi!"); return; }
-                var element = getEl("sokPreviewContainer");
-                var sube = getEl("sok_sube").value.trim() || "11_A";
-                
-                var opt = { 
-                    margin: [0, 0, 0, 0], 
-                    filename: sube.replace(/[/\\?%*:|"<>]/g, '_') + "_SOK_Resmi_Tutanak.pdf", 
-                    image: { type: 'jpeg', quality: 0.98 }, 
-                    html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 }, 
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }, 
-                    pagebreak: { mode: ['css', 'legacy'] } 
+            // JSON Taslak Dışa Aktarma
+            getEl("sok_btn_export_json").addEventListener("click", function() {
+                var data = {
+                    okulAdi: getEl("sok_okulAdi").value,
+                    okulTuru: getEl("sok_okulTuru").value,
+                    okulTuruOzel: getEl("sok_okulTuruOzel").value,
+                    sokNo: getEl("sok_sokNo").value,
+                    sokNoOzel: getEl("sok_sokNoOzel").value,
+                    egitimYili: getEl("sok_egitimYili").value,
+                    sube: getEl("sok_sube").value,
+                    toplantiTarihi: getEl("sok_toplantiTarihi").value,
+                    toplantiSaati: getEl("sok_toplantiSaati").value,
+                    toplantiYeri: getEl("sok_toplantiYeri").value,
+                    okulMuduru: getEl("sok_okulMuduru").value,
+                    mudurYardimcisi: getEl("sok_mudurYardimcisi").value,
+                    showLegal: getEl("sok_show_legal").checked,
+                    gundemMetni: getEl("sok_gundemMetni").value,
+                    gorusmeMetni: getEl("sok_gorusmeMetni").value,
+                    kararMetni: getEl("sok_kararMetni").value,
+                    branslar: [],
+                    ogrenciler: []
                 };
-                html2pdf().set(opt).from(element).save();
+
+                var bransInp = document.querySelectorAll(".sok-brans-input");
+                var ogrtInp = document.querySelectorAll(".sok-ogretmen-input");
+                bransInp.forEach(function(b, i) {
+                    data.branslar.push({ brans: b.value, ogretmen: ogrtInp[i] ? ogrtInp[i].value : "" });
+                });
+
+                var ogrTrList = document.querySelectorAll("#sok_ogrenciTbody tr");
+                ogrTrList.forEach(function(tr) {
+                    data.ogrenciler.push({
+                        ad: tr.querySelector(".sok-ogr-ad") ? tr.querySelector(".sok-ogr-ad").value : "",
+                        kisilik: tr.querySelector(".sok-ogr-kisilik") ? tr.querySelector(".sok-ogr-kisilik").value : "",
+                        beslenme: tr.querySelector(".sok-ogr-beslenme") ? tr.querySelector(".sok-ogr-beslenme").value : "",
+                        saglik: tr.querySelector(".sok-ogr-saglik") ? tr.querySelector(".sok-ogr-saglik").value : "",
+                        sosyal: tr.querySelector(".sok-ogr-sosyal") ? tr.querySelector(".sok-ogr-sosyal").value : "",
+                        ekonomik: tr.querySelector(".sok-ogr-ekonomik") ? tr.querySelector(".sok-ogr-ekonomik").value : "",
+                        basari: tr.querySelector(".sok-ogr-basari") ? tr.querySelector(".sok-ogr-basari").value : ""
+                    });
+                });
+
+                var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+                var link = document.createElement("a");
+                var sube = getEl("sok_sube").value.trim() || "11_A";
+                link.href = URL.createObjectURL(blob);
+                link.download = sube.replace(/[/\\?%*:|"<>]/g, '_') + "_SOK_Taslak.json";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             });
 
+            // JSON Taslak İçe Aktarma
+            getEl("sok_btn_import_json").addEventListener("click", function() {
+                getEl("sok_file_json").click();
+            });
+
+            getEl("sok_file_json").addEventListener("change", function(e) {
+                var file = e.target.files[0];
+                if (!file) return;
+                var reader = new FileReader();
+                reader.onload = function(evt) {
+                    try {
+                        var data = JSON.parse(evt.target.result);
+                        if (data.okulAdi !== undefined) getEl("sok_okulAdi").value = data.okulAdi;
+                        if (data.okulTuru !== undefined) getEl("sok_okulTuru").value = data.okulTuru;
+                        if (data.okulTuruOzel !== undefined) getEl("sok_okulTuruOzel").value = data.okulTuruOzel;
+                        if (data.sokNo !== undefined) getEl("sok_sokNo").value = data.sokNo;
+                        if (data.sokNoOzel !== undefined) getEl("sok_sokNoOzel").value = data.sokNoOzel;
+                        if (data.egitimYili !== undefined) getEl("sok_egitimYili").value = data.egitimYili;
+                        if (data.sube !== undefined) getEl("sok_sube").value = data.sube;
+                        if (data.toplantiTarihi !== undefined) getEl("sok_toplantiTarihi").value = data.toplantiTarihi;
+                        if (data.toplantiSaati !== undefined) getEl("sok_toplantiSaati").value = data.toplantiSaati;
+                        if (data.toplantiYeri !== undefined) getEl("sok_toplantiYeri").value = data.toplantiYeri;
+                        if (data.okulMuduru !== undefined) getEl("sok_okulMuduru").value = data.okulMuduru;
+                        if (data.mudurYardimcisi !== undefined) getEl("sok_mudurYardimcisi").value = data.mudurYardimcisi;
+                        if (data.showLegal !== undefined) getEl("sok_show_legal").checked = data.showLegal;
+
+                        if (data.gundemMetni !== undefined) { getEl("sok_gundemMetni").value = data.gundemMetni; userEditedTexts.gundem = true; }
+                        if (data.gorusmeMetni !== undefined) { getEl("sok_gorusmeMetni").value = data.gorusmeMetni; userEditedTexts.gorusme = true; }
+                        if (data.kararMetni !== undefined) { getEl("sok_kararMetni").value = data.kararMetni; userEditedTexts.karar = true; }
+
+                        if (Array.isArray(data.branslar)) {
+                            getEl("sok_bransTbody").innerHTML = "";
+                            data.branslar.forEach(function(b) { addBransRow(b.brans, b.ogretmen); });
+                        }
+
+                        if (Array.isArray(data.ogrenciler)) {
+                            getEl("sok_ogrenciTbody").innerHTML = "";
+                            data.ogrenciler.forEach(function(o) { addOgrenciRow(o.ad, o.kisilik, o.beslenme, o.saglik, o.sosyal, o.ekonomik, o.basari); });
+                        }
+
+                        updatePreview();
+                        alert("Taslak başarıyla yüklendi!");
+                    } catch (err) {
+                        alert("JSON dosyası ayrıştırılamadı. Lütfen geçerli bir dosya seçin.");
+                    }
+                };
+                reader.readAsText(file);
+            });
+
+            // PDF Dışa Aktarma
+            getEl("sok_btn_pdf").addEventListener("click", async function() {
+                if (!checkSanityBeforeExport()) return;
+                if (typeof html2pdf === "undefined") { alert("PDF kütüphanesi yüklenemedi!"); return; }
+
+                var previewContainer = getEl("sokPreviewContainer");
+                previewContainer.scrollLeft = 0;
+                previewContainer.scrollTop = 0;
+
+                var page1El = getEl("sokA4Preview");
+                var page2El = getEl("sokA4PreviewLandscape");
+                var sube = getEl("sok_sube").value.trim() || "11_A";
+                var filename = sube.replace(/[/\\?%*:|"<>]/g, '_') + "_SOK_Resmi_Tutanak.pdf";
+
+                try {
+                    page1El.classList.add("pdf-export-mode");
+                    page2El.classList.add("pdf-export-mode");
+
+                    var opt1 = {
+                        margin: 0,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0, windowWidth: page1El.offsetWidth },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    };
+
+                    var pdfWorker = html2pdf().set(opt1).from(page1El).toPdf();
+                    var pdf = await pdfWorker.get('pdf');
+
+                    var opt2 = {
+                        margin: 0,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0, windowWidth: page2El.offsetWidth }
+                    };
+
+                    var canvas2 = await html2pdf().set(opt2).from(page2El).outputImg('img');
+                    
+                    pdf.addPage('a4', 'landscape');
+                    pdf.addImage(canvas2.src, 'JPEG', 0, 0, 297, 210, undefined, 'FAST');
+                    
+                    pdf.save(filename);
+                } catch (err) {
+                    console.error("PDF oluşturma hatası:", err);
+                    alert("PDF oluşturulurken bir hata meydana geldi.");
+                } finally {
+                    page1El.classList.remove("pdf-export-mode");
+                    page2El.classList.remove("pdf-export-mode");
+                }
+            });
+
+            /* Word (.doc) Dışa Aktarma: HTML blob yaklaşımı kullanılmaktadır. Word sürümleri format uyarısı verebilir. */
             getEl("sok_btn_word").addEventListener("click", function() {
+                if (!checkSanityBeforeExport()) return;
                 var p1 = getEl("sokA4Preview").innerHTML;
                 var p2 = getEl("sokA4PreviewLandscape").innerHTML;
                 var sube = getEl("sok_sube").value.trim() || "11_A";
@@ -713,8 +1288,10 @@ Madde 15: Dilek ve Temenniler
                 document.body.removeChild(link);
             });
 
-            varsayilanBranslar.forEach(function(b) { addBransRow(b, ""); });
+            // Başlangıç Kurulumu
+            populateBranchesForLevel("lise");
             varsayilanOgrenciler.forEach(function(o) { addOgrenciRow(o.ad, o.kisilik, o.beslenme, o.saglik, o.sosyal, o.ekonomik, o.basari); });
+            loadTemplateText(true);
             updatePreview();
         }
 
