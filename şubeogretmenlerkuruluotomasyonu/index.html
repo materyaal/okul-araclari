@@ -528,6 +528,17 @@ Madde 15: Dilek ve Temenniler
                             } else {
                                 document.addEventListener("DOMContentLoaded", initSokApp);
                             }
+
+                            // --- IFRAME YÜKSEKLİK BİLDİRİMİ (Odoo'daki iframe'in otomatik büyümesi için) ---
+                            function notifyParentHeight() {
+                                var height = document.documentElement.scrollHeight || document.body.scrollHeight;
+                                window.parent.postMessage({ type: 'setHeight', height: height + 30 }, '*');
+                            }
+                            window.addEventListener('load', function () { setTimeout(notifyParentHeight, 400); });
+                            window.addEventListener('resize', notifyParentHeight);
+                            if (window.ResizeObserver) {
+                                new ResizeObserver(notifyParentHeight).observe(document.body);
+                            }
                         })();
                     //]]>
                     </script>
