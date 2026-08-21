@@ -25,7 +25,6 @@
         }
     </script>
     <style>
-        /* İframe içi dikey taşma ve çubukları sıfırlar */
         html, body {
             background-color: transparent !important;
             height: auto !important;
@@ -42,7 +41,6 @@
             box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25);
         }
 
-        /* Tablo yatay kaydırma çubuğu */
         .custom-scrollbar::-webkit-scrollbar {
             height: 7px;
             width: 7px;
@@ -74,6 +72,17 @@
             color: #dc2626 !important;
         }
 
+        /* Ekranda Resmi Belge Ön İzleme Modu */
+        .preview-paper {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            border-radius: 12px;
+            font-family: Calibri, Arial, sans-serif;
+            color: #000000;
+        }
+
         /* PRINT / RESMİ BELGE MODU (@media print) */
         @media print {
             @page {
@@ -87,8 +96,16 @@
                 font-size: 8pt;
             }
 
-            .no-print, .form-section, .action-buttons, .tab-navigation, .col-actions, #scoreAlert {
+            .no-print, .form-section, .action-buttons, .tab-navigation, .col-actions, #scoreAlert, #editModeContainer {
                 display: none !important;
+            }
+
+            #previewModeContainer {
+                display: block !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
             }
 
             .main-container {
@@ -97,24 +114,6 @@
                 margin: 0 !important;
                 padding: 0 !important;
                 box-shadow: none !important;
-            }
-
-            .print-only-header {
-                display: block !important;
-                margin-bottom: 10px;
-            }
-
-            .print-only-footer {
-                display: block !important;
-                margin-top: 25px;
-                page-break-inside: avoid;
-            }
-
-            .card-wrapper {
-                border: none !important;
-                box-shadow: none !important;
-                padding: 0 !important;
-                background: transparent !important;
             }
 
             table {
@@ -136,28 +135,6 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
-
-            .print-input-clean {
-                border: none !important;
-                background: transparent !important;
-                box-shadow: none !important;
-                padding: 0 !important;
-                text-align: center !important;
-                width: 100% !important;
-                font-weight: 600 !important;
-            }
-
-            .print-footer-brand {
-                display: flex !important;
-                justify-content: center;
-                align-items: center;
-                margin-top: 15px;
-                padding-top: 8px;
-                border-top: 1px solid #cbd5e1;
-                font-size: 7.5pt;
-                color: #64748b;
-                pointer-events: none;
-            }
         }
     </style>
 </head>
@@ -165,7 +142,7 @@
 
     <main class="w-full max-w-7xl mx-auto py-1 px-1 sm:px-2 main-container">
         
-        <!-- ÜST UYARI BANDI (100 Puan Kontrolü) -->
+        <!-- ÜST UYARI BANDI -->
         <div id="scoreAlert" class="hidden mb-4 p-4 rounded-xl border border-rose-300 bg-rose-50 text-rose-800 no-print flex items-start gap-3 shadow-sm">
             <svg class="w-5 h-5 text-rose-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
@@ -175,224 +152,209 @@
             </div>
         </div>
 
-        <!-- 1. BÖLÜM: BİLGİ VE KRİTER YÖNETİMİ -->
-        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-6 mb-4 form-section card-wrapper">
-            <div class="flex flex-wrap items-center justify-between border-b border-slate-100 pb-4 mb-5 gap-2">
-                <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                    1. Resmi Belge Bilgileri ve Kriter Ayarları
-                </h2>
-                <div class="flex items-center gap-2">
-                    <button onclick="backupStateToJson()" class="text-xs font-semibold text-brand-600 bg-brand-50 hover:bg-brand-100 border border-brand-200 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                        Yedeği İndir (JSON)
-                    </button>
-                    <label class="text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors flex items-center gap-1">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                        Yedekten Yükle
-                        <input type="file" id="jsonFileInput" accept=".json" onchange="restoreStateFromJson(event)" class="hidden">
-                    </label>
-                    <button onclick="resetToDefaults()" class="text-xs font-semibold text-slate-500 hover:text-brand-600 transition-colors px-2 py-1.5">Sıfırla</button>
+        <!-- DÜZENLEME MODU KONTEYNERİ -->
+        <div id="editModeContainer">
+            <!-- 1. BÖLÜM: BİLGİ VE KRİTER YÖNETİMİ -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-6 mb-4 form-section card-wrapper">
+                <div class="flex flex-wrap items-center justify-between border-b border-slate-100 pb-4 mb-5 gap-2">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        1. Resmi Belge Bilgileri ve Kriter Ayarları
+                    </h2>
+                    <div class="flex items-center gap-2">
+                        <button onclick="backupStateToJson()" class="text-xs font-semibold text-brand-600 bg-brand-50 hover:bg-brand-100 border border-brand-200 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            Yedeği İndir (JSON)
+                        </button>
+                        <label class="text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                            Yedekten Yükle
+                            <input type="file" id="jsonFileInput" accept=".json" onchange="restoreStateFromJson(event)" class="hidden">
+                        </label>
+                        <button onclick="resetToDefaults()" class="text-xs font-semibold text-slate-500 hover:text-brand-600 transition-colors px-2 py-1.5">Sıfırla</button>
+                    </div>
                 </div>
-            </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-                <!-- Sol Kolon: Resmi Belge Bilgileri -->
-                <div class="lg:col-span-6 space-y-4">
-                    <div>
-                        <label for="schoolName" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Okul Adı</label>
-                        <input type="text" id="schoolName" oninput="syncFormToPrint()" placeholder="Örn: Atatürk Anadolu Lisesi" class="w-full min-h-[44px] px-3.5 text-base text-slate-800 bg-slate-50 border border-slate-300 rounded-[10px] transition-all focus:bg-white">
-                    </div>
-                    <div>
-                        <label for="teacherName" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Ders Öğretmeni</label>
-                        <input type="text" id="teacherName" oninput="syncFormToPrint()" placeholder="Ad Soyad" class="w-full min-h-[44px] px-3.5 text-base text-slate-800 bg-slate-50 border border-slate-300 rounded-[10px] transition-all focus:bg-white">
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                    <div class="lg:col-span-6 space-y-4">
                         <div>
-                            <label for="lessonName" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Dersin Adı</label>
-                            <input type="text" id="lessonName" oninput="syncFormToPrint()" placeholder="Örn: Matematik" class="w-full min-h-[44px] px-3.5 text-base text-slate-800 bg-slate-50 border border-slate-300 rounded-[10px] transition-all focus:bg-white">
+                            <label for="schoolName" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Okul Adı</label>
+                            <input type="text" id="schoolName" oninput="syncFormToPrint()" placeholder="Örn: Atatürk Anadolu Lisesi" class="w-full min-h-[44px] px-3.5 text-base text-slate-800 bg-slate-50 border border-slate-300 rounded-[10px] transition-all focus:bg-white">
                         </div>
                         <div>
-                            <label for="className" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Sınıf / Şube</label>
-                            <input type="text" id="className" oninput="syncFormToPrint()" placeholder="Örn: 10-A" class="w-full min-h-[44px] px-3.5 text-base text-slate-800 bg-slate-50 border border-slate-300 rounded-[10px] transition-all focus:bg-white">
+                            <label for="teacherName" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Ders Öğretmeni</label>
+                            <input type="text" id="teacherName" oninput="syncFormToPrint()" placeholder="Ad Soyad" class="w-full min-h-[44px] px-3.5 text-base text-slate-800 bg-slate-50 border border-slate-300 rounded-[10px] transition-all focus:bg-white">
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label for="lessonName" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Dersin Adı</label>
+                                <input type="text" id="lessonName" oninput="syncFormToPrint()" placeholder="Örn: Matematik" class="w-full min-h-[44px] px-3.5 text-base text-slate-800 bg-slate-50 border border-slate-300 rounded-[10px] transition-all focus:bg-white">
+                            </div>
+                            <div>
+                                <label for="className" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Sınıf / Şube</label>
+                                <input type="text" id="className" oninput="syncFormToPrint()" placeholder="Örn: 10-A" class="w-full min-h-[44px] px-3.5 text-base text-slate-800 bg-slate-50 border border-slate-300 rounded-[10px] transition-all focus:bg-white">
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <label for="docDate" class="text-xs font-bold uppercase tracking-wider text-slate-600">Tarih</label>
+                                    <div class="flex items-center gap-1">
+                                        <input type="checkbox" id="includeDateCheck" onchange="toggleDateOption()" class="w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500 cursor-pointer">
+                                        <label for="includeDateCheck" class="text-[11px] font-semibold text-brand-700 cursor-pointer select-none">Tarih Ekle</label>
+                                    </div>
+                                </div>
+                                <input type="date" id="docDate" oninput="syncFormToPrint()" disabled class="w-full min-h-[44px] px-3 text-sm text-slate-400 bg-slate-100 border border-slate-300 rounded-[10px] transition-all focus:bg-white cursor-not-allowed">
+                            </div>
+                        </div>
+
+                        <div class="pt-1">
+                            <label for="splitCount" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5 flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                                Puan Bölüm (Kutucuk) Sayısı:
+                            </label>
+                            <select id="splitCount" onchange="updateSplitCount(this.value)" class="w-full min-h-[44px] px-3.5 text-sm font-semibold text-slate-800 bg-brand-50 border border-brand-300 rounded-[10px] focus:bg-white transition-all">
+                                <option value="1" selected>1 Parça (Tek Not Girişi - Klasik)</option>
+                                <option value="2">2 Parçaya Böl</option>
+                                <option value="3">3 Parçaya Böl</option>
+                                <option value="4">4 Parçaya Böl</option>
+                                <option value="5">5 Parçaya Böl</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-6 bg-slate-50/70 p-4 rounded-xl border border-slate-200">
+                        <div class="flex justify-between items-center mb-3">
+                            <label class="text-xs font-bold uppercase tracking-wider text-slate-600">Değerlendirme Kriterleri</label>
+                            <span class="text-xs font-bold text-slate-700 bg-white px-2.5 py-1 rounded-md border border-slate-200">
+                                Toplam: <span id="weightSumBadge" class="text-brand-600 font-extrabold">0</span> / 100 Puan
+                            </span>
                         </div>
                         
-                        <!-- TARİH SEÇİM KUTUCUĞU -->
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <label for="docDate" class="text-xs font-bold uppercase tracking-wider text-slate-600">Tarih</label>
-                                <div class="flex items-center gap-1">
-                                    <input type="checkbox" id="includeDateCheck" onchange="toggleDateOption()" class="w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500 cursor-pointer">
-                                    <label for="includeDateCheck" class="text-[11px] font-semibold text-brand-700 cursor-pointer select-none">Tarih Ekle</label>
-                                </div>
-                            </div>
-                            <input type="date" id="docDate" oninput="syncFormToPrint()" disabled class="w-full min-h-[44px] px-3 text-sm text-slate-400 bg-slate-100 border border-slate-300 rounded-[10px] transition-all focus:bg-white cursor-not-allowed">
+                        <div id="criteriaList" class="space-y-2.5 max-h-64 overflow-y-auto pr-1 custom-scrollbar mb-3"></div>
+
+                        <button onclick="addCriteria()" class="w-full h-11 bg-white hover:bg-slate-100 text-brand-600 border border-slate-300 rounded-[10px] text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-2xs">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            Yeni Kriter Ekle
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. BÖLÜM: ÖĞRENCİ LİSTESİ -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-6 mb-4 form-section card-wrapper">
+                <div class="border-b border-slate-200 mb-4 no-print">
+                    <nav class="-mb-px flex space-x-6">
+                        <button onclick="switchTab('single')" id="tabBtnSingle" class="tab-btn border-brand-500 text-brand-600 font-bold whitespace-nowrap py-3 px-1 border-b-2 text-sm flex items-center gap-2 transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                            Tek Tek Öğrenci Ekle
+                        </button>
+                        <button onclick="switchTab('bulk')" id="tabBtnBulk" class="tab-btn border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-medium whitespace-nowrap py-3 px-1 border-b-2 text-sm flex items-center gap-2 transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                            Toplu Liste Yapıştır
+                        </button>
+                    </nav>
+                </div>
+
+                <div id="tabContentSingle" class="tab-content transition-opacity duration-200">
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                        <div class="sm:col-span-3">
+                            <label for="singleNum" class="block text-xs font-bold text-slate-600 mb-1">Okul No</label>
+                            <input type="text" id="singleNum" placeholder="Örn: 104" class="w-full min-h-[44px] px-3.5 text-base text-slate-800 bg-slate-50 border border-slate-300 rounded-[10px]">
+                        </div>
+                        <div class="sm:col-span-6">
+                            <label for="singleName" class="block text-xs font-bold text-slate-600 mb-1">Adı Soyadı</label>
+                            <input type="text" id="singleName" placeholder="Örn: Ahmet Yılmaz" class="w-full min-h-[44px] px-3.5 text-base text-slate-800 bg-slate-50 border border-slate-300 rounded-[10px]">
+                        </div>
+                        <div class="sm:col-span-3">
+                            <button onclick="addSingleStudent()" class="w-full min-h-[44px] bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-[10px] text-sm flex items-center justify-center gap-1.5 shadow-md shadow-brand-500/20 transition-all">
+                                Listeye Ekle
+                            </button>
                         </div>
                     </div>
+                </div>
 
-                    <!-- PUAN BÖLÜM SAYISI AYARI -->
-                    <div class="pt-1">
-                        <label for="splitCount" class="block text-xs font-bold uppercase tracking-wider text-brand-700 mb-1.5 flex items-center gap-1.5">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
-                            Puan Bölüm (Kutucuk) Sayısı:
+                <div id="tabContentBulk" class="tab-content hidden transition-opacity duration-200">
+                    <div class="space-y-3">
+                        <label for="bulkText" class="block text-xs font-semibold text-slate-600">
+                            Excel veya e-Okul'dan kopyaladığınız listeyi yapıştırın:
                         </label>
-                        <select id="splitCount" onchange="updateSplitCount(this.value)" class="w-full min-h-[44px] px-3.5 text-sm font-semibold text-slate-800 bg-brand-50 border border-brand-300 rounded-[10px] focus:bg-white transition-all">
-                            <option value="1" selected>1 Parça (Tek Not Girişi - Klasik)</option>
-                            <option value="2">2 Parçaya Böl</option>
-                            <option value="3">3 Parçaya Böl</option>
-                            <option value="4">4 Parçaya Böl</option>
-                            <option value="5">5 Parçaya Böl</option>
-                        </select>
+                        <textarea id="bulkText" rows="4" placeholder="Örnek format:&#10;123 Ahmet Yılmaz&#10;Mehmet Demir 124" class="w-full p-3 text-base text-slate-800 bg-slate-50 border border-slate-300 rounded-[10px] font-mono focus:bg-white"></textarea>
+                        <div class="flex justify-end">
+                            <button onclick="processBulkStudents()" class="min-h-[44px] px-6 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-[10px] text-sm shadow-md shadow-brand-500/20 transition-all flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                Listeyi Ayrıştır ve Aktar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. BÖLÜM: ÇİZELGE VE BUTONLAR -->
+            <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-6 card-wrapper">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4 no-print">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-800">2. Performans Değerlendirme Çizelgesi</h2>
+                        <p class="text-xs text-slate-500">Masaüstünde yön tuşları (↑ ↓ ← →) veya Enter ile kutucuklar arası hızlıca geçiş yapabilirsiniz.</p>
+                    </div>
+                    <div class="flex flex-wrap items-center justify-between lg:justify-end gap-3 action-buttons">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- CANLI ÖN İZLEME BUTONU -->
+                            <button onclick="openPreviewMode()" class="min-h-[44px] px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[10px] text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm active:scale-95">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                Belge Ön İzleme
+                            </button>
+                            <button onclick="exportToExcel()" class="min-h-[44px] px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[10px] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                Excel (.xls)
+                            </button>
+                            <button onclick="exportToWord()" class="min-h-[44px] px-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                Word (.doc)
+                            </button>
+                            <button onclick="printDocument()" class="min-h-[44px] px-4 bg-slate-800 hover:bg-slate-900 text-white rounded-[10px] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                                PDF / Yazdır
+                            </button>
+                        </div>
+                        <div class="border-l border-slate-200 pl-3">
+                            <button onclick="clearStudents()" class="min-h-[44px] px-3 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-[10px] text-xs font-semibold transition-colors">
+                                Sınıfı Temizle
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Sağ Kolon: Dinamik Kriterler -->
-                <div class="lg:col-span-6 bg-slate-50/70 p-4 rounded-xl border border-slate-200">
-                    <div class="flex justify-between items-center mb-3">
-                        <label class="text-xs font-bold uppercase tracking-wider text-slate-600">Değerlendirme Kriterleri</label>
-                        <span class="text-xs font-bold text-slate-700 bg-white px-2.5 py-1 rounded-md border border-slate-200">
-                            Toplam: <span id="weightSumBadge" class="text-brand-600 font-extrabold">0</span> / 100 Puan
-                        </span>
-                    </div>
-                    
-                    <div id="criteriaList" class="space-y-2.5 max-h-64 overflow-y-auto pr-1 custom-scrollbar mb-3">
-                        <!-- JS ile dolar -->
-                    </div>
-
-                    <button onclick="addCriteria()" class="w-full h-11 bg-white hover:bg-slate-100 text-brand-600 border border-slate-300 rounded-[10px] text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-2xs">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        Yeni Kriter Ekle
-                    </button>
+                <div class="overflow-x-auto custom-scrollbar border border-slate-200 rounded-xl">
+                    <table class="w-full text-center text-xs text-slate-700" id="mainAssessmentTable">
+                        <thead class="bg-slate-100 text-slate-800 uppercase font-bold border-b border-slate-300" id="tableHead"></thead>
+                        <tbody class="divide-y divide-slate-200" id="tableBody"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-        <!-- 2. BÖLÜM: ÖĞRENCİ LİSTESİ -->
-        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-6 mb-4 form-section card-wrapper">
-            <div class="border-b border-slate-200 mb-4 no-print">
-                <nav class="-mb-px flex space-x-6">
-                    <button onclick="switchTab('single')" id="tabBtnSingle" class="tab-btn border-brand-500 text-brand-600 font-bold whitespace-nowrap py-3 px-1 border-b-2 text-sm flex items-center gap-2 transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-                        Tek Tek Öğrenci Ekle
+        <!-- RESMİ BELGE CANLI ÖN İZLEME KONTEYNERİ -->
+        <div id="previewModeContainer" class="hidden animate-fade-in">
+            <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-xl mb-4 flex flex-wrap items-center justify-between gap-3 no-print">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-indigo-600 animate-pulse"></span>
+                    <span class="text-sm font-bold text-indigo-950">Resmi Belge Ön İzleme Modu (A4 Yatay Çıktı)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="closePreviewMode()" class="min-h-[40px] px-4 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-[10px] text-xs font-bold transition-all shadow-2xs">
+                        ← Düzenlemeye Dön
                     </button>
-                    <button onclick="switchTab('bulk')" id="tabBtnBulk" class="tab-btn border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-medium whitespace-nowrap py-3 px-1 border-b-2 text-sm flex items-center gap-2 transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-                        Toplu Liste Yapıştır
+                    <button onclick="printDocument()" class="min-h-[40px] px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-[10px] text-xs font-bold transition-all shadow-md shadow-brand-500/20">
+                        Yazdır / PDF Kaydet
                     </button>
-                </nav>
-            </div>
-
-            <!-- TAB 1: TEK TEK EKLE -->
-            <div id="tabContentSingle" class="tab-content transition-opacity duration-200">
-                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-                    <div class="sm:col-span-3">
-                        <label for="singleNum" class="block text-xs font-bold text-slate-600 mb-1">Okul No</label>
-                        <input type="text" id="singleNum" placeholder="Örn: 104" class="w-full min-h-[44px] px-3.5 text-base text-slate-800 bg-slate-50 border border-slate-300 rounded-[10px]">
-                    </div>
-                    <div class="sm:col-span-6">
-                        <label for="singleName" class="block text-xs font-bold text-slate-600 mb-1">Adı Soyadı</label>
-                        <input type="text" id="singleName" placeholder="Örn: Ahmet Yılmaz" class="w-full min-h-[44px] px-3.5 text-base text-slate-800 bg-slate-50 border border-slate-300 rounded-[10px]">
-                    </div>
-                    <div class="sm:col-span-3">
-                        <button onclick="addSingleStudent()" class="w-full min-h-[44px] bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-[10px] text-sm flex items-center justify-center gap-1.5 shadow-md shadow-brand-500/20 transition-all">
-                            Listeye Ekle
-                        </button>
-                    </div>
                 </div>
             </div>
 
-            <!-- TAB 2: TOPLU LISTE YAPIŞTIR -->
-            <div id="tabContentBulk" class="tab-content hidden transition-opacity duration-200">
-                <div class="space-y-3">
-                    <label for="bulkText" class="block text-xs font-semibold text-slate-600">
-                        Excel veya e-Okul'dan kopyaladığınız listeyi yapıştırın:
-                    </label>
-                    <textarea id="bulkText" rows="4" placeholder="Örnek format:&#10;123 Ahmet Yılmaz&#10;Mehmet Demir 124&#10;125	Ayşe Kaya" class="w-full p-3 text-base text-slate-800 bg-slate-50 border border-slate-300 rounded-[10px] font-mono focus:bg-white"></textarea>
-                    <div class="flex justify-end">
-                        <button onclick="processBulkStudents()" class="min-h-[44px] px-6 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-[10px] text-sm shadow-md shadow-brand-500/20 transition-all flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                            Listeyi Ayrıştır ve Aktar
-                        </button>
-                    </div>
-                </div>
+            <!-- A4 Belge Görünümü -->
+            <div class="preview-paper overflow-x-auto custom-scrollbar">
+                <div id="previewContentArea"></div>
             </div>
         </div>
 
-        <!-- 3. BÖLÜM: DEĞERLENDİRME ÇİZELGESİ -->
-        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-6 card-wrapper">
-            
-            <!-- BASKI BAŞLIĞI (@media print) -->
-            <div class="print-only-header hidden">
-                <div class="text-center font-bold text-base uppercase tracking-wide border-b-2 border-black pb-2 mb-2">
-                    <span id="printSchoolTitle">....................................................................................... OKULU</span><br>
-                    <span class="text-sm font-normal">DERS İÇİ PERFORMANS VE SÜREÇ DEĞERLENDİRME ÖLÇEĞİ</span>
-                </div>
-                <div class="grid grid-cols-4 gap-2 text-[8pt] font-bold border-b border-black pb-2 mb-3">
-                    <div>DERS: <span id="printLesson" class="font-normal">............</span></div>
-                    <div>SINIF/ŞUBE: <span id="printClass" class="font-normal">............</span></div>
-                    <div>ÖĞRETMEN: <span id="printTeacher" class="font-normal">............</span></div>
-                    <div>TARİH: <span id="printDate" class="font-normal">............</span></div>
-                </div>
-            </div>
-
-            <!-- EKRAN BUTONLARI -->
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4 no-print">
-                <div>
-                    <h2 class="text-base font-bold text-slate-800">2. Performans Değerlendirme Çizelgesi</h2>
-                    <p class="text-xs text-slate-500">Masaüstünde yön tuşları (↑ ↓ ← →) veya Enter ile kutucuklar arası hızlıca geçiş yapabilirsiniz.</p>
-                </div>
-                <div class="flex flex-wrap items-center justify-between lg:justify-end gap-3 action-buttons">
-                    <div class="flex flex-wrap items-center gap-2">
-                        <button onclick="exportToExcel()" class="min-h-[44px] px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[10px] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                            Excel (.xls)
-                        </button>
-                        <button onclick="exportToWord()" class="min-h-[44px] px-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                            Word (.doc)
-                        </button>
-                        <button onclick="printDocument()" class="min-h-[44px] px-4 bg-slate-800 hover:bg-slate-900 text-white rounded-[10px] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                            PDF / Yazdır
-                        </button>
-                    </div>
-                    <!-- Silme butonu -->
-                    <div class="border-l border-slate-200 pl-3">
-                        <button onclick="clearStudents()" class="min-h-[44px] px-3 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-[10px] text-xs font-semibold transition-colors">
-                            Sınıfı Temizle
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- MOBİL VE RESPONSIVE TABLO -->
-            <div class="overflow-x-auto custom-scrollbar border border-slate-200 rounded-xl">
-                <table class="w-full text-center text-xs text-slate-700" id="mainAssessmentTable">
-                    <thead class="bg-slate-100 text-slate-800 uppercase font-bold border-b border-slate-300" id="tableHead">
-                        <!-- Dinamik Başlık -->
-                    </thead>
-                    <tbody class="divide-y divide-slate-200" id="tableBody">
-                        <!-- Dinamik Satırlar -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- BASKI İMZA BLOĞU (ORTALI) -->
-            <div class="print-only-footer hidden">
-                <div class="flex justify-center pt-8 text-center text-xs font-bold">
-                    <div class="min-w-[260px]">
-                        <div id="printTeacherDate">.... / .... / 2026</div>
-                        <div class="mt-8"><span id="printTeacherSign">.........................</span></div>
-                        <div class="text-[9pt] font-normal mt-0.5">Ders Öğretmeni</div>
-                    </div>
-                </div>
-                
-                <div class="print-footer-brand">
-                    <span>Resmi Okul ve Kurum Performans Süreç Değerlendirme Sistemi</span>
-                </div>
-            </div>
-
-        </div>
     </main>
 
     <!-- ODOO İLE %100 UYUMLU DİNAMİK YÜKSEKLİK POSTMESSAGE MOTORU -->
@@ -407,7 +369,6 @@
                 document.documentElement.clientHeight
             );
             
-            // Web sitenizdeki dinleyicinin beklediği format
             window.parent.postMessage({
                 type: 'setHeight',
                 height: docHeight
@@ -599,10 +560,7 @@
             }
 
             state.splitCount = newSplit;
-
-            state.criteria.forEach(c => {
-                recalculateSubMaxes(c, newSplit);
-            });
+            state.criteria.forEach(c => { recalculateSubMaxes(c, newSplit); });
 
             const validCriteriaIds = new Set(state.criteria.map(c => c.id));
             state.students.forEach(student => {
@@ -642,23 +600,6 @@
             state.lessonName = document.getElementById('lessonName').value;
             state.className = document.getElementById('className').value;
             state.docDate = document.getElementById('docDate').value;
-
-            document.getElementById('printSchoolTitle').textContent = state.schoolName ? state.schoolName.toUpperCase() : '....................................................................................... OKULU';
-            document.getElementById('printTeacher').textContent = state.teacherName || '............';
-            document.getElementById('printTeacherSign').textContent = state.teacherName || '.........................';
-            document.getElementById('printLesson').textContent = state.lessonName || '............';
-            document.getElementById('printClass').textContent = state.className || '............';
-            
-            if (state.hasCustomDate && state.docDate) {
-                const parts = state.docDate.split('-');
-                const formattedDate = `${parts[2]}.${parts[1]}.${parts[0]}`;
-                document.getElementById('printDate').textContent = formattedDate;
-                document.getElementById('printTeacherDate').textContent = formattedDate;
-            } else {
-                document.getElementById('printDate').textContent = '.... / .... / 2026';
-                document.getElementById('printTeacherDate').textContent = '.... / .... / 2026';
-            }
-
             saveToLocalStorage();
         }
 
@@ -1094,31 +1035,48 @@
             return true;
         }
 
+        /* CANLI ÖN İZLEME MODU AÇMA / KAPATMA */
+        function openPreviewMode() {
+            syncFormToPrint();
+            const content = getOfficeExportTableHTML();
+            document.getElementById('previewContentArea').innerHTML = content;
+            document.getElementById('editModeContainer').classList.add('hidden');
+            document.getElementById('previewModeContainer').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(sendHeightToParent, 150);
+        }
+
+        function closePreviewMode() {
+            document.getElementById('previewModeContainer').classList.add('hidden');
+            document.getElementById('editModeContainer').classList.remove('hidden');
+            setTimeout(sendHeightToParent, 150);
+        }
+
         function getOfficeExportTableHTML() {
-            const school = state.schoolName ? escapeHtml(state.schoolName.toUpperCase()) : 'OKUL ADI BELİRTİLMEDİ';
+            const school = state.schoolName ? escapeHtml(state.schoolName.toUpperCase()) : '....................................................................................... OKULU';
             const teacher = state.teacherName ? escapeHtml(state.teacherName) : '.........................';
             const lesson = state.lessonName ? escapeHtml(state.lessonName) : '............';
             const className = state.className ? escapeHtml(state.className) : '............';
-            const date = (state.hasCustomDate && state.docDate) ? escapeHtml(state.docDate.split('-').reverse().join('.')) : '..../..../2026';
+            const date = (state.hasCustomDate && state.docDate) ? escapeHtml(state.docDate.split('-').reverse().join('.')) : '.... / .... / 2026';
             const split = state.splitCount || 1;
 
-            const tableStyle = 'border-collapse: collapse; width: 100%; border: 1.5pt solid #000000; font-family: Calibri, Arial, sans-serif; font-size: 9pt; text-align: center;';
-            const thStyle = 'border: 1pt solid #000000; background-color: #f2f2f2; font-weight: bold; padding: 5px; text-align: center; vertical-align: middle;';
+            const tableStyle = 'border-collapse: collapse; width: 100%; border: 1.5pt solid #000000; font-family: Calibri, Arial, sans-serif; font-size: 8.5pt; text-align: center;';
+            const thStyle = 'border: 1pt solid #000000; background-color: #f2f2f2; font-weight: bold; padding: 4px; text-align: center; vertical-align: middle;';
             const tdStyle = 'border: 1pt solid #000000; padding: 4px; text-align: center; vertical-align: middle;';
             const tdLeftStyle = 'border: 1pt solid #000000; padding: 4px 6px; text-align: left; vertical-align: middle;';
 
             let headerRow1 = `<tr>
-                <th rowspan="${split > 1 ? '2' : '1'}" style="${thStyle} width: 35px;">S.No</th>
-                <th rowspan="${split > 1 ? '2' : '1'}" style="${thStyle} width: 60px;">Öğr. No</th>
-                <th rowspan="${split > 1 ? '2' : '1'}" style="${thStyle} min-width: 140px; text-align: left;">Adı Soyadı</th>`;
+                <th rowspan="${split > 1 ? '2' : '1'}" style="${thStyle} width: 30px;">S.No</th>
+                <th rowspan="${split > 1 ? '2' : '1'}" style="${thStyle} width: 55px;">Öğr. No</th>
+                <th rowspan="${split > 1 ? '2' : '1'}" style="${thStyle} min-width: 130px; text-align: left;">Adı Soyadı</th>`;
 
             state.criteria.forEach(c => {
                 headerRow1 += `<th colspan="${split}" style="${thStyle}">
-                    ${escapeHtml(c.title)}<br><span style="font-size: 8pt; color: #0284c7;">(${escapeHtml(c.max)} Puan)</span>
+                    ${escapeHtml(c.title)}<br><span style="font-size: 7.5pt; color: #0284c7;">(${escapeHtml(c.max)} P)</span>
                 </th>`;
             });
 
-            headerRow1 += `<th rowspan="${split > 1 ? '2' : '1'}" style="${thStyle} width: 65px; background-color: #e2e8f0;">TOPLAM</th></tr>`;
+            headerRow1 += `<th rowspan="${split > 1 ? '2' : '1'}" style="${thStyle} width: 60px; background-color: #e2e8f0;">TOPLAM</th></tr>`;
 
             let headerRow2 = '';
             if (split > 1) {
@@ -1126,7 +1084,7 @@
                 state.criteria.forEach(c => {
                     for (let i = 0; i < split; i++) {
                         const subMax = c.subMaxes[i] || 1;
-                        headerRow2 += `<th style="${thStyle} font-size: 8pt; background-color: #fafafa;">
+                        headerRow2 += `<th style="${thStyle} font-size: 7.5pt; background-color: #fafafa;">
                             P${i+1} (${escapeHtml(subMax)}p)
                         </th>`;
                     }
@@ -1164,15 +1122,15 @@
             });
 
             return `
-                <div style="font-family: Calibri, Arial, sans-serif; padding: 10px;">
-                    <table style="width: 100%; border: none; margin-bottom: 12px; text-align: center;">
+                <div style="font-family: Calibri, Arial, sans-serif; padding: 4px;">
+                    <table style="width: 100%; border: none; margin-bottom: 10px; text-align: center;">
                         <tr>
                             <td colspan="${3 + (state.criteria.length * split) + 1}" style="border: none; text-align: center;">
-                                <h2 style="margin: 0; padding: 0; font-size: 13pt;">${school}</h2>
-                                <h3 style="margin: 4px 0 10px 0; padding: 0; font-size: 11pt; font-weight: normal;">DERS İÇİ PERFORMANS VE SÜREÇ DEĞERLENDİRME ÖLÇEĞİ</h3>
+                                <h2 style="margin: 0; padding: 0; font-size: 12pt; font-weight: bold;">${school}</h2>
+                                <h3 style="margin: 4px 0 8px 0; padding: 0; font-size: 10pt; font-weight: normal;">DERS İÇİ PERFORMANS VE SÜREÇ DEĞERLENDİRME ÖLÇEĞİ</h3>
                             </td>
                         </tr>
-                        <tr style="font-size: 9.5pt; font-weight: bold;">
+                        <tr style="font-size: 8.5pt; font-weight: bold;">
                             <td style="border: none; text-align: left;"><b>DERS:</b> ${lesson}</td>
                             <td style="border: none; text-align: left;"><b>SINIF / ŞUBE:</b> ${className}</td>
                             <td style="border: none; text-align: left;"><b>ÖĞRETMEN:</b> ${teacher}</td>
@@ -1191,9 +1149,9 @@
                     </table>
 
                     <br>
-                    <table style="width: 100%; border: none; margin-top: 20px;">
+                    <table style="width: 100%; border: none; margin-top: 15px;">
                         <tr>
-                            <td style="border: none; text-align: center; font-size: 9.5pt;">
+                            <td style="border: none; text-align: center; font-size: 9pt;">
                                 ${date}<br><br><br>
                                 <b>${teacher}</b><br>
                                 Ders Öğretmeni
@@ -1266,7 +1224,7 @@
                     <![endif]-->
                     <style>
                         @page Section1 {
-                            size: 841.9pt 595.3pt; /* A4 Yatay (Landscape) */
+                            size: 841.9pt 595.3pt; /* A4 Yatay */
                             margin: 28.35pt 28.35pt 28.35pt 28.35pt;
                             mso-header-margin: 35.4pt;
                             mso-footer-margin: 35.4pt;
