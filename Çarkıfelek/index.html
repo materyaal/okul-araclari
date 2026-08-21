@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Rastgele Öğrenci Seçici & Çok Amaçlı Çarkıfelek</title>
+  <style>
+    :root {
+      --bg-main: #0b1329;
+      --bg-panel: #16203c;
+      --bg-card: #1f2d52;
+      --bg-input: #293b68;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --accent-danger: #f43f5e;
+      --accent-danger-hover: #e11d48;
+      --accent-success: #10b981;
+      --accent-warning: #f59e0b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --radius: 12px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    header {
+      background-color: var(--bg-panel);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow);
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #fff;
+    }
+
+    .brand span {
+      color: var(--accent);
+    }
+
+    .btn {
+      background-color: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 0.65rem 1.2rem;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.15s ease;
+      touch-action: manipulation;
+    }
+
+    .btn:hover {
+      background-color: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-danger {
+      background-color: var(--accent-danger);
+    }
+
+    .btn-danger:hover {
+      background-color: var(--accent-danger-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-input);
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background-color: #3b5087;
+    }
+
+    .main-container {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      flex: 1;
+      height: calc(100vh - 65px);
+      position: relative;
+    }
+
+    /* Sol Sütun - Çark Alanı */
+    .wheel-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 1.5rem;
+      overflow: hidden;
+    }
+
+    .wheel-container {
+      position: relative;
+      width: min(72vh, 80vw);
+      height: min(72vh, 80vw);
+      max-width: 620px;
+      max-height: 620px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #wheelCanvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      box-shadow: 0 0 35px rgba(0,0,0,0.6), 0 0 15px rgba(99, 102, 241, 0.25);
+    }
+
+    /* Dinamik Yaylanan Pointer (Ok) */
+    .pointer {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      margin-left: -18px;
+      width: 36px;
+      height: 46px;
+      z-index: 5;
+      transform-origin: 50% 0%;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+      transition: transform 0.05s ease-out;
+    }
+
+    .pointer-shape {
+      width: 0;
+      height: 0;
+      border-left: 18px solid transparent;
+      border-right: 18px solid transparent;
+      border-top: 38px solid var(--accent-warning);
+    }
+
+    .pointer-hub {
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 16px;
+      height: 16px;
+      background: #fff;
+      border-radius: 50%;
+      border: 3px solid var(--accent-warning);
+    }
+
+    .center-spin-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffffff 0%, #cbd5e1 100%);
+      color: #0b1329;
+      border: 6px solid #16203c;
+      font-weight: 850;
+      font-size: 1.05rem;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      z-index: 6;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s ease, background 0.2s ease;
+      touch-action: manipulation;
+    }
+
+    .center-spin-btn:active {
+      transform: translate(-50%, -50%) scale(0.92);
+    }
+
+    .center-spin-btn:disabled {
+      background: #475569;
+      color: #94a3b8;
+      cursor: not-allowed;
+      border-color: #334155;
+    }
+
+    /* Sağ Sütun - Kontrol Paneli */
+    .controls-section {
+      background-color: var(--bg-panel);
+      border-left: 1px solid var(--border-color);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      overflow-y: auto;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .badge {
+      background: var(--accent);
+      color: white;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+      font-weight: 700;
+    }
+
+    select, input[type="text"], textarea {
+      width: 100%;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: #fff;
+      padding: 0.65rem 0.8rem;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    select:focus, input[type="text"]:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+      max-height: 220px;
+      line-height: 1.4;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .toggle-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      padding: 0.2rem 0;
+    }
+
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toggle-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--bg-input);
+      transition: .3s;
+      border-radius: 34px;
+      border: 1px solid var(--border-color);
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--accent-success);
+      border-color: var(--accent-success);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Kazanan Modalı */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      background: var(--bg-panel);
+      border: 2px solid var(--accent);
+      border-radius: 18px;
+      padding: 2.2rem 2rem;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.7);
+      transform: scale(0.85);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal-backdrop.active .modal-box {
+      transform: scale(1);
+    }
+
+    .modal-tag {
+      color: var(--accent-warning);
+      font-weight: 800;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+    }
+
+    .winner-name {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 1rem 0 1.8rem;
+      padding: 1.2rem;
+      background: var(--bg-main);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      word-break: break-word;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.8rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 99;
+    }
+
+    @media (max-width: 900px) {
+      .main-container {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      .controls-section {
+        border-left: none;
+        border-top: 1px solid var(--border-color);
+      }
+      .wheel-container {
+        width: 82vw;
+        height: 82vw;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      🎯 <span>Materyaal</span> Akıllı Çarkıfelek
+    </div>
+    <button class="btn btn-secondary" id="fullscreenBtn" title="Tam Ekran Modu">
+      ⛶ Tam Ekran
+    </button>
+  </header>
+
+  <div class="main-container">
+    <!-- Sol Sütun: Çark Alanı -->
+    <section class="wheel-section">
+      <div class="wheel-container">
+        <div class="pointer" id="wheelPointer">
+          <div class="pointer-hub"></div>
+          <div class="pointer-shape"></div>
+        </div>
+        <canvas id="wheelCanvas" width="900" height="900"></canvas>
+        <button class="center-spin-btn" id="spinBtn">DÖNDÜR</button>
+      </div>
+    </section>
+
+    <!-- Sağ Sütun: Kontrol Paneli -->
+    <section class="controls-section">
+      
+      <!-- Hazır Şablonlar -->
+      <div class="card">
+        <div class="card-title">
+          <span>📚 Hazır Etkinlik Şablonları</span>
+        </div>
+        <select id="templatesSelect">
+          <option value="" disabled selected>Bir şablon seçin...</option>
+          <option value="homework">Haftanın Eğlenceli Ödevleri</option>
+          <option value="roles">Sınıf İçi Roller ve Görevler</option>
+          <option value="reading">Kitap Okuma Türleri</option>
+        </select>
+      </div>
+
+      <!-- Sınıf / Liste Yönetimi -->
+      <div class="card">
+        <div class="card-title">
+          <span>💾 Kayıtlı Sınıflar & Listeler</span>
+        </div>
+        <div class="button-group">
+          <select id="savedListsSelect" style="flex: 1;">
+            <option value="" disabled selected>Kayıtlı liste seçin...</option>
+          </select>
+          <button class="btn btn-danger" id="deleteListBtn" title="Seçili Listeyi Sil">Sil</button>
+        </div>
+        <div class="button-group">
+          <input type="text" id="listNameInput" placeholder="Örn: 9-A Sınıfı" maxlength="30">
+          <button class="btn" id="saveListBtn">Kaydet</button>
+        </div>
+      </div>
+
+      <!-- Liste Giriş ve Ayarlar -->
+      <div class="card" style="flex: 1;">
+        <div class="card-title">
+          <span>📋 Çark Elemanları</span>
+          <span class="badge" id="itemCountBadge">0 Eleman</span>
+        </div>
+        <textarea id="itemsTextarea" placeholder="İsimleri veya görevleri satır satır ya da virgülle ayırarak yazın/yapıştırın..."></textarea>
+        
+        <div class="toggle-row">
+          <div class="toggle-container">
+            <label class="toggle-label" for="autoRemoveToggle">Seçilen Öğeyi Listeden Çıkar</label>
+            <label class="switch">
+              <input type="checkbox" id="autoRemoveToggle">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-container">
+            <label class="toggle-label" for="mysteryToggle">İsimleri Gizle (Gizemli Çark ❓)</label>
+            <label class="switch">
+              <input type="checkbox" id="mysteryToggle">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-secondary" id="resetOriginalBtn" style="flex: 1;">Orijinal Listeyi Sıfırla</button>
+          <button class="btn btn-danger" id="clearBtn">Temizle</button>
+        </div>
+      </div>
+
+    </section>
+  </div>
+
+  <!-- Kazanan Modalı -->
+  <div class="modal-backdrop" id="winnerModal">
+    <div class="modal-box">
+      <div class="modal-tag">🎉 Günün Şanslı Öğresi / Görevi</div>
+      <div class="winner-name" id="winnerDisplay">...</div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="modalCloseBtn">Kapat</button>
+        <button class="btn btn-danger" id="modalRemoveBtn">Listeden Çıkar ve Kapat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Konfeti Efekti -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <script>
+    /* ==========================================================
+       1. VERİ YAPILARI & GLOBAL DURUM
+    ========================================================== */
+    const PRESET_TEMPLATES = {
+      homework: [
+        "Evde bir deney yap",
+        "En sevdiğin kitabı 20 sayfa oku",
+        "Ailen için bir akşam yemeği hazırla",
+        "Bir doğa yürüyüşü yap ve fotoğraf çek",
+        "Eski bir arkadaşını ara ve sohbet et",
+        "Bugün hiç teknoloji kullanma"
+      ],
+      roles: [
+        "Sınıf Başkanı",
+        "Temizlik ve Düzen Sorumlusu",
+        "Akıllı Tahta Sorumlusu",
+        "Kütüphane Sorumlusu",
+        "Nöbetçi Öğrenci",
+        "EBA/Ödev Takipçisi"
+      ],
+      reading: [
+        "Bilim Kurgu / Fantastik",
+        "Tarih / Biyografi",
+        "Macera / Gizem",
+        "Şiir / Tiyatro",
+        "Kişisel Gelişim / Felsefe",
+        "Klasik Dünya Edebiyatı"
+      ]
+    };
+
+    const PALETTE = [
+      "#4f46e5", "#06b6d4", "#10b981", "#f59e0b", "#ec4899", 
+      "#8b5cf6", "#3b82f6", "#14b8a6", "#84cc16", "#f97316", 
+      "#e11d48", "#6366f1", "#0284c7", "#059669", "#d97706"
+    ];
+
+    let items = [];
+    let originalSnapshot = [];
+    let isSpinning = false;
+    let currentRotation = 0;
+    let lastWinner = null;
+
+    // DOM Referansları
+    const canvas = document.getElementById('wheelCanvas');
+    const ctx = canvas.getContext('2d');
+    const pointer = document.getElementById('wheelPointer');
+    const confettiCanvas = document.getElementById('confettiCanvas');
+    const confettiCtx = confettiCanvas.getContext('2d');
+    const itemsTextarea = document.getElementById('itemsTextarea');
+    const itemCountBadge = document.getElementById('itemCountBadge');
+    const spinBtn = document.getElementById('spinBtn');
+    const templatesSelect = document.getElementById('templatesSelect');
+    const savedListsSelect = document.getElementById('savedListsSelect');
+    const listNameInput = document.getElementById('listNameInput');
+    const saveListBtn = document.getElementById('saveListBtn');
+    const deleteListBtn = document.getElementById('deleteListBtn');
+    const autoRemoveToggle = document.getElementById('autoRemoveToggle');
+    const mysteryToggle = document.getElementById('mysteryToggle');
+    const resetOriginalBtn = document.getElementById('resetOriginalBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const winnerModal = document.getElementById('winnerModal');
+    const winnerDisplay = document.getElementById('winnerDisplay');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const modalRemoveBtn = document.getElementById('modalRemoveBtn');
+
+    /* ==========================================================
+       2. WEB AUDIO API SES MOTORU
+    ========================================================== */
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playTickSound() {
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(520, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.035);
+        gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.035);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.035);
+      } catch (e) {}
+    }
+
+    function playVictoryMelody() {
+      try {
+        initAudio();
+        const notes = [261.63, 329.63, 392.00, 523.25, 659.25]; // C4, E4, G4, C5, E5
+        notes.forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          const start = audioCtx.currentTime + (idx * 0.1);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, start);
+          gain.gain.setValueAtTime(0, start);
+          gain.gain.linearRampToValueAtTime(0.35, start + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, start + 0.4);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(start);
+          osc.stop(start + 0.4);
+        });
+      } catch (e) {}
+    }
+
+    /* ==========================================================
+       3. ÇARK ÇİZİMİ (Canvas & Dinamik Tipografi)
+    ========================================================== */
+    function drawWheel() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const center = w / 2;
+      const radius = center - 30;
+
+      ctx.clearRect(0, 0, w, h);
+
+      if (items.length === 0) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(center, center, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = '#16203c';
+        ctx.fill();
+        ctx.lineWidth = 12;
+        ctx.strokeStyle = '#293b68';
+        ctx.stroke();
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = 'bold 28px system-ui';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Listeye Eleman Ekleyin', center, center);
+        ctx.restore();
+        return;
+      }
+
+      const sliceAngle = (2 * Math.PI) / items.length;
+      const isMystery = mysteryToggle.checked;
+
+      ctx.save();
+      ctx.translate(center, center);
+      ctx.rotate(currentRotation);
+
+      for (let i = 0; i < items.length; i++) {
+        const angle = i * sliceAngle;
+        
+        // Dilim Arka Planı
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, radius, angle, angle + sliceAngle);
+        ctx.closePath();
+        ctx.fillStyle = PALETTE[i % PALETTE.length];
+        ctx.fill();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#0b1329';
+        ctx.stroke();
+
+        // Metin Yerleşimi
+        ctx.save();
+        ctx.rotate(angle + sliceAngle / 2);
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffffff';
+
+        // Adaptif Font Boyutu
+        let fontSize = Math.min(26, Math.max(12, Math.floor(460 / items.length)));
+        if (items.length <= 4) fontSize = 30;
+        ctx.font = `700 ${fontSize}px system-ui`;
+        ctx.shadowColor = "rgba(0,0,0,0.7)";
+        ctx.shadowBlur = 5;
+
+        let text = isMystery ? "???" : items[i];
+        const maxTextLen = radius - 90;
+        
+        if (ctx.measureText(text).width > maxTextLen) {
+          while (ctx.measureText(text + '...').width > maxTextLen && text.length > 0) {
+            text = text.slice(0, -1);
+          }
+          text += '...';
+        }
+
+        ctx.fillText(text, radius - 40, 0);
+        ctx.restore();
+      }
+
+      // Dış Halka Süslemesi
+      ctx.restore();
+      ctx.beginPath();
+      ctx.arc(center, center, radius, 0, 2 * Math.PI);
+      ctx.lineWidth = 16;
+      ctx.strokeStyle = '#1f2d52';
+      ctx.stroke();
+    }
+
+    /* ==========================================================
+       4. GELİŞMİŞ DÖNÜŞ FİZİĞİ & POINTER YAYLANMASI
+    ========================================================== */
+    function triggerPointerFlick() {
+      pointer.style.transform = 'rotate(-18deg)';
+      setTimeout(() => {
+        pointer.style.transform = 'rotate(0deg)';
+      }, 50);
+    }
+
+    function spinWheel() {
+      if (isSpinning || items.length === 0) return;
+      initAudio();
+
+      isSpinning = true;
+      spinBtn.disabled = true;
+
+      const numItems = items.length;
+      const sliceAngle = (2 * Math.PI) / numItems;
+      const targetIndex = Math.floor(Math.random() * numItems);
+      lastWinner = items[targetIndex];
+
+      // İbre tam tepede (-PI/2). Dilim merkezini ibreye oturtma:
+      const targetSliceCenter = (targetIndex * sliceAngle) + (sliceAngle / 2);
+      let targetRot = (1.5 * Math.PI) - targetSliceCenter;
+
+      while (targetRot < 0) targetRot += 2 * Math.PI;
+
+      const currentMod = currentRotation % (2 * Math.PI);
+      let diff = targetRot - currentMod;
+      if (diff < 0) diff += 2 * Math.PI;
+
+      const minRounds = 6 + Math.floor(Math.random() * 3);
+      const totalSpinAngle = (minRounds * 2 * Math.PI) + diff;
+
+      const startAngle = currentRotation;
+      const duration = 4200 + Math.random() * 1600; // 4.2 - 5.8 saniye rastgele süre
+      let startTime = null;
+      let lastTickSlice = -1;
+
+      function easeOut(t) {
+        return 1 - Math.pow(1 - t, 5); // Quintic Ease Out
+      }
+
+      function animate(currentTime) {
+        if (!startTime) startTime = currentTime;
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easedProgress = easeOut(progress);
+
+        currentRotation = startAngle + (totalSpinAngle * easedProgress);
+        drawWheel();
+
+        // İbrenin Dilim Geçiş Tespiti
+        const activeNormalizedAngle = (1.5 * Math.PI - (currentRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+        const currentSlice = Math.floor(activeNormalizedAngle / sliceAngle);
+
+        if (currentSlice !== lastTickSlice) {
+          playTickSound();
+          triggerPointerFlick();
+          lastTickSlice = currentSlice;
+        }
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          isSpinning = false;
+          spinBtn.disabled = false;
+          pointer.style.transform = 'rotate(0deg)';
+          playVictoryMelody();
+          launchConfetti();
+          showWinnerModal(lastWinner);
+
+          if (autoRemoveToggle.checked) {
+            removeItemFromCurrentList(lastWinner);
+          }
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    /* ==========================================================
+       5. KONFETİ MOTORU & KAZANAN MODALI
+    ========================================================== */
+    let confettiParticles = [];
+    let confettiAnimationId = null;
+
+    function resizeConfettiCanvas() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeConfettiCanvas);
+    resizeConfettiCanvas();
+
+    function launchConfetti() {
+      confettiParticles = [];
+      const colors = ['#f59e0b', '#f43f5e', '#10b981', '#6366f1', '#ec4899', '#38bdf8', '#fbbf24'];
+      for (let i = 0; i < 160; i++) {
+        confettiParticles.push({
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2,
+          w: Math.random() * 10 + 6,
+          h: Math.random() * 6 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 24,
+          vy: (Math.random() - 0.5) * 24 - 6,
+          gravity: 0.35,
+          opacity: 1,
+          rot: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 14
+        });
+      }
+
+      if (confettiAnimationId) cancelAnimationFrame(confettiAnimationId);
+      animateConfetti();
+    }
+
+    function animateConfetti() {
+      confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      let alive = false;
+
+      for (let p of confettiParticles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += p.gravity;
+        p.rot += p.rotSpeed;
+        p.opacity -= 0.007;
+
+        if (p.opacity > 0) {
+          alive = true;
+          confettiCtx.save();
+          confettiCtx.translate(p.x, p.y);
+          confettiCtx.rotate((p.rot * Math.PI) / 180);
+          confettiCtx.globalAlpha = p.opacity;
+          confettiCtx.fillStyle = p.color;
+          confettiCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          confettiCtx.restore();
+        }
+      }
+
+      if (alive) {
+        confettiAnimationId = requestAnimationFrame(animateConfetti);
+      } else {
+        confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      }
+    }
+
+    function showWinnerModal(winner) {
+      winnerDisplay.textContent = winner;
+      winnerModal.classList.add('active');
+    }
+
+    function hideWinnerModal() {
+      winnerModal.classList.remove('active');
+    }
+
+    /* ==========================================================
+       6. VERİ TEMİZLEME, LİSTE YÖNETİMİ & LOCALSTORAGE
+    ========================================================== */
+    function cleanAndParseInput(rawText) {
+      return rawText
+        .split(/[\n,]+/)
+        .map(i => i.trim())
+        .filter(i => i.length > 0); // Boşluk ve boş satırları kesin temizle
+    }
+
+    function updateFromTextarea() {
+      items = cleanAndParseInput(itemsTextarea.value);
+      itemCountBadge.textContent = `${items.length} Eleman`;
+      drawWheel();
+    }
+
+    function setListContent(arr, saveSnapshot = true) {
+      items = [...arr];
+      if (saveSnapshot) {
+        originalSnapshot = [...arr];
+      }
+      itemsTextarea.value = items.join('\n');
+      itemCountBadge.textContent = `${items.length} Eleman`;
+      drawWheel();
+    }
+
+    function removeItemFromCurrentList(itemToRemove) {
+      const idx = items.indexOf(itemToRemove);
+      if (idx !== -1) {
+        items.splice(idx, 1);
+        itemsTextarea.value = items.join('\n');
+        itemCountBadge.textContent = `${items.length} Eleman`;
+        drawWheel();
+      }
+    }
+
+    function getSavedLists() {
+      try {
+        return JSON.parse(localStorage.getItem('materyaal_wheel_lists') || '{}');
+      } catch {
+        return {};
+      }
+    }
+
+    function saveListsToStorage(lists) {
+      localStorage.setItem('materyaal_wheel_lists', JSON.stringify(lists));
+      renderSavedListsDropdown();
+    }
+
+    function renderSavedListsDropdown() {
+      const lists = getSavedLists();
+      savedListsSelect.innerHTML = '<option value="" disabled selected>Kayıtlı liste seçin...</option>';
+      for (const name of Object.keys(lists)) {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        savedListsSelect.appendChild(opt);
+      }
+    }
+
+    /* ==========================================================
+       7. ETKİNLİK DİNLEYİCİLERİ (Touch & Click)
+    ========================================================== */
+    function attachFastClick(element, handler) {
+      element.addEventListener('click', handler);
+      element.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        handler(e);
+      });
+    }
+
+    itemsTextarea.addEventListener('input', () => {
+      updateFromTextarea();
+      originalSnapshot = [...items];
+    });
+
+    mysteryToggle.addEventListener('change', drawWheel);
+
+    attachFastClick(spinBtn, spinWheel);
+
+    templatesSelect.addEventListener('change', (e) => {
+      const templateKey = e.target.value;
+      if (PRESET_TEMPLATES[templateKey]) {
+        setListContent(PRESET_TEMPLATES[templateKey]);
+        savedListsSelect.selectedIndex = 0;
+      }
+    });
+
+    attachFastClick(saveListBtn, () => {
+      const name = listNameInput.value.trim();
+      if (!name) {
+        alert('Lütfen listenize bir isim verin!');
+        return;
+      }
+      const currentList = cleanAndParseInput(itemsTextarea.value);
+      if (currentList.length === 0) {
+        alert('Kaydetmek için en az 1 eleman girmelisiniz!');
+        return;
+      }
+      const lists = getSavedLists();
+      lists[name] = currentList;
+      saveListsToStorage(lists);
+      listNameInput.value = '';
+      savedListsSelect.value = name;
+    });
+
+    savedListsSelect.addEventListener('change', (e) => {
+      const name = e.target.value;
+      const lists = getSavedLists();
+      if (lists[name]) {
+        setListContent(lists[name]);
+        templatesSelect.selectedIndex = 0;
+      }
+    });
+
+    attachFastClick(deleteListBtn, () => {
+      const name = savedListsSelect.value;
+      if (!name) return;
+      if (confirm(`"${name}" sınıf listesini silmek istediğinize emin misiniz?`)) {
+        const lists = getSavedLists();
+        delete lists[name];
+        saveListsToStorage(lists);
+      }
+    });
+
+    attachFastClick(clearBtn, () => {
+      setListContent([]);
+      templatesSelect.selectedIndex = 0;
+      savedListsSelect.selectedIndex = 0;
+    });
+
+    attachFastClick(resetOriginalBtn, () => {
+      if (originalSnapshot.length > 0) {
+        setListContent(originalSnapshot, false);
+      } else {
+        updateFromTextarea();
+      }
+    });
+
+    attachFastClick(fullscreenBtn, () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+
+    attachFastClick(modalCloseBtn, hideWinnerModal);
+
+    attachFastClick(modalRemoveBtn, () => {
+      if (lastWinner) {
+        removeItemFromCurrentList(lastWinner);
+      }
+      hideWinnerModal();
+    });
+
+    // İlk Yükleme
+    window.addEventListener('DOMContentLoaded', () => {
+      renderSavedListsDropdown();
+      setListContent(PRESET_TEMPLATES.homework);
+      templatesSelect.value = 'homework';
+    });
+  </script>
+</body>
+</html>
