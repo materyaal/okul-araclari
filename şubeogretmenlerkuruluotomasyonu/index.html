@@ -1,67 +1,54 @@
 <t t-name="website.sube-ogretmenler-kurulu-sok">
-    <!-- Odoo Header ve Footer Alanlarını Tamamen Gizleyen Özelleştirilmiş Yapı -->
     <t t-call="website.layout">
-        <t t-set="no_header" t-value="true"/>
-        <t t-set="no_footer" t-value="true"/>
-        
-        <div id="wrap" class="oe_structure oe_empty" style="background-color: #f1f5f9; min-height: 100vh; padding: 10px 0;">
-            <section class="s_embed_code o_colored_level" data-snippet="s_embed_code" data-name="Yerleştirme Kodu" style="padding: 0 !important; margin: 0 !important;">
-                <div class="s_embed_code_embedded o_not_editable container-fluid" style="max-width: 1600px; padding: 0 10px;">
+        <div id="wrap" class="oe_structure oe_empty">
+            <section class="s_embed_code pt16 pb16 o_colored_level" data-snippet="s_embed_code" data-name="Yerleştirme Kodu">
+                <div class="s_embed_code_embedded o_not_editable container">
                     
                     <!-- html2pdf Kütüphanesi -->
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-                    <!-- Tam Mobil & Web Uyumlu, Header/Footer Gizleyen CSS -->
+                    <!-- Resmî Formatlı ve İzolasyonlu CSS -->
                     <style>
-                        /* Odoo Varsayılan Header/Footer Gizleme */
-                        header#top, footer#bottom, .o_footer, .top-nav, .o_main_navbar { display: none !important; }
-                        body { background-color: #f1f5f9 !important; }
-
-                        #sokAppWrapper { text-align: left !important; width: 100% !important; margin: 0 auto !important; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
+                        #sokAppWrapper { text-align: left !important; width: 100% !important; max-width: 1500px !important; margin: 0 auto !important; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
                         #sokAppWrapper * { box-sizing: border-box !important; }
                         
                         #sokAppWrapper .main-layout { display: flex !important; flex-direction: column !important; gap: 20px !important; width: 100% !important; }
-                        @media (min-width: 1200px) {
-                            #sokAppWrapper .main-layout.side-by-side { flex-direction: row !important; align-items: flex-start !important; }
-                        }
-                        
-                        #sokAppWrapper .form-container { flex: 1 !important; background: #ffffff !important; border: 1px solid #cbd5e1 !important; border-radius: 12px !important; padding: 15px sm:25px !important; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1) !important; text-align: left !important; width: 100% !important; }
+                        #sokAppWrapper .form-container { flex: 1 !important; background: #ffffff !important; border: 1px solid #cbd5e1 !important; border-radius: 10px !important; padding: 20px !important; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1) !important; text-align: left !important; }
                         #sokAppWrapper h2 { color: #1e3a8a !important; margin-top: 0 !important; border-bottom: 2px solid #3b82f6 !important; padding-bottom: 8px !important; font-size: 15px !important; font-weight: 700 !important; text-align: left !important; }
                         
-                        #sokAppWrapper .form-grid { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important; gap: 10px !important; margin-bottom: 15px !important; text-align: left !important; }
-                        #sokAppWrapper .form-group { display: flex !important; flex-direction: column !important; margin-bottom: 10px !important; text-align: left !important; align-items: flex-start !important; width: 100% !important; }
+                        #sokAppWrapper .form-grid { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important; gap: 12px !important; margin-bottom: 15px !important; text-align: left !important; }
+                        #sokAppWrapper .form-group { display: flex !important; flex-direction: column !important; margin-bottom: 10px !important; text-align: left !important; align-items: flex-start !important; }
                         #sokAppWrapper label { display: block !important; width: 100% !important; font-size: 11px !important; font-weight: 600 !important; color: #475569 !important; margin-bottom: 4px !important; text-align: left !important; }
                         
                         #sokAppWrapper input[type="text"], 
                         #sokAppWrapper select, 
-                        #sokAppWrapper textarea { display: block !important; width: 100% !important; padding: 8px !important; border: 1px solid #cbd5e1 !important; border-radius: 6px !important; font-size: 13px !important; background-color: #f8fafc !important; color: #0f172a !important; text-align: left !important; margin: 0 !important; }
-                        #sokAppWrapper textarea { resize: vertical !important; min-height: 110px !important; font-family: inherit !important; line-height: 1.4 !important; }
+                        #sokAppWrapper textarea { display: block !important; width: 100% !important; padding: 8px !important; border: 1px solid #cbd5e1 !important; border-radius: 5px !important; font-size: 12px !important; background-color: #f8fafc !important; color: #0f172a !important; text-align: left !important; margin: 0 !important; }
+                        #sokAppWrapper textarea { resize: vertical !important; min-height: 120px !important; font-family: inherit !important; line-height: 1.4 !important; }
                         
                         #sokAppWrapper .brans-header { display: flex !important; justify-content: space-between !important; align-items: center !important; margin-top: 15px !important; border-bottom: 2px solid #3b82f6 !important; padding-bottom: 5px !important; }
-                        #sokAppWrapper .custom-table-wrap { width: 100% !important; overflow-x: auto !important; }
-                        #sokAppWrapper .custom-table { width: 100% !important; border-collapse: collapse !important; margin-top: 8px !important; font-size: 12px !important; min-width: 500px; }
+                        #sokAppWrapper .custom-table { width: 100% !important; border-collapse: collapse !important; margin-top: 8px !important; font-size: 12px !important; }
                         #sokAppWrapper .custom-table th { background: #f8fafc !important; color: #64748b !important; text-align: left !important; padding: 8px !important; border-bottom: 1px solid #e2e8f0 !important; }
                         #sokAppWrapper .custom-table td { padding: 4px 6px !important; border-bottom: 1px solid #f1f5f9 !important; text-align: left !important; }
                         #sokAppWrapper .custom-table input { background: #ffffff !important; border: 1px solid #cbd5e1 !important; }
                         
                         #sokAppWrapper .btn-group { display: flex !important; gap: 8px !important; margin-top: 20px !important; flex-wrap: wrap !important; justify-content: flex-start !important; }
-                        #sokAppWrapper .btn { background: #2563eb !important; color: #ffffff !important; border: none !important; padding: 10px 16px !important; border-radius: 6px !important; cursor: pointer !important; font-weight: 600 !important; font-size: 12px !important; text-decoration: none !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; }
+                        #sokAppWrapper .btn { background: #2563eb !important; color: #ffffff !important; border: none !important; padding: 9px 14px !important; border-radius: 6px !important; cursor: pointer !important; font-weight: 600 !important; font-size: 12px !important; text-decoration: none !important; display: inline-block !important; }
                         #sokAppWrapper .btn:hover { background: #1d4ed8 !important; }
                         #sokAppWrapper .btn-pdf { background: #dc2626 !important; }
                         #sokAppWrapper .btn-word { background: #1d4ed8 !important; }
                         #sokAppWrapper .btn-print { background: #16a34a !important; }
                         #sokAppWrapper .btn-reset { background: #64748b !important; }
-                        #sokAppWrapper .btn-danger-sm { background: #dc2626 !important; color: #fff !important; padding: 5px 10px !important; font-size: 11px !important; border-radius: 4px !important; border: none !important; cursor: pointer !important; }
+                        #sokAppWrapper .btn-danger-sm { background: #dc2626 !important; color: #fff !important; padding: 4px 8px !important; font-size: 11px !important; border-radius: 4px !important; border: none !important; cursor: pointer !important; }
 
-                        /* Ön İzleme Alanı (Mobil Uyumlu Yatay Kaydırma) */
-                        #sokAppWrapper .preview-container { background: #334155 !important; border-radius: 12px !important; padding: 20px 10px !important; display: flex !important; flex-direction: column !important; align-items: center !important; gap: 20px !important; overflow-x: auto !important; width: 100% !important; margin-top: 15px !important; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.2); }
-                        #sokAppWrapper .a4-page { width: 210mm !important; min-height: 297mm !important; padding: 15mm 18mm !important; background: #ffffff !important; box-shadow: 0 0 15px rgba(0,0,0,0.3) !important; font-family: 'Times New Roman', Times, serif !important; font-size: 10.5pt !important; line-height: 1.5 !important; color: #000000 !important; box-sizing: border-box !important; text-align: left !important; flex-shrink: 0 !important; }
+                        /* Ön İzleme A4 Sayfa Düzeni */
+                        #sokAppWrapper .preview-container { background: #525659 !important; border-radius: 10px !important; padding: 25px 10px !important; display: flex !important; flex-direction: column !important; align-items: center !important; gap: 20px !important; overflow-x: auto !important; width: 100% !important; margin-top: 15px !important; }
+                        #sokAppWrapper .a4-page { width: 210mm !important; min-height: 297mm !important; padding: 15mm 18mm !important; background: #ffffff !important; box-shadow: 0 0 12px rgba(0,0,0,0.35) !important; font-family: 'Times New Roman', Times, serif !important; font-size: 10.5pt !important; line-height: 1.5 !important; color: #000000 !important; box-sizing: border-box !important; text-align: left !important; }
                         #sokAppWrapper .a4-page.landscape { width: 297mm !important; min-height: 210mm !important; padding: 12mm 15mm !important; }
 
                         @media print {
-                            .no-print, header, footer { display: none !important; }
+                            .no-print { display: none !important; }
                             #sokAppWrapper .main-layout { display: block !important; }
-                            #sokAppWrapper .preview-container { background: white !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; }
+                            #sokAppWrapper .preview-container { background: white !important; padding: 0 !important; margin: 0 !important; }
                             #sokAppWrapper .a4-page { box-shadow: none !important; width: 100% !important; padding: 10mm !important; }
                         }
                     </style>
@@ -142,7 +129,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Gündem Maddelerinin Görüşülmesi</label>
-                                    <textarea id="sok_gorusmeMetni" style="min-height:220px;">Madde 1: Açılış ve Yoklama
+                                    <textarea id="sok_gorusmeMetni" style="min-height:200px;">Madde 1: Açılış ve Yoklama
 Toplantı, belirtilen tarih ve saatte öğretmenler odasında kurul başkanının açılış konuşmasıyla başlatılmıştır. Yapılan yoklamada ilgili şubede derse giren tüm branş öğretmenlerinin toplantıda hazır bulunduğu tespit edilmiştir. Kurul başkanı, eğitim-öğretim sürecinin verimli geçmesi dileğiyle gündem maddelerinin görüşülmesine geçilmesini kararlaştırmıştır.
 
 Madde 2: Bir Önceki Toplantıda Alınan Kararlar
@@ -207,49 +194,45 @@ Madde 15: Dilek ve Temenniler
                                     <h2 style="margin:0; border:none;">3. Branşlar ve Katılımcı Öğretmenler</h2>
                                     <button type="button" class="btn" id="sok_btn_add_brans" style="padding:4px 8px; font-size:11px;">⊕ Yeni Branş Ekle</button>
                                 </div>
-                                <div class="custom-table-wrap">
-                                    <table class="custom-table">
-                                        <colgroup>
-                                            <col style="width: 40%;"/>
-                                            <col style="width: 45%;"/>
-                                            <col style="width: 15%;"/>
-                                        </colgroup>
-                                        <thead>
-                                            <tr>
-                                                <th>Branş</th>
-                                                <th>Öğretmen Adı Soyadı</th>
-                                                <th>İşlem</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="sok_bransTbody"></tbody>
-                                    </table>
-                                </div>
+                                <table class="custom-table">
+                                    <colgroup>
+                                        <col style="width: 40%;"/>
+                                        <col style="width: 45%;"/>
+                                        <col style="width: 15%;"/>
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th>Branş</th>
+                                            <th>Öğretmen Adı Soyadı</th>
+                                            <th>İşlem</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sok_bransTbody"></tbody>
+                                </table>
 
+                                <!-- BİREYSEL ÖĞRENCİ DEĞERLENDİRME ÇİZELGESİ FORM BÖLÜMÜ -->
                                 <div class="brans-header" style="margin-top:25px;">
-                                    <h2 style="margin:0; border:none;">4. Bireysel Öğrenci Değerlendirme Çizelgesi</h2>
+                                    <h2 style="margin:0; border:none;">4. Bireysel Öğrenci Değerlendirme Çizelgesi Veri Girişi</h2>
                                     <button type="button" class="btn" id="sok_btn_add_student" style="padding:4px 8px; font-size:11px;">⊕ Yeni Öğrenci Ekle</button>
                                 </div>
-                                <div class="custom-table-wrap">
-                                    <table class="custom-table" style="font-size:11px;">
-                                        <thead>
-                                            <tr>
-                                                <th style="width:15%;">Öğrenci Adı Soyadı</th>
-                                                <th style="width:12%;">Kişilik Durumu</th>
-                                                <th style="width:12%;">Beslenme</th>
-                                                <th style="width:12%;">Sağlık Durumu</th>
-                                                <th style="width:12%;">Sosyal İlişkiler</th>
-                                                <th style="width:12%;">Ekonomik Durum</th>
-                                                <th style="width:15%;">Başarı &amp; Çözüm</th>
-                                                <th style="width:10%;">İşlem</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="sok_ogrenciTbody"></tbody>
-                                    </table>
-                                </div>
+                                <table class="custom-table" style="font-size:11px;">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:15%;">Öğrenci Adı Soyadı</th>
+                                            <th style="width:12%;">Kişilik Durumu</th>
+                                            <th style="width:12%;">Beslenme</th>
+                                            <th style="width:12%;">Sağlık Durumu</th>
+                                            <th style="width:12%;">Sosyal İlişkiler</th>
+                                            <th style="width:12%;">Ekonomik Durum</th>
+                                            <th style="width:15%;">Başarı &amp; Çözüm</th>
+                                            <th style="width:10%;">İşlem</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sok_ogrenciTbody"></tbody>
+                                </table>
                                 
                                 <div class="btn-group">
                                     <button type="button" class="btn" id="sok_btn_refresh">Ön İzlemeyi Yenile</button>
-                                    <button type="button" class="btn btn-toggle" id="sok_btn_toggle">↔️ Yan Yana / Alt Alta Düzen</button>
                                     <button type="button" class="btn btn-pdf" id="sok_btn_pdf">📄 Resmî A4 PDF İndir</button>
                                     <button type="button" class="btn btn-word" id="sok_btn_word">📝 Resmî Word (.doc) İndir</button>
                                     <button type="button" class="btn btn-print" id="sok_btn_print">🖨️ Yazdır / Çıktı Al</button>
@@ -265,7 +248,7 @@ Madde 15: Dilek ve Temenniler
                         </div>
                     </div>
 
-                    <!-- Entegre JS Mantığı -->
+                    <!-- Entegre JS Motoru: Paragraf Düzenleyici Eklenmiş Sürüm -->
                     <script type="text/javascript">
                     //<![CDATA[
                         (function() {
@@ -291,6 +274,7 @@ Madde 15: Dilek ve Temenniler
                                     return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;").replace(/\r/g, "");
                                 }
 
+                                // HER BİR SATIRI AYRI BİR PARAGRAF KUTUSUNA DÖNÜŞTÜREN KRİTİK FONKSİYON
                                 function formatTextToParagraphs(rawText) {
                                     if (!rawText || !rawText.trim()) return '';
                                     var lines = rawText.split('\n');
@@ -298,7 +282,7 @@ Madde 15: Dilek ve Temenniler
                                     lines.forEach(function(line) {
                                         var trimmed = line.trim();
                                         if (trimmed.length > 0) {
-                                            htmlResult += '<p style="margin: 0 0 6pt 0; text-align: justify; line-height: 1.45; font-size: 10pt; font-family:\'Times New Roman\', serif;">' + escapeHTML(trimmed) + '</p>';
+                                            htmlResult += '<p style="margin: 0 0 7pt 0; text-align: justify; line-height: 1.5; font-size: 10pt; font-family:\'Times New Roman\', serif;">' + escapeHTML(trimmed) + '</p>';
                                         }
                                     });
                                     return htmlResult;
@@ -335,7 +319,7 @@ Madde 15: Dilek ve Temenniler
                                     var tbody = getEl("sok_ogrenciTbody");
                                     if (!tbody) return;
                                     var tr = document.createElement("tr");
-                                    tr.innerHTML = '<td><input type="text" class="sok-ogr-ad" value="' + escapeHTML(ad) + '" placeholder="Ögr. Adı"/></td>' +
+                                    tr.innerHTML = '<td><input type="text" class="sok-ogr-ad" value="' + escapeHTML(ad) + '" placeholder="Ögr. Adı Soyadı"/></td>' +
                                                    '<td><input type="text" class="sok-ogr-kisilik" value="' + escapeHTML(kisilik) + '"/></td>' +
                                                    '<td><input type="text" class="sok-ogr-beslenme" value="' + escapeHTML(beslenme) + '"/></td>' +
                                                    '<td><input type="text" class="sok-ogr-saglik" value="' + escapeHTML(saglik) + '"/></td>' +
@@ -397,6 +381,7 @@ Madde 15: Dilek ve Temenniler
                                         '</tr>';
                                     }
 
+                                    // DİKEY SAYFA TUTANAK METNİ (PARAGRAF FORMATI ENTEGRELİ)
                                     var htmlPage1 = '<div style="text-align: center; font-weight: bold; line-height: 1.35; font-size: 11pt; margin-bottom: 12px; font-family:\'Times New Roman\', serif;">' +
                                             escapeHTML(egitimYili) + ' EĞİTİM-ÖĞRETİM YILI<br/>' +
                                             escapeHTML(okulAdi) + ' ' + escapeHTML(okulTuru) + ' MÜDÜRLÜĞÜ<br/>' +
@@ -416,6 +401,7 @@ Madde 15: Dilek ve Temenniler
 
                                     getEl("sokA4Preview").innerHTML = htmlPage1;
 
+                                    // YATAY SAYFA ÖĞRENCİ ÇİZELGESİ
                                     var ogrTrList = document.querySelectorAll("#sok_ogrenciTbody tr");
                                     var ogrRowsHtml = "";
 
@@ -463,6 +449,7 @@ Madde 15: Dilek ve Temenniler
                                     getEl("sokA4PreviewLandscape").innerHTML = htmlPage2;
                                 }
 
+                                // Dinleyicileri Bağlama
                                 var inputs = document.querySelectorAll("#sokAppWrapper input, #sokAppWrapper select, #sokAppWrapper textarea");
                                 inputs.forEach(function(inp) {
                                     inp.addEventListener("input", updatePreview);
@@ -473,11 +460,11 @@ Madde 15: Dilek ve Temenniler
                                 getEl("sok_btn_add_student").addEventListener("click", function() { addOgrenciRow("", "", "", "", "", "", ""); updatePreview(); });
                                 getEl("sok_btn_refresh").addEventListener("click", updatePreview);
                                 getEl("sok_btn_print").addEventListener("click", function() { window.print(); });
-                                getEl("sok_btn_toggle").addEventListener("click", function() { getEl("sokMainLayout").classList.toggle("side-by-side"); });
                                 getEl("sok_btn_reset").addEventListener("click", function() {
                                     if(confirm("Tüm form varsayılan değerlere sıfırlanacak?")) location.reload();
                                 });
 
+                                // PDF Çıktısı Al
                                 getEl("sok_btn_pdf").addEventListener("click", function() {
                                     if (typeof html2pdf === "undefined") { alert("PDF kütüphanesi yüklenemedi!"); return; }
                                     var element = getEl("sokPreviewContainer");
@@ -494,6 +481,7 @@ Madde 15: Dilek ve Temenniler
                                     html2pdf().set(opt).from(element).save();
                                 });
 
+                                // Çift Yönlendirmeli (Portrait + Landscape) Resmî Word Aktarımı
                                 getEl("sok_btn_word").addEventListener("click", function() {
                                     var p1 = getEl("sokA4Preview").innerHTML;
                                     var p2 = getEl("sokA4PreviewLandscape").innerHTML;
@@ -527,6 +515,7 @@ Madde 15: Dilek ve Temenniler
                                     document.body.removeChild(link);
                                 });
 
+                                // Branşları ve Örnek Öğrencileri Yükle
                                 varsayilanBranslar.forEach(function(b) { addBransRow(b, ""); });
                                 varsayilanOgrenciler.forEach(function(o) { addOgrenciRow(o.ad, o.kisilik, o.beslenme, o.saglik, o.sosyal, o.ekonomik, o.basari); });
                                 updatePreview();
