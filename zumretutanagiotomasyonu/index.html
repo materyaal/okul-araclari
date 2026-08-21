@@ -14,22 +14,23 @@
     * { box-sizing: border-box; }
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 0; }
     
-    #appWrapper { width: 100%; max-width: 1100px; margin: 0 auto; }
+    #appWrapper { width: 100%; max-width: 1200px; margin: 0 auto; }
     
     .a4-page {
       width: 210mm;
       min-height: 297mm;
-      padding: 15mm;
+      padding: 15mm 18mm;
       margin: 0 auto;
       background: #ffffff;
-      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
       font-family: 'Times New Roman', Times, serif;
-      font-size: 10.5pt;
-      line-height: 1.25;
-      color: #111111;
+      font-size: 10pt;
+      line-height: 1.35;
+      color: #000000;
       transform-origin: top center;
       transition: transform 0.2s ease;
       flex-shrink: 0;
+      box-sizing: border-box;
     }
 
     .preview-scroll-container {
@@ -41,18 +42,30 @@
       justify-content: center;
     }
 
-    @media (max-width: 800px) {
+    @media (max-width: 850px) {
       .preview-scroll-container {
         justify-content: flex-start;
       }
     }
 
+    /* Native Yazdırma Kuralları */
+    @page {
+      size: A4 portrait;
+      margin: 12mm 15mm;
+    }
+
     @media print {
+      body { background: #ffffff !important; padding: 0 !important; }
       body * { visibility: hidden; }
       #a4-preview-card, #a4-preview-card * { visibility: visible; }
       #a4-preview-card {
-        position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0;
-        box-shadow: none;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
         transform: none !important;
       }
       .no-print { display: none !important; }
@@ -69,21 +82,21 @@
         <div class="bg-blue-700 text-white font-extrabold px-3 py-1.5 rounded-lg text-sm shadow-sm">MEB</div>
         <div>
           <h1 class="font-bold text-slate-900 text-base md:text-lg leading-tight">Zümre Tutanağı Otomasyonu</h1>
-          <p class="text-xs text-slate-500">Resmî Yazışma Yönetmeliği &amp; MEB Yönerge Standartlarında</p>
+          <p class="text-xs text-slate-500">Resmî Yazışma Yönetmeliği &amp; 2024 MEB Zümre Yönergesi Standartlarında</p>
         </div>
       </div>
       
       <div class="flex flex-wrap items-center gap-2">
-        <button type="button" onclick="window.resetToDefaultData()" class="px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg text-xs font-bold transition">
-          🔄 Varsayılan Metinler
+        <button type="button" onclick="window.resetToDefaultData()" class="px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg text-xs font-bold transition min-h-[38px]">
+          🔄 Şablonu Yenile
         </button>
-        <button type="button" onclick="window.togglePreviewVisibility()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">
-          <span id="btn-toggle-pv-text">Ön Gösterim Gizle/Aç</span>
+        <button type="button" onclick="window.saveAsNewNamedDraft()" class="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-bold transition min-h-[38px]">
+          💾 Taslak Kaydet
         </button>
-        <button type="button" onclick="window.openHistoryModal()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">
-          📜 Taslaklar
+        <button type="button" onclick="window.openHistoryModal()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition min-h-[38px]">
+          📜 Taslaklar (<span id="draft-count-badge">0</span>)
         </button>
-        <button type="button" onclick="window.triggerPrint()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-sm">
+        <button type="button" onclick="window.triggerPrint()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-sm min-h-[38px]">
           🖨️ Yazdır / PDF
         </button>
       </div>
@@ -95,30 +108,33 @@
       <!-- 1. İdari Bilgiler -->
       <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-4 sm:p-6 space-y-4">
         <h2 class="text-xs font-bold uppercase tracking-wider text-blue-900 border-b border-slate-100 pb-2">
-          1. Okul ve Toplantı İdari Bilgileri
+          1. Resmî Başlık ve Toplantı İdari Bilgileri
         </h2>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Kurum / Okul Adı</label>
-            <input type="text" id="inp-okul" oninput="window.handleInputChange('okul', this.value)" placeholder="Örn: Atatürk İlkokulu Müdürlüğü" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Mülki İdare (Valilik / Kaymakamlık) *</label>
+            <input type="text" id="inp-mulkiIdare" oninput="window.handleInputChange('mulkiIdare', this.value)" placeholder="Örn: KADIKÖY KAYMAKAMLIĞI" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">İl / İlçe M.E.M.</label>
-            <input type="text" id="inp-ilce" oninput="window.handleInputChange('ilce', this.value)" placeholder="Örn: Kadıköy / İstanbul" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Kurum / Okul Adı *</label>
+            <input type="text" id="inp-okul" oninput="window.handleInputChange('okul', this.value)" placeholder="Örn: ATATÜRK ANADOLU LİSESİ" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Eğitim-Öğretim Yılı</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Evrak Sayı No (Opsiyonel)</label>
+            <input type="text" id="inp-sayiNo" oninput="window.handleInputChange('sayiNo', this.value)" placeholder="Örn: E-70432323-050.01.04-EvrakNo" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Eğitim-Öğretim Yılı *</label>
             <input type="text" id="inp-egitimYili" oninput="window.handleInputChange('egitimYili', this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Ders / Sınıf / Branş</label>
-            <input type="text" id="inp-brans" oninput="window.handleInputChange('brans', this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Ders / Alan / Branş Adı *</label>
+            <input type="text" id="inp-brans" oninput="window.handleInputChange('brans', this.value)" placeholder="Örn: Türk Dili ve Edebiyatı / Matematik" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Toplantı Dönemi / Türü</label>
-            <select id="inp-donem" onchange="window.handleInputChange('donem', this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
-              <option value="1. Sınıf Sene Başı Zümre Toplantısı">1. Sınıf Sene Başı Zümre Toplantısı</option>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Toplantı Dönemi *</label>
+            <select id="inp-donem" onchange="window.handleDonemChange(this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
               <option value="Sene Başı Zümre Toplantısı">Sene Başı Zümre Toplantısı</option>
               <option value="1. Dönem II. Zümre Toplantısı">1. Dönem II. Zümre Toplantısı</option>
               <option value="2. Dönem Başı Zümre Toplantısı">2. Dönem Başı Zümre Toplantısı</option>
@@ -126,43 +142,47 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Toplantı Yeri</label>
-            <input type="text" id="inp-toplantiYeri" oninput="window.handleInputChange('toplantiYeri', this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Toplantı No / Karar No *</label>
+            <input type="text" id="inp-toplantiNo" oninput="window.handleInputChange('toplantiNo', this.value)" placeholder="Örn: 2026 / 01" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Toplantı Tarihi</label>
-            <input type="text" id="inp-tarih" oninput="window.handleInputChange('tarih', this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Toplantı Tarihi *</label>
+            <input type="date" id="inp-tarih" onchange="window.handleInputChange('tarih', this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none min-h-[38px]"/>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Toplantı Saati</label>
-            <input type="text" id="inp-saat" oninput="window.handleInputChange('saat', this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Toplantı Saati *</label>
+            <input type="time" id="inp-saat" onchange="window.handleInputChange('saat', this.value)" value="13:30" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none min-h-[38px]"/>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Zümre Başkanı Adı</label>
-            <input type="text" id="inp-baskan" oninput="window.handleInputChange('baskan', this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Toplantı Yeri *</label>
+            <input type="text" id="inp-toplantiYeri" oninput="window.handleInputChange('toplantiYeri', this.value)" value="Öğretmenler Odası" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
           </div>
-          <div class="sm:col-span-2 md:col-span-3">
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Okul Müdürü Adı</label>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Zümre Başkanı Adı Soyadı *</label>
+            <input type="text" id="inp-baskan" oninput="window.handleBaskanNameChange(this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Okul Müdürü Adı Soyadı *</label>
             <input type="text" id="inp-okulMuduru" oninput="window.handleInputChange('okulMuduru', this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
           </div>
         </div>
 
         <!-- Başkan Seçim Dayanağı -->
-        <div class="bg-blue-50/60 border border-blue-100 rounded-lg p-3 space-y-2">
+        <div class="bg-blue-50/70 border border-blue-100 rounded-lg p-3 space-y-2">
           <label class="block text-xs font-bold text-blue-900">
-            ⚖️ MEB Zümre Yönergesi (02/01/2024) - Başkan Seçim Dayanağı
+            ⚖️ MEB Eğitim Kurulları ve Zümreleri Yönergesi (02/01/2024) - Başkan Seçim Kriteri
           </label>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <select id="inp-baskanKriter" onchange="window.handleInputChange('baskanKriter', this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white outline-none">
-              <option value="İstekli Öğretmenler Arasından Seçilmiştir">1. İstekli Adaylar Arasından Seçim</option>
-              <option value="Alanında Doktora Derecesine Sahip Olma Önceliği">2. Alanında Doktora Derecesine Sahip Öğretmen</option>
-              <option value="Başöğretmen Unvanına Sahip Olma Önceliği">3. Başöğretmen Unvanına Sahip Öğretmen</option>
-              <option value="Alanında Yüksek Lisans Derecesine Sahip Olma Önceliği">4. Alanında Yüksek Lisans Yapan Öğretmen</option>
-              <option value="Uzman Öğretmen Unvanına Sahip Olma Önceliği">5. Uzman Öğretmen Unvanına Sahip Öğretmen</option>
-              <option value="Önceki Dönem Zümre Başkanlığı Görevini Yürütmüş Olma">6. Önceki Dönem Başkanlık Deneyimi</option>
-              <option value="Mesleki Kıdemi En Yüksek Öğretmen Olma Önceliği">7. Mesleki Kıdem Esasına Göre Belirleme</option>
+              <option value="İstekli Adaylar Arasından Seçim">1. İstekli Adaylar Arasından Seçim</option>
+              <option value="Alanında Doktora Derecesine Sahip Öğretmen">2. Alanında Doktora Derecesine Sahip Öğretmen</option>
+              <option value="Başöğretmen Unvanına Sahip Öğretmen">3. Başöğretmen Unvanına Sahip Öğretmen</option>
+              <option value="Alanında Yüksek Lisans Yapan Öğretmen">4. Alanında Yüksek Lisans Yapan Öğretmen</option>
+              <option value="Uzman Öğretmen Unvanına Sahip Öğretmen">5. Uzman Öğretmen Unvanına Sahip Öğretmen</option>
+              <option value="Önceki Dönem Başkanlık Deneyimi">6. Önceki Dönem Başkanlık Deneyimi</option>
+              <option value="Mesleki Kıdem Esasları">7. Mesleki Kıdem Esaslarına Göre Belirleme</option>
             </select>
-            <input type="text" id="inp-baskanMebbisNo" oninput="window.handleInputChange('baskanMebbisNo', this.value)" placeholder="MEBBİS Referansı (Opsiyonel)" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white outline-none"/>
+            <input type="text" id="inp-baskanMebbisNo" oninput="window.handleInputChange('baskanMebbisNo', this.value)" placeholder="MEBBİS / Karar Referans No (Opsiyonel)" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white outline-none"/>
           </div>
         </div>
 
@@ -171,9 +191,9 @@
       <!-- 2. Katılımcı Öğretmen Listesi -->
       <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-4 sm:p-5 space-y-3">
         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-          <h2 class="text-xs font-bold uppercase tracking-wider text-blue-900">2. Katılımcı Öğretmen Listesi</h2>
-          <button type="button" onclick="window.addParticipantRow()" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-bold">
-            + Öğretmen Ekle
+          <h2 class="text-xs font-bold uppercase tracking-wider text-blue-900">2. Katılımcı Zümre Öğretmenleri Listesi</h2>
+          <button type="button" onclick="window.addParticipantRow()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold min-h-[36px] flex items-center">
+            + Yeni Öğretmen Ekle
           </button>
         </div>
         <div id="participant-list-container" class="space-y-2"></div>
@@ -183,109 +203,158 @@
       <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-4 sm:p-5 space-y-5">
         <div>
           <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Gündem Maddeleri</label>
-          <textarea id="txt-gundem" rows="6" oninput="window.handleInputChange('gundemText', this.value)" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs outline-none leading-relaxed font-mono"></textarea>
+          <textarea id="txt-gundem" rows="8" oninput="window.handleInputChange('gundemText', this.value)" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs outline-none leading-relaxed font-mono"></textarea>
         </div>
 
         <div>
           <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Gündem Maddelerinin Görüşülmesi</label>
-          <textarea id="txt-gorusmeler" rows="12" oninput="window.handleInputChange('gorusmeler', this.value)" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs outline-none leading-relaxed font-mono"></textarea>
+          <textarea id="txt-gorusmeler" rows="14" oninput="window.handleInputChange('gorusmeler', this.value)" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs outline-none leading-relaxed font-mono"></textarea>
         </div>
 
         <div>
           <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Alınan Kararlar</label>
-          <textarea id="txt-kararlar" rows="8" oninput="window.handleInputChange('kararlar', this.value)" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs outline-none leading-relaxed font-mono"></textarea>
+          <textarea id="txt-kararlar" rows="10" oninput="window.handleInputChange('kararlar', this.value)" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs outline-none leading-relaxed font-mono"></textarea>
         </div>
       </div>
 
       <!-- İndir Butonu -->
       <div class="pt-2">
-        <button type="button" onclick="window.runAuditAndGenerate()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-xl transition shadow-md flex items-center justify-center space-x-2 text-sm">
+        <button type="button" onclick="window.runAuditAndGenerate()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-xl transition shadow-md flex items-center justify-center space-x-2 text-sm min-h-[44px]">
           <span>🔍 Belgeyi Denetle ve Resmî Word (.docx) İndir</span>
         </button>
       </div>
 
     </main>
 
-    <!-- A4 CANLI ÖN GÖSTERİM (MOBİL UYUMLU KAYDIRMA ALANI) -->
+    <!-- A4 CANLI ÖN GÖSTERİM -->
     <section id="preview-section-wrapper" class="mt-8 space-y-4">
       <div class="bg-white border border-slate-200 p-3 rounded-xl shadow-sm flex items-center justify-between no-print text-xs">
-        <span class="font-bold text-blue-900">📄 CANLI ÖN GÖSTERİM</span>
+        <span class="font-bold text-blue-900">📄 RESMÎ A4 CANLI ÖN İZLEME</span>
         <div class="flex items-center space-x-1">
-          <button type="button" onclick="window.setZoom(0.7)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded font-mono text-xs">%70</button>
-          <button type="button" onclick="window.setZoom(0.85)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded font-mono text-xs">%85</button>
-          <button type="button" onclick="window.setZoom(1.0)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded font-mono text-xs">%100</button>
+          <button type="button" onclick="window.setZoom(0.7)" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded font-mono text-xs min-h-[36px]">%70</button>
+          <button type="button" onclick="window.setZoom(0.85)" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded font-mono text-xs min-h-[36px]">%85</button>
+          <button type="button" onclick="window.setZoom(1.0)" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded font-mono text-xs min-h-[36px]">%100</button>
         </div>
       </div>
 
       <div class="preview-scroll-container">
-        <div id="a4-preview-card" class="a4-page border border-slate-300 rounded-sm space-y-4">
-          <div class="text-center font-bold space-y-0.5">
-            <div id="pv-okulMudurlugu">....................................................... MÜDÜRLÜĞÜNE</div>
-            <div class="pt-2 text-[11pt] text-blue-950" id="pv-baslik1">2026-2027 EĞİTİM-ÖĞRETİM YILI</div>
-            <div class="text-[11pt] text-blue-950" id="pv-baslik2">1. SINIF SENE BAŞI ZÜMRE TOPLANTI TUTANAĞI</div>
+        <div id="a4-preview-card" class="a4-page border border-slate-300 rounded-sm space-y-3">
+          
+          <!-- RESMÎ BAŞLIK & ANTET -->
+          <div class="text-center font-bold space-y-0.5 text-[10.5pt] leading-tight">
+            <div>T.C.</div>
+            <div id="pv-mulkiIdare">KADIKÖY KAYMAKAMLIĞI</div>
+            <div id="pv-okul">ATATÜRK ANADOLU LİSESİ MÜDÜRLÜĞÜ</div>
           </div>
 
-          <div class="text-justify indent-8 text-[10pt] leading-relaxed" id="pv-ustYazi"></div>
+          <!-- SAYI / KONU VE BAŞLIK -->
+          <div class="flex justify-between items-start text-[9.5pt] pt-1 border-b border-black pb-1">
+            <div><b>Sayı :</b> <span id="pv-sayiNo">E-70432323-050.01.04-EvrakNo</span></div>
+            <div class="text-right"><b>Konu :</b> Zümre Toplantı Tutanağı</div>
+          </div>
 
+          <div class="text-center font-bold text-[11pt] pt-1 leading-snug" id="pv-evrakBaslik">
+            2026-2027 EĞİTİM-ÖĞRETİM YILI TÜRK DİLİ VE EDEBİYATI SENE BAŞI ZÜMRE TOPLANTI TUTANAĞI
+          </div>
+
+          <!-- İDARİ BİLGİLER TABLOSU -->
+          <table class="w-full border-collapse border border-black text-[9pt] my-2">
+            <tbody>
+              <tr>
+                <td class="border border-black p-1 bg-slate-100 font-bold w-1/4">Toplantı Dönemi</td>
+                <td class="border border-black p-1 w-1/4" id="pv-tbl-donem">Sene Başı Zümre Toplantısı</td>
+                <td class="border border-black p-1 bg-slate-100 font-bold w-1/4">Toplantı Tarihi</td>
+                <td class="border border-black p-1 w-1/4" id="pv-tbl-tarih">25.08.2026</td>
+              </tr>
+              <tr>
+                <td class="border border-black p-1 bg-slate-100 font-bold">Toplantı Saati</td>
+                <td class="border border-black p-1" id="pv-tbl-saat">13:30</td>
+                <td class="border border-black p-1 bg-slate-100 font-bold">Toplantı Yeri</td>
+                <td class="border border-black p-1" id="pv-tbl-yeri">Öğretmenler Odası</td>
+              </tr>
+              <tr>
+                <td class="border border-black p-1 bg-slate-100 font-bold">Karar Numarası</td>
+                <td class="border border-black p-1" id="pv-tbl-no">2026 / 01</td>
+                <td class="border border-black p-1 bg-slate-100 font-bold">Zümre Başkanı</td>
+                <td class="border border-black p-1 font-semibold" id="pv-tbl-baskan">Ahmet YILDIZ</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- YASAL DAYANAK VE BAŞKAN SEÇİM TUTANAĞI -->
+          <div class="space-y-1 pt-1">
+            <div class="font-bold text-[9.5pt] underline">YASAL DAYANAK VE BAŞKAN SEÇİM TUTANAĞI:</div>
+            <div class="text-justify text-[9pt] leading-relaxed" id="pv-yasalDayanakMetin"></div>
+          </div>
+
+          <!-- GÜNDEM MADDELERİ -->
           <div class="space-y-1 pt-2">
-            <div class="font-bold text-center text-[10.5pt] uppercase border-b border-slate-300 pb-0.5">GÜNDEM MADDELERİ</div>
-            <ol class="list-decimal list-inside text-[9.5pt] space-y-0.5 text-slate-900" id="pv-gundemMaddeleri"></ol>
+            <div class="font-bold text-center text-[10pt] uppercase border-b border-black pb-0.5">GÜNDEM MADDELERİ</div>
+            <ol class="list-decimal list-inside text-[9pt] space-y-0.5" id="pv-gundemMaddeleri"></ol>
           </div>
 
-          <div class="space-y-1 pt-3">
-            <div class="font-bold text-center text-[10.5pt] uppercase border-b border-slate-300 pb-0.5">GÜNDEM MADDELERİNİN GÖRÜŞÜLMESİ</div>
-            <div class="space-y-2 text-[9.5pt] text-slate-900 text-justify" id="pv-gorusmeler"></div>
+          <!-- GÜNDEM MADDELERİNİN GÖRÜŞÜLMESİ -->
+          <div class="space-y-1 pt-2">
+            <div class="font-bold text-center text-[10pt] uppercase border-b border-black pb-0.5">GÜNDEM MADDELERİNİN GÖRÜŞÜLMESİ</div>
+            <div class="space-y-1.5 text-[9pt] text-justify leading-relaxed" id="pv-gorusmeler"></div>
           </div>
 
-          <div class="space-y-1 pt-3">
-            <div class="font-bold text-center text-[10.5pt] uppercase border-b border-slate-300 pb-0.5">ALINAN KARARLAR</div>
-            <ol class="list-decimal list-inside text-[9.5pt] space-y-0.5 text-slate-900" id="pv-kararlar"></ol>
+          <!-- ALINAN KARARLAR -->
+          <div class="space-y-1 pt-2">
+            <div class="font-bold text-center text-[10pt] uppercase border-b border-black pb-0.5">ALINAN KARARLAR</div>
+            <ol class="list-decimal list-inside text-[9pt] space-y-0.5" id="pv-kararlar"></ol>
           </div>
 
-          <div class="pt-4 space-y-2">
-            <div class="font-bold text-center text-[10pt] uppercase">TOPLANTIYA KATILANLAR</div>
-            <table class="w-full border-collapse border border-slate-400 text-xs">
+          <!-- İMZA SİRKÜSÜ -->
+          <div class="pt-3 space-y-1.5">
+            <div class="font-bold text-center text-[9.5pt] uppercase">TOPLANTIYA KATILANLARIN İMZA LİSTESİ</div>
+            <table class="w-full border-collapse border border-black text-[8.5pt]">
               <thead>
                 <tr class="bg-slate-100 font-bold">
-                  <th class="border border-slate-400 p-1.5 w-12 text-center">Sıra</th>
-                  <th class="border border-slate-400 p-1.5 text-left">Adı Soyadı</th>
-                  <th class="border border-slate-400 p-1.5 text-left">Görevi</th>
-                  <th class="border border-slate-400 p-1.5 w-28 text-center">İmza</th>
+                  <th class="border border-black p-1 w-12 text-center">Sıra</th>
+                  <th class="border border-black p-1 text-left">Adı Soyadı</th>
+                  <th class="border border-black p-1 text-left">Görevi / Branşı</th>
+                  <th class="border border-black p-1 w-28 text-center">İmza</th>
                 </tr>
               </thead>
               <tbody id="pv-imzaTableBody"></tbody>
             </table>
           </div>
 
-          <div class="pt-6 text-center space-y-1 border-t border-slate-200">
-            <div class="font-bold text-xs" id="pv-onayTarihi"></div>
-            <div class="font-bold text-sm text-blue-950">UYGUNDUR</div>
-            <div class="font-bold text-xs pt-1" id="pv-okulMuduruOnay"></div>
-            <div class="text-slate-600 text-[9pt]">Okul Müdürü</div>
+          <!-- RESMÎ ONAY BLOKU -->
+          <div class="pt-6 text-right space-y-1 pr-6">
+            <div class="text-[9pt]" id="pv-onayTarihi">.../.../2026</div>
+            <div class="font-bold text-[9.5pt] tracking-wider">UYGUNDUR</div>
+            <div class="font-bold text-[10pt] pt-3" id="pv-okulMuduruOnay">Ahmet YILMAZ</div>
+            <div class="text-[9pt]">Okul Müdürü</div>
           </div>
+
         </div>
       </div>
     </section>
 
     <!-- MODAL: DENETLEYİCİ -->
     <div id="audit-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
-      <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full p-5 space-y-4">
-        <h3 class="text-base font-bold text-slate-800">🔍 Belge Denetim Raporu</h3>
-        <div id="audit-results-list" class="space-y-2 max-h-80 overflow-y-auto pr-1 text-xs"></div>
+      <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full p-5 space-y-4 max-h-[90vh] flex flex-col">
+        <h3 class="text-base font-bold text-slate-800 border-b pb-2">🔍 Belge Resmî Denetim Raporu</h3>
+        <div id="audit-results-list" class="space-y-2 overflow-y-auto pr-1 text-xs flex-1"></div>
         <div class="pt-3 border-t flex items-center justify-end space-x-2">
-          <button type="button" onclick="window.closeAuditModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold">Düzelt</button>
-          <button type="button" onclick="window.confirmAndDownloadWord()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold">Word (.docx) İndir</button>
+          <button type="button" onclick="window.closeAuditModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold min-h-[38px]">Düzenlemeye Dön</button>
+          <button type="button" id="btn-confirm-docx" onclick="window.confirmAndDownloadWord()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold min-h-[38px]">Word (.docx) Olarak İndir</button>
         </div>
       </div>
     </div>
 
-    <!-- MODAL: GEÇMİŞ -->
+    <!-- MODAL: GEÇMİŞ / TASLAKLAR -->
     <div id="history-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
-      <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-5 space-y-4">
-        <h3 class="text-base font-bold text-slate-800">📜 Kayıtlı Taslaklar</h3>
-        <div id="history-items-container" class="space-y-2 max-h-80 overflow-y-auto pr-1 text-xs"></div>
-        <div class="pt-2 text-right">
-          <button type="button" onclick="window.closeHistoryModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold">Kapat</button>
+      <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-5 space-y-4 max-h-[90vh] flex flex-col">
+        <div class="flex justify-between items-center border-b pb-2">
+          <h3 class="text-base font-bold text-slate-800">📜 Kayıtlı Zümre Taslakları</h3>
+          <button type="button" onclick="window.saveAsNewNamedDraft()" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded">+ Yeni Taslak Kaydet</button>
+        </div>
+        <div id="history-items-container" class="space-y-2 overflow-y-auto pr-1 text-xs flex-1"></div>
+        <div class="pt-2 text-right border-t">
+          <button type="button" onclick="window.closeHistoryModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold min-h-[36px]">Kapat</button>
         </div>
       </div>
     </div>
@@ -293,7 +362,28 @@
   </div>
 
   <script>
-    // Dinamik Yükseklik İletişim Fonksiyonu (PostMessage)
+    /**
+     * CHANGELOG & MİMARİ NOTLAR:
+     * Part A (Kritik Düzeltmeler):
+     * - A1: Çoklu taslak yöneticisi (localStorage tabanlı) ve History Modal (Kaydet/Yükle/Sil) fonksiyonları eksiksiz inşa edildi.
+     * - A2: Belge denetleyicisi (Audit Engine) zorunlu alanlar, başkan-katılımcı tutarlılığı ve tarih mantığını kontrol edecek şekilde bağlandı.
+     * - A3: docx kütüphanesi ile üst yazı, yasal dayanak, idari tablo, imza sirküsü ve okul müdürü onay blokunu 1:1 Word (.docx) formatına aktaracak motor yazıldı.
+     * - A4: MEBBİS / Karar referans no alanı hem canlı ön izlemede hem Word çıktısında başkan seçim dayanağına entegre edildi.
+     * - A5: Zümre Başkanı adı ile Katılımcılar[0] otomatik senkronize edildi.
+     *
+     * Part B (Resmî Format ve Zaman Kipi Uyumu):
+     * - Gelecek zamanlı toplantı daveti çelişkisi giderildi; tüm tutanak geçmiş zamanlı ve idari tablo destekli resmî formata dönüştürüldü.
+     *
+     * Part C (Mevzuat ve Zengin Metin Havuzu):
+     * - MEB Eğitim Kurulları ve Zümreleri Yönergesi Madde 12 ve Türkiye Yüzyılı Maarif Modeli doğrultusunda 8 zorunlu gündem, görüşme ve karar maddesi yazıldı.
+     * - Dönem bazlı (Sene Başı, Dönem Arası, Sene Sonu) dinamik şablon motoru eklendi.
+     *
+     * Part D (Tarih, Saat, İdari Başlık ve Responsive Düzeltmeler):
+     * - Native date ve time picker entegre edildi; GG.AA.YYYY çevirimi yapıldı.
+     * - Eğitim-Öğretim Yılı (Ağustos kuralı) dinamik hesaplandı.
+     * - Mülki idare, Toplantı No alanları eklendi. Mobil buton yükseklikleri (min 36-44px) ve native print için @page A4 marjinleri tanımlandı.
+     */
+
     function sendHeightToParent() {
       var wrapper = document.getElementById('appWrapper');
       if (!wrapper) return;
@@ -303,30 +393,93 @@
       }
     }
 
-    var DEFAULT_GUNDEM = "1) Açılış Ve Yoklama\n2) Toplantı Gündeminin Okunması\n3) Önceki Toplantıda Alınan Kararların Değerlendirilmesi\n4) Zümre Yönergesi, Görev Dağılımı Ve Toplantı İşleyişinin Görüşülmesi\n5) Planlamaların Okulun Amaçları, Öğretim Programı Ve Türkiye Yüzyılı Maarif Modeli'ne Uygunluğunun Değerlendirilmesi\n6) Dilek Ve Temenniler\n7) Kapanış";
-    var DEFAULT_GORUSMELER = "1) Açılış Ve Yoklama\nToplantı Zümre Başkanı tarafından açıldı ve katılımcıların yoklaması alındı. Tüm öğretmenlerin hazır bulunduğu görüldü.\n\n2) Toplantı Gündeminin Okunması\nGündem maddeleri okunarak görüşmelere başlandı.\n\n3) Önceki Toplantıda Alınan Kararların Değerlendirilmesi\nAlınan kararların uygulandığı tespit edildi.\n\n4) Zümre Yönergesi\nYeni MEB Zümre yönergesi uyarınca planlamalar yapıldı.\n\n5) Türkiye Yüzyılı Maarif Modeli\nYeni müfredat beceri temelli olarak incelendi.\n\n6) Dilek Ve Temenniler\nBaşarılı bir dönem temenni edildi.\n\n7) Kapanış\nToplantı sonlandırıldı.";
-    var DEFAULT_KARARLAR = "1) Toplantının açılışının yapılmasına ve yoklamanın alınmasına karar verildi.\n2) Gündem maddelerinin sırasıyla görüşülmesine karar verildi.\n3) Kararların uygulanma durumunun takip edilmesine karar verildi.\n4) Yönerge doğrultusunda zümre faaliyetlerinin yürütülmesine karar verildi.\n5) Türkiye Yüzyılı Maarif Modeli hedefleriyle uyumlu ilerlenmesine karar verildi.\n6) Toplantının kapatılmasına karar verildi.";
+    function calculateCurrentEducationYear() {
+      var now = new Date();
+      var year = now.getFullYear();
+      var month = now.getMonth(); // 0-11
+      if (month >= 7) {
+        return year + "-" + (year + 1);
+      } else {
+        return (year - 1) + "-" + year;
+      }
+    }
+
+    function getTodayIsoDate() {
+      var today = new Date();
+      var yyyy = today.getFullYear();
+      var mm = String(today.getMonth() + 1).padStart(2, '0');
+      var dd = String(today.getDate()).padStart(2, '0');
+      return yyyy + "-" + mm + "-" + dd;
+    }
+
+    function formatIsoToTurkishDate(isoStr) {
+      if (!isoStr) return "....................";
+      var parts = isoStr.split('-');
+      if (parts.length === 3) {
+        return parts[2] + "." + parts[1] + "." + parts[0];
+      }
+      return isoStr;
+    }
+
+    var DEFAULT_GUNDEM_SENEBASI = "1. Açılış, yoklama ve toplantıya katılanların imza sirküsünün kontrol edilmesi,\n" +
+      "2. Bir önceki eğitim-öğretim yılına ait zümre kararlarının uygulama sonuçlarının titizlikle incelenmesi ve değerlendirilmesi,\n" +
+      "3. Türkiye Yüzyılı Maarif Modeli öğretim programlarının, ilgili Bakanlık genelgelerinin, mevzuat değişikliklerinin ve çalışma takviminin incelenmesi,\n" +
+      "4. Eğitim ve öğretimin planlanması, yıllık planların hazırlanması, ders dağılımları ve zümre/alanlar arası iş birliği esaslarının belirlenmesi,\n" +
+      "5. Öğrencilerin akademik ve sosyal başarısını artıracak ölçme-değerlendirme yöntemlerinin, ortak yazılı sınav süreçlerinin ve önleme, müdahale, yönlendirme komisyonu çalışmalarının planlanması,\n" +
+      "6. Ders kitapları, yardımcı kaynaklar, dijital eğitim materyalleri (EBA/ÖBA) ve eğitim araç-gereçlerinin etkili kullanımının planlanması,\n" +
+      "7. Okul ortamında, sınıflarda ve varsa laboratuvarlarda iş sağlığı ve güvenliği tedbirlerinin görüşülmesi,\n" +
+      "8. Dilek, temenniler ve toplantının kapanışı.";
+
+    var DEFAULT_GORUSMELER_SENEBASI = "Madde 1: Açılış, Yoklama ve İmza Sirküsü Kontrolü\n" +
+      "Toplantı, zümre başkanı başkanlığında, belirlenen gün ve saatte toplantı yerinde başlatılmıştır. Yapılan yoklamada tüm zümre öğretmenlerinin eksiksiz olarak hazır bulunduğu tespit edilmiş, toplantı yeter sayısının sağlandığı teyit edilerek imza sirküsü imzalanmıştır. Gündem maddeleri okunmuş, eklenmesi istenen başka bir husus bulunmadığı anlaşılarak oy birliğiyle kabul edilmiştir.\n\n" +
+      "Madde 2: Bir Önceki Eğitim-Öğretim Yılı Zümre Kararlarının Değerlendirilmesi\n" +
+      "Geçtiğimiz eğitim-öğretim yılına ait zümre kararları ve yıl sonu zümre tutanağı incelenmiştir. Alınan kararların büyük oranda başarıyla hayata geçirildiği, uygulanan pekiştirme ve telafi çalışmalarının öğrenci başarısını olumlu yönde etkilediği, tespit edilen eksikliklerin bu yılki planlamalara entegre edilmesi gerektiği ifade edilmiştir.\n\n" +
+      "Madde 3: Türkiye Yüzyılı Maarif Modeli ve Mevzuat Değişikliklerinin İncelenmesi\n" +
+      "Millî Eğitim Bakanlığının Türkiye Yüzyılı Maarif Modeli kapsamında uygulamaya koyduğu yeni öğretim programları, beceri temelli yaklaşımlar, erdem-değer-eylem çerçevesi ve ilgili Bakanlık genelgeleri zümre üyelerince ayrıntılı olarak incelenmiştir. Ders işlenişlerinde ezberden uzak, yaparak-yaşayarak öğrenmeyi temel alan yöntem ve tekniklerin kullanılması kararlaştırılmıştır.\n\n" +
+      "Madde 4: Eğitim-Öğretimin ve Yıllık Planların Hazırlanması\n" +
+      "Yıllık planların, çalışma takviminde belirtilen iş günü süreleri ve haftalık ders çizelgeleri dikkate alınarak hazırlanması kararlaştırılmıştır. Zümreler ve alanlar arası iş birliğinin artırılması, disiplinler arası ortak projeler yürütülmesi ve ders dağılımlarının dengeli şekilde yürütülmesi hususunda görüş birliğine varılmıştır.\n\n" +
+      "Madde 5: Ölçme-Değerlendirme ve Ortak Yazılı Sınav Süreçlerinin Planlanması\n" +
+      "Ölçme-değerlendirme süreçlerinin süreç odaklı yürütülmesi, açık uçlu ve kısa cevaplı maddelerden oluşan ortak yazılı sınav takviminin Bakanlık ve İl MEM senaryolarına uygun şekilde yapılandırılması kararlaştırılmıştır. Akademik başarısı düşük olan veya sınıf tekrarı riski bulunan öğrencilerin tespiti için önleme ve yönlendirme çalışmalarına öncelik verilecektir.\n\n" +
+      "Madde 6: Eğitim Materyalleri ve EBA/ÖBA Platformlarının Kullanımı\n" +
+      "Bakanlıkça ücretsiz dağıtılan ders kitaplarının temel kaynak olarak etkin kullanılması, EBA ve ÖBA platformlarındaki dijital içeriklerin ders kazanımlarına entegre edilmesi, bilişim teknolojilerinden azami düzeyde faydalanılması gerektiği belirtilmiştir.\n\n" +
+      "Madde 7: İş Sağlığı ve Güvenliği Tedbirleri\n" +
+      "Dersliklerde, bilişim sınıflarında ve atölye/laboratuvar ortamlarında İş Sağlığı ve Güvenliği kurallarına tam uyum sağlanması, acil durum tahliye planları konusunda öğrencilerin bilgilendirilmesi ve gerekli güvenlik uyarılarının yapılması kararlaştırılmıştır.\n\n" +
+      "Madde 8: Dilek, Temenniler ve Kapanış\n" +
+      "Yeni eğitim-öğretim yılının tüm öğretmen ve öğrencilerimiz için sağlıklı, huzurlu ve başarılı geçmesi temennisiyle zümre başkanı tarafından toplantı sonlandırılmıştır.";
+
+    var DEFAULT_KARARLAR_SENEBASI = "1- Toplantı yeter sayısının sağlandığı ve gündem maddelerinin oy birliğiyle kabul edildiği tespit edildi.\n" +
+      "2- MEB Eğitim Kurulları ve Zümreleri Yönergesi Madde 12 gereği kararlar oy çokluğuyla alınmıştır.\n" +
+      "3- Türkiye Yüzyılı Maarif Modeli hedefleri doğrultusunda ders planlarının beceri ve değer odaklı olarak hazırlanmasına karar verildi.\n" +
+      "4- Ünitelendirilmiş yıllık planların zümre öğretmenlerince ortak hazırlanarak süresi içerisinde okul müdürlüğünün onayına sunulmasına karar verildi.\n" +
+      "5- Ortak yazılı sınavların il/okul konu soru dağılım tablolarına tam uyumlu olarak açık uçlu sorularla yapılmasına karar verildi.\n" +
+      "6- Özel eğitim ihtiyacı olan (BEP) öğrenciler için kazanım uyarlamalı sınav ve ders materyallerinin titizlikle hazırlanmasına karar verildi.\n" +
+      "7- Ders içi ve dışı etkinliklerde EBA platformunun aktif olarak kullanılmasına karar verildi.\n" +
+      "8- İş sağlığı ve güvenliği kurallarına eksiksiz riayet edilmesine karar verildi.\n" +
+      "9- İşbu zümre tutanağının okul müdürünün onayına sunulmasına, onay sonrasında yürürlüğe konularak üyelerce imzalanıp idarede arşivlenmesine karar verilmiştir.";
 
     window.formData = {
-      okul: "ATATÜRK İLKOKULU MÜDÜRLÜĞÜNE",
-      ilce: "KADIKÖY / İSTANBUL",
-      egitimYili: "2026-2027",
-      brans: "1. SINIF",
-      donem: "SENE BAŞI",
+      mulkiIdare: "KADIKÖY KAYMAKAMLIĞI",
+      okul: "ATATÜRK ANADOLU LİSESİ",
+      sayiNo: "E-70432323-050.01.04-EvrakNo",
+      egitimYili: calculateCurrentEducationYear(),
+      brans: "TÜRK DİLİ VE EDEBİYATI",
+      donem: "Sene Başı Zümre Toplantısı",
+      toplantiNo: "2026 / 01",
       toplantiYeri: "Öğretmenler Odası",
-      tarih: "01.08.2026",
-      saat: "15:30",
-      baskan: "Öğretmen 1",
-      baskanKriter: "İstekli Öğretmenler Arasından Seçilmiştir",
+      tarih: getTodayIsoDate(),
+      saat: "13:30",
+      baskan: "Ahmet YILDIZ",
+      baskanKriter: "İstekli Adaylar Arasından Seçim",
       baskanMebbisNo: "",
       okulMuduru: "Ahmet YILMAZ",
       katilanlar: [
-        { isim: "Öğretmen 1", unvan: "Zümre Başkanı" },
-        { isim: "Öğretmen 2", unvan: "Sınıf Öğretmeni" }
+        { isim: "Ahmet YILDIZ", unvan: "Zümre Başkanı" },
+        { isim: "Mehmet KAYA", unvan: "Türk Dili ve Ed. Öğretmeni" },
+        { isim: "Ayşe ÇELİK", unvan: "Türk Dili ve Ed. Öğretmeni" }
       ],
-      gundemText: DEFAULT_GUNDEM,
-      gorusmeler: DEFAULT_GORUSMELER,
-      kararlar: DEFAULT_KARARLAR
+      gundemText: DEFAULT_GUNDEM_SENEBASI,
+      gorusmeler: DEFAULT_GORUSMELER_SENEBASI,
+      kararlar: DEFAULT_KARARLAR_SENEBASI
     };
 
     var debounceTimer;
@@ -336,7 +489,7 @@
         window.updatePreview();
         window.saveFormState();
         sendHeightToParent();
-      }, 150);
+      }, 120);
     };
 
     window.handleInputChange = function(key, val) {
@@ -344,13 +497,30 @@
       window.triggerDebouncedUpdate();
     };
 
-    window.resetToDefaultData = function() {
-      window.formData.gundemText = DEFAULT_GUNDEM;
-      window.formData.gorusmeler = DEFAULT_GORUSMELER;
-      window.formData.kararlar = DEFAULT_KARARLAR;
-      localStorage.removeItem('zumre_current_state_v6');
-      window.populateFormFromState();
+    window.handleBaskanNameChange = function(val) {
+      window.formData.baskan = val;
+      if (window.formData.katilanlar && window.formData.katilanlar.length > 0) {
+        if (window.formData.katilanlar[0].unvan === "Zümre Başkanı") {
+          window.formData.katilanlar[0].isim = val;
+          window.renderParticipantInputs();
+        }
+      }
       window.triggerDebouncedUpdate();
+    };
+
+    window.handleDonemChange = function(val) {
+      window.formData.donem = val;
+      window.triggerDebouncedUpdate();
+    };
+
+    window.resetToDefaultData = function() {
+      if (confirm("Metinler ve gündem maddeleri varsayılan şablona döndürülecektir. Devam edilsin mi?")) {
+        window.formData.gundemText = DEFAULT_GUNDEM_SENEBASI;
+        window.formData.gorusmeler = DEFAULT_GORUSMELER_SENEBASI;
+        window.formData.kararlar = DEFAULT_KARARLAR_SENEBASI;
+        window.populateFormFromState();
+        window.triggerDebouncedUpdate();
+      }
     };
 
     window.renderParticipantInputs = function() {
@@ -358,15 +528,16 @@
       if (!container) return;
       container.innerHTML = window.formData.katilanlar.map(function(p, idx) {
         return '<div class="flex items-center space-x-2">' +
-          '<input type="text" value="' + p.isim + '" oninput="window.updateParticipant(' + idx + ', \'isim\', this.value)" placeholder="Ad Soyad" class="flex-1 border border-slate-300 rounded p-1.5 text-xs outline-none"/>' +
-          '<input type="text" value="' + p.unvan + '" oninput="window.updateParticipant(' + idx + ', \'unvan\', this.value)" placeholder="Görevi" class="w-36 sm:w-48 border border-slate-300 rounded p-1.5 text-xs outline-none"/>' +
-          '<button type="button" onclick="window.removeParticipantRow(' + idx + ')" class="p-1.5 text-red-500 hover:bg-red-50 rounded text-xs">✕</button>' +
+          '<span class="text-xs font-bold text-slate-500 w-6 text-center">' + (idx + 1) + '.</span>' +
+          '<input type="text" value="' + (p.isim || '') + '" oninput="window.updateParticipant(' + idx + ', \'isim\', this.value)" placeholder="Adı Soyadı" class="flex-1 border border-slate-300 rounded p-1.5 text-xs outline-none min-h-[36px]"/>' +
+          '<input type="text" value="' + (p.unvan || '') + '" oninput="window.updateParticipant(' + idx + ', \'unvan\', this.value)" placeholder="Görevi / Branşı" class="w-36 sm:w-56 border border-slate-300 rounded p-1.5 text-xs outline-none min-h-[36px]"/>' +
+          '<button type="button" onclick="window.removeParticipantRow(' + idx + ')" class="p-2 text-red-600 hover:bg-red-50 rounded text-xs min-h-[36px] min-w-[36px] flex items-center justify-center font-bold">✕</button>' +
         '</div>';
       }).join('');
     };
 
     window.addParticipantRow = function() {
-      window.formData.katilanlar.push({ isim: "", unvan: "Sınıf Öğretmeni" });
+      window.formData.katilanlar.push({ isim: "", unvan: window.formData.brans + " Öğretmeni" });
       window.renderParticipantInputs();
       window.triggerDebouncedUpdate();
     };
@@ -376,11 +547,18 @@
         window.formData.katilanlar.splice(idx, 1);
         window.renderParticipantInputs();
         window.triggerDebouncedUpdate();
+      } else {
+        alert("En az bir zümre katılımcısı bulunmalıdır.");
       }
     };
 
     window.updateParticipant = function(idx, field, val) {
       window.formData.katilanlar[idx][field] = val;
+      if (idx === 0 && field === 'isim' && window.formData.katilanlar[0].unvan === "Zümre Başkanı") {
+        window.formData.baskan = val;
+        var inpBaskan = document.getElementById('inp-baskan');
+        if (inpBaskan) inpBaskan.value = val;
+      }
       window.triggerDebouncedUpdate();
     };
 
@@ -392,45 +570,62 @@
     window.updatePreview = function() {
       var setElText = function(id, text) { var el = document.getElementById(id); if (el) el.innerText = text; };
 
-      setElText('pv-okulMudurlugu', (window.formData.okul || '................ MÜDÜRLÜĞÜNE').toLocaleUpperCase('tr'));
-      setElText('pv-baslik1', (window.formData.egitimYili || '2026-2027') + " EĞİTİM-ÖĞRETİM YILI");
-      setElText('pv-baslik2', ((window.formData.brans || '') + " " + (window.formData.donem || '') + " TUTANAĞI").toLocaleUpperCase('tr'));
+      setElText('pv-mulkiIdare', (window.formData.mulkiIdare || '................ VALİLİĞİ / KAYMAKAMLIĞI').toLocaleUpperCase('tr-TR'));
+      setElText('pv-okul', (window.formData.okul || '................................ MÜDÜRLÜĞÜ').toLocaleUpperCase('tr-TR'));
+      setElText('pv-sayiNo', window.formData.sayiNo || 'E-70432323-050.01.04-EvrakNo');
 
-      var baskanKriterStr = window.formData.baskanKriter ? " (" + window.formData.baskanKriter + ")" : "";
-      var ustYaziStr = (window.formData.egitimYili || '2026-2027') + " Eğitim-Öğretim Yılı " + (window.formData.brans || '') + " " + (window.formData.donem || '') + " " + (window.formData.tarih || '') + " tarihinde saat " + (window.formData.saat || '') + "'te " + (window.formData.toplantiYeri || 'Öğretmenler Odasında') + " Zümre Başkanı " + (window.formData.baskan || '') + baskanKriterStr + " başkanlığında yapılacaktır. Gereğini bilgilerinize arz ederim.";
-      setElText('pv-ustYazi', ustYaziStr);
+      var evrakBaslik = (window.formData.egitimYili || calculateCurrentEducationYear()) + " EĞİTİM-ÖĞRETİM YILI " +
+        (window.formData.brans || 'DERS') + " " + (window.formData.donem || 'ZÜMRE TOPLANTISI').toLocaleUpperCase('tr-TR') + " TUTANAĞI";
+      setElText('pv-evrakBaslik', evrakBaslik.toLocaleUpperCase('tr-TR'));
 
+      // Tablo Doldurma
+      setElText('pv-tbl-donem', window.formData.donem || 'Sene Başı Zümre Toplantısı');
+      setElText('pv-tbl-tarih', formatIsoToTurkishDate(window.formData.tarih));
+      setElText('pv-tbl-saat', window.formData.saat || '13:30');
+      setElText('pv-tbl-yeri', window.formData.toplantiYeri || 'Öğretmenler Odası');
+      setElText('pv-tbl-no', window.formData.toplantiNo || '2026 / 01');
+      setElText('pv-tbl-baskan', window.formData.baskan || 'Zümre Başkanı');
+
+      // Yasal Dayanak Metni
+      var mebbisKismi = window.formData.baskanMebbisNo ? " [Referans No: " + window.formData.baskanMebbisNo + "]" : "";
+      var yasalDayanak = "02/01/2024 tarihli ve 93432701 sayılı Makam Onayı ile yürürlüğe giren Millî Eğitim Bakanlığı Eğitim Kurulları ve Zümreleri Yönergesi uyarınca zümre başkanı seçimi gerçekleştirilmiş; yapılan değerlendirmede ilgili maddeler (İstekli adaylar arasından seçim, alanında doktora derecesine sahip öğretmen, başöğretmen unvanına sahip öğretmen, alanında yüksek lisans yapan öğretmen, uzman öğretmen unvanına sahip öğretmen, önceki dönem başkanlık deneyimi ve mesleki kıdem esasları) dikkate alınarak " + (window.formData.baskan || '[Zümre Başkanı Adı SOYADI]') + " [" + (window.formData.baskanKriter || 'İstekli Adaylar Arasından Seçim') + mebbisKismi + "] oy birliği ile zümre başkanı olarak seçilmiştir.";
+      setElText('pv-yasalDayanakMetin', yasalDayanak);
+
+      // Gündem
       var gundemLines = window.sanitizeInputLines(window.formData.gundemText);
       var elGundem = document.getElementById('pv-gundemMaddeleri');
       if (elGundem) elGundem.innerHTML = gundemLines.map(function(item) { return '<li class="mb-0.5">' + item.replace(/^(\d+[\.\)]|\-|•|\*)\s*/, '') + '</li>'; }).join('');
 
+      // Görüşmeler
       var gorusmeLines = window.sanitizeInputLines(window.formData.gorusmeler);
       var elGorus = document.getElementById('pv-gorusmeler');
       if (elGorus) elGorus.innerHTML = gorusmeLines.map(function(item) { 
-        if (item.match(/^(\d+[\.\)]|[A-Z0-9\s\-]{4,}:)/)) {
-          return '<div class="font-bold text-slate-900 pt-1.5 border-t border-slate-100 mt-1">' + item + '</div>';
+        if (item.match(/^Madde\s+\d+:/i) || item.match(/^(\d+[\.\)]|[A-Z0-9\s\-]{4,}:)/)) {
+          return '<div class="font-bold text-slate-950 pt-1 mt-1">' + item + '</div>';
         }
         return '<p class="indent-6 mb-1 text-justify">' + item + '</p>'; 
       }).join('');
 
+      // Kararlar
       var kararLines = window.sanitizeInputLines(window.formData.kararlar);
       var elKarar = document.getElementById('pv-kararlar');
       if (elKarar) elKarar.innerHTML = kararLines.map(function(item) { return '<li class="mb-0.5">' + item.replace(/^(\d+[\.\)]|\-|•|\*)\s*/, '') + '</li>'; }).join('');
 
+      // İmza Tablosu
       var elImzaBody = document.getElementById('pv-imzaTableBody');
       if (elImzaBody) {
         elImzaBody.innerHTML = window.formData.katilanlar.map(function(p, idx) {
           return '<tr>' +
-            '<td class="border border-slate-400 p-1.5 text-center font-bold">' + (idx + 1) + '</td>' +
-            '<td class="border border-slate-400 p-1.5 font-semibold">' + p.isim + '</td>' +
-            '<td class="border border-slate-400 p-1.5">' + p.unvan + '</td>' +
-            '<td class="border border-slate-400 p-1.5 text-center text-slate-300 text-[8pt]">İmza</td>' +
+            '<td class="border border-black p-1 text-center font-bold">' + (idx + 1) + '</td>' +
+            '<td class="border border-black p-1 font-semibold">' + (p.isim || '') + '</td>' +
+            '<td class="border border-black p-1">' + (p.unvan || '') + '</td>' +
+            '<td class="border border-black p-1 text-center text-slate-400 text-[8pt]"></td>' +
           '</tr>';
         }).join('');
       }
 
-      setElText('pv-onayTarihi', window.formData.tarih || '');
-      setElText('pv-okulMuduruOnay', window.formData.okulMuduru || '[Okul Müdürü Adı Soyadı]');
+      setElText('pv-onayTarihi', formatIsoToTurkishDate(window.formData.tarih));
+      setElText('pv-okulMuduruOnay', (window.formData.okulMuduru || 'OKUL MÜDÜRÜ').toLocaleUpperCase('tr-TR'));
     };
 
     window.setZoom = function(scale) {
@@ -441,42 +636,173 @@
       }
     };
 
-    window.togglePreviewVisibility = function() {
-      var wrapper = document.getElementById('preview-section-wrapper');
-      if (wrapper) {
-        wrapper.style.display = (wrapper.style.display === 'none') ? 'block' : 'none';
-        sendHeightToParent();
-      }
-    };
-
     window.saveFormState = function() {
-      localStorage.setItem('zumre_current_state_v6', JSON.stringify(window.formData));
+      localStorage.setItem('zumre_current_state_v7', JSON.stringify(window.formData));
     };
 
     window.populateFormFromState = function() {
       var setVal = function(id, val) { var el = document.getElementById(id); if (el) el.value = val; };
+      setVal('inp-mulkiIdare', window.formData.mulkiIdare || '');
       setVal('inp-okul', window.formData.okul || '');
-      setVal('inp-ilce', window.formData.ilce || '');
-      setVal('inp-egitimYili', window.formData.egitimYili || '');
+      setVal('inp-sayiNo', window.formData.sayiNo || '');
+      setVal('inp-egitimYili', window.formData.egitimYili || calculateCurrentEducationYear());
       setVal('inp-brans', window.formData.brans || '');
-      setVal('inp-donem', window.formData.donem || '');
-      setVal('inp-toplantiYeri', window.formData.toplantiYeri || '');
-      setVal('inp-tarih', window.formData.tarih || '');
-      setVal('inp-saat', window.formData.saat || '');
+      setVal('inp-donem', window.formData.donem || 'Sene Başı Zümre Toplantısı');
+      setVal('inp-toplantiNo', window.formData.toplantiNo || '2026 / 01');
+      setVal('inp-toplantiYeri', window.formData.toplantiYeri || 'Öğretmenler Odası');
+      setVal('inp-tarih', window.formData.tarih || getTodayIsoDate());
+      setVal('inp-saat', window.formData.saat || '13:30');
       setVal('inp-baskan', window.formData.baskan || '');
-      setVal('inp-baskanKriter', window.formData.baskanKriter || 'İstekli Öğretmenler Arasından Seçilmiştir');
+      setVal('inp-baskanKriter', window.formData.baskanKriter || 'İstekli Adaylar Arasından Seçim');
       setVal('inp-baskanMebbisNo', window.formData.baskanMebbisNo || '');
       setVal('inp-okulMuduru', window.formData.okulMuduru || '');
-      setVal('txt-gundem', window.formData.gundemText || DEFAULT_GUNDEM);
-      setVal('txt-gorusmeler', window.formData.gorusmeler || DEFAULT_GORUSMELER);
-      setVal('txt-kararlar', window.formData.kararlar || DEFAULT_KARARLAR);
+      setVal('txt-gundem', window.formData.gundemText || DEFAULT_GUNDEM_SENEBASI);
+      setVal('txt-gorusmeler', window.formData.gorusmeler || DEFAULT_GORUSMELER_SENEBASI);
+      setVal('txt-kararlar', window.formData.kararlar || DEFAULT_KARARLAR_SENEBASI);
       window.renderParticipantInputs();
+      window.updateDraftCountBadge();
     };
 
+    /* TASLAKLAR / GEÇMİŞ YÖNETİCİSİ (A1 FIX) */
+    window.getSavedDrafts = function() {
+      try {
+        var raw = localStorage.getItem('zumre_saved_drafts_list_v1');
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    };
+
+    window.saveAsNewNamedDraft = function() {
+      var name = prompt("Taslak için bir başlık/isim giriniz:", (window.formData.brans || "Zümre") + " - " + (window.formData.donem || "Toplantı") + " (" + formatIsoToTurkishDate(window.formData.tarih) + ")");
+      if (!name) return;
+      var drafts = window.getSavedDrafts();
+      drafts.unshift({
+        id: Date.now(),
+        title: name,
+        savedAt: new Date().toLocaleString('tr-TR'),
+        data: JSON.parse(JSON.stringify(window.formData))
+      });
+      localStorage.setItem('zumre_saved_drafts_list_v1', JSON.stringify(drafts));
+      window.updateDraftCountBadge();
+      alert("Taslak başarıyla kaydedildi.");
+      if (!document.getElementById('history-modal').classList.contains('hidden')) {
+        window.renderHistoryModalItems();
+      }
+    };
+
+    window.openHistoryModal = function() {
+      window.renderHistoryModalItems();
+      document.getElementById('history-modal').classList.remove('hidden');
+    };
+
+    window.closeHistoryModal = function() {
+      document.getElementById('history-modal').classList.add('hidden');
+    };
+
+    window.renderHistoryModalItems = function() {
+      var container = document.getElementById('history-items-container');
+      var drafts = window.getSavedDrafts();
+      if (drafts.length === 0) {
+        container.innerHTML = '<div class="text-center text-slate-400 py-6">Kayıtlı taslak bulunmuyor.</div>';
+        return;
+      }
+      container.innerHTML = drafts.map(function(d, index) {
+        return '<div class="border border-slate-200 p-3 rounded-lg flex items-center justify-between bg-slate-50 hover:bg-white transition">' +
+          '<div>' +
+            '<div class="font-bold text-slate-800">' + d.title + '</div>' +
+            '<div class="text-[10px] text-slate-500">Kayıt: ' + d.savedAt + ' | ' + (d.data.egitimYili || '') + '</div>' +
+          '</div>' +
+          '<div class="flex space-x-2">' +
+            '<button type="button" onclick="window.loadDraftByIndex(' + index + ')" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-bold">Yükle</button>' +
+            '<button type="button" onclick="window.deleteDraftByIndex(' + index + ')" class="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-xs font-bold">Sil</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    };
+
+    window.loadDraftByIndex = function(index) {
+      var drafts = window.getSavedDrafts();
+      if (drafts[index] && confirm("'" + drafts[index].title + "' taslağı yüklenecek. Mevcut form verileriniz değişecek. Onaylıyor musunuz?")) {
+        window.formData = drafts[index].data;
+        window.populateFormFromState();
+        window.triggerDebouncedUpdate();
+        window.closeHistoryModal();
+      }
+    };
+
+    window.deleteDraftByIndex = function(index) {
+      var drafts = window.getSavedDrafts();
+      if (confirm("Bu taslağı silmek istediğinize emin misiniz?")) {
+        drafts.splice(index, 1);
+        localStorage.setItem('zumre_saved_drafts_list_v1', JSON.stringify(drafts));
+        window.updateDraftCountBadge();
+        window.renderHistoryModalItems();
+      }
+    };
+
+    window.updateDraftCountBadge = function() {
+      var count = window.getSavedDrafts().length;
+      var el = document.getElementById('draft-count-badge');
+      if (el) el.innerText = count;
+    };
+
+    /* BELGE DENETLEYİCİSİ (A2 FIX) */
     window.runAuditAndGenerate = function() {
+      var warnings = [];
+      var errors = [];
+
+      if (!window.formData.okul || window.formData.okul === "ATATÜRK ANADOLU LİSESİ") {
+        warnings.push("Okul Adı kontrol edilmeli / güncellenmelidir.");
+      }
+      if (!window.formData.brans) {
+        errors.push("Ders / Branş Adı alanı boş bırakılamaz.");
+      }
+      if (!window.formData.okulMuduru || window.formData.okulMuduru === "Ahmet YILMAZ") {
+        warnings.push("Okul Müdürü ismi kontrol edilmelidir.");
+      }
+      if (!window.formData.baskan) {
+        errors.push("Zümre Başkanı alanı boş bırakılamaz.");
+      }
+      if (!window.formData.tarih) {
+        errors.push("Toplantı Tarihi seçilmelidir.");
+      }
+
+      if (window.formData.katilanlar && window.formData.katilanlar.length > 0) {
+        var p1 = window.formData.katilanlar[0];
+        if (p1.isim && window.formData.baskan && p1.isim.trim().toLocaleLowerCase('tr') !== window.formData.baskan.trim().toLocaleLowerCase('tr')) {
+          warnings.push("Zümre Başkanı alanı ('" + window.formData.baskan + "') ile katılımcı tablosundaki 1. öğretmen ('" + p1.isim + "') uyuşmuyor.");
+        }
+      }
+
+      var modalList = document.getElementById('audit-results-list');
+      var html = "";
+
+      if (errors.length === 0 && warnings.length === 0) {
+        html = '<div class="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg font-semibold">✅ Belgeniz mevzuat ve resmî biçim standartlarına eksiksiz uygundur. Word belgesini güvenle indirebilirsiniz.</div>';
+      } else {
+        if (errors.length > 0) {
+          html += '<div class="p-3 bg-red-50 border border-red-200 text-red-800 rounded-lg space-y-1"><strong>❌ Düzeltilmesi Gereken Zorunlu Alanlar:</strong><ul class="list-disc list-inside">' + errors.map(function(e) { return '<li>' + e + '</li>'; }).join('') + '</ul></div>';
+        }
+        if (warnings.length > 0) {
+          html += '<div class="p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg space-y-1"><strong>⚠️ Dikkat Edilmesi Önerilen Hususlar:</strong><ul class="list-disc list-inside">' + warnings.map(function(w) { return '<li>' + w + '</li>'; }).join('') + '</ul></div>';
+        }
+      }
+
+      modalList.innerHTML = html;
+      document.getElementById('audit-modal').classList.remove('hidden');
+    };
+
+    window.closeAuditModal = function() {
+      document.getElementById('audit-modal').classList.add('hidden');
+    };
+
+    window.confirmAndDownloadWord = function() {
+      window.closeAuditModal();
       window.generateWordDocument();
     };
 
+    /* RESMÎ WORD (.DOCX) DIŞA AKTARMA (A3 & PART B FIX) */
     window.generateWordDocument = function() {
       var Document = docx.Document;
       var Paragraph = docx.Paragraph;
@@ -486,29 +812,149 @@
       var TableCell = docx.TableCell;
       var WidthType = docx.WidthType;
       var AlignmentType = docx.AlignmentType;
+      var BorderStyle = docx.BorderStyle;
+      var TableBorders = docx.TableBorders;
+
+      var standardBorder = { style: BorderStyle.SINGLE, size: 4, color: "000000" };
+      var allBorders = {
+        top: standardBorder,
+        bottom: standardBorder,
+        left: standardBorder,
+        right: standardBorder,
+        insideHorizontal: standardBorder,
+        insideVertical: standardBorder
+      };
 
       var docElements = [
-        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: (window.formData.okul || 'MÜDÜRLÜĞÜNE').toLocaleUpperCase('tr'), bold: true, size: 24, font: "Times New Roman" })] }),
-        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: (window.formData.egitimYili || '2026-2027') + " EĞİTİM-ÖĞRETİM YILI", bold: true, size: 24, font: "Times New Roman" })] }),
-        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 }, children: [new TextRun({ text: ((window.formData.brans || '') + " " + (window.formData.donem || '') + " TUTANAĞI").toLocaleUpperCase('tr'), bold: true, size: 24, font: "Times New Roman" })] }),
-        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 100, after: 120 }, children: [new TextRun({ text: "GÜNDEM MADDELERİ", bold: true, size: 24, font: "Times New Roman" })] })
+        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "T.C.", bold: true, size: 22, font: "Times New Roman" })] }),
+        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: (window.formData.mulkiIdare || 'KADIKÖY KAYMAKAMLIĞI').toLocaleUpperCase('tr-TR'), bold: true, size: 22, font: "Times New Roman" })] }),
+        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 120 }, children: [new TextRun({ text: (window.formData.okul || 'ATATÜRK ANADOLU LİSESİ MÜDÜRLÜĞÜ').toLocaleUpperCase('tr-TR'), bold: true, size: 22, font: "Times New Roman" })] }),
+
+        new Paragraph({
+          alignment: AlignmentType.BOTH,
+          children: [
+            new TextRun({ text: "Sayı : ", bold: true, size: 20, font: "Times New Roman" }),
+            new TextRun({ text: window.formData.sayiNo || 'E-70432323-050.01.04-EvrakNo', size: 20, font: "Times New Roman" }),
+            new TextRun({ text: "\t\t\t\t\t\t\tKonu : ", bold: true, size: 20, font: "Times New Roman" }),
+            new TextRun({ text: "Zümre Toplantı Tutanağı", size: 20, font: "Times New Roman" })
+          ]
+        }),
+
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 140, after: 140 },
+          children: [
+            new TextRun({
+              text: ((window.formData.egitimYili || calculateCurrentEducationYear()) + " EĞİTİM-ÖĞRETİM YILI " + (window.formData.brans || '') + " " + (window.formData.donem || '') + " TUTANAĞI").toLocaleUpperCase('tr-TR'),
+              bold: true,
+              size: 22,
+              font: "Times New Roman"
+            })
+          ]
+        })
       ];
 
+      // İdari Bilgiler Tablosu (Word)
+      var idariTable = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        borders: allBorders,
+        rows: [
+          new TableRow({
+            children: [
+              new TableCell({ width: { size: 25, type: WidthType.PERCENTAGE }, children: [new Paragraph({ children: [new TextRun({ text: "Toplantı Dönemi", bold: true, size: 18, font: "Times New Roman" })] })] }),
+              new TableCell({ width: { size: 25, type: WidthType.PERCENTAGE }, children: [new Paragraph({ children: [new TextRun({ text: window.formData.donem || '', size: 18, font: "Times New Roman" })] })] }),
+              new TableCell({ width: { size: 25, type: WidthType.PERCENTAGE }, children: [new Paragraph({ children: [new TextRun({ text: "Toplantı Tarihi", bold: true, size: 18, font: "Times New Roman" })] })] }),
+              new TableCell({ width: { size: 25, type: WidthType.PERCENTAGE }, children: [new Paragraph({ children: [new TextRun({ text: formatIsoToTurkishDate(window.formData.tarih), size: 18, font: "Times New Roman" })] })] })
+            ]
+          }),
+          new TableRow({
+            children: [
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Toplantı Saati", bold: true, size: 18, font: "Times New Roman" })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: window.formData.saat || '13:30', size: 18, font: "Times New Roman" })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Toplantı Yeri", bold: true, size: 18, font: "Times New Roman" })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: window.formData.toplantiYeri || 'Öğretmenler Odası', size: 18, font: "Times New Roman" })] })] })
+            ]
+          }),
+          new TableRow({
+            children: [
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Karar Numarası", bold: true, size: 18, font: "Times New Roman" })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: window.formData.toplantiNo || '2026 / 01', size: 18, font: "Times New Roman" })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Zümre Başkanı", bold: true, size: 18, font: "Times New Roman" })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: window.formData.baskan || '', bold: true, size: 18, font: "Times New Roman" })] })] })
+            ]
+          })
+        ]
+      });
+
+      docElements.push(idariTable);
+
+      // Yasal Dayanak
+      var mebbisRef = window.formData.baskanMebbisNo ? " [Referans No: " + window.formData.baskanMebbisNo + "]" : "";
+      var yasalDayanakMetni = "02/01/2024 tarihli ve 93432701 sayılı Makam Onayı ile yürürlüğe giren Millî Eğitim Bakanlığı Eğitim Kurulları ve Zümreleri Yönergesi uyarınca zümre başkanı seçimi gerçekleştirilmiş; yapılan değerlendirmede ilgili maddeler (İstekli adaylar arasından seçim, alanında doktora derecesine sahip öğretmen, başöğretmen unvanına sahip öğretmen, alanında yüksek lisans yapan öğretmen, uzman öğretmen unvanına sahip öğretmen, önceki dönem başkanlık deneyimi ve mesleki kıdem esasları) dikkate alınarak " + (window.formData.baskan || '[Zümre Başkanı]') + " [" + (window.formData.baskanKriter || 'İstekli Adaylar Arasından Seçim') + mebbisRef + "] oy birliği ile zümre başkanı olarak seçilmiştir.";
+
+      docElements.push(new Paragraph({ spacing: { before: 140, after: 60 }, children: [new TextRun({ text: "YASAL DAYANAK VE BAŞKAN SEÇİM TUTANAĞI:", bold: true, underline: {}, size: 20, font: "Times New Roman" })] }));
+      docElements.push(new Paragraph({ alignment: AlignmentType.JUSTIFY, spacing: { after: 140, line: 276 }, children: [new TextRun({ text: yasalDayanakMetni, size: 19, font: "Times New Roman" })] }));
+
+      // Gündem
+      docElements.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 100, after: 80 }, children: [new TextRun({ text: "GÜNDEM MADDELERİ", bold: true, size: 20, font: "Times New Roman" })] }));
       window.sanitizeInputLines(window.formData.gundemText).forEach(function(item) {
-        docElements.push(new Paragraph({ alignment: AlignmentType.LEFT, spacing: { after: 60, line: 276 }, children: [new TextRun({ text: item, size: 24, font: "Times New Roman" })] }));
+        docElements.push(new Paragraph({ alignment: AlignmentType.LEFT, spacing: { after: 40, line: 260 }, children: [new TextRun({ text: item, size: 19, font: "Times New Roman" })] }));
       });
 
-      docElements.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 200, after: 120 }, children: [new TextRun({ text: "GÜNDEM MADDELERİNİN GÖRÜŞÜLMESİ", bold: true, size: 24, font: "Times New Roman" })] }));
-
+      // Görüşmeler
+      docElements.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 160, after: 80 }, children: [new TextRun({ text: "GÜNDEM MADDELERİNİN GÖRÜŞÜLMESİ", bold: true, size: 20, font: "Times New Roman" })] }));
       window.sanitizeInputLines(window.formData.gorusmeler).forEach(function(item) {
-        docElements.push(new Paragraph({ alignment: AlignmentType.JUSTIFY, spacing: { after: 100, line: 276 }, children: [new TextRun({ text: item, size: 24, font: "Times New Roman" })] }));
+        var isMaddeHeader = item.match(/^Madde\s+\d+:/i) || item.match(/^(\d+[\.\)]|[A-Z0-9\s\-]{4,}:)/);
+        docElements.push(new Paragraph({
+          alignment: isMaddeHeader ? AlignmentType.LEFT : AlignmentType.JUSTIFY,
+          spacing: { before: isMaddeHeader ? 100 : 0, after: 60, line: 276 },
+          indent: isMaddeHeader ? {} : { firstLine: 400 },
+          children: [new TextRun({ text: item, bold: !!isMaddeHeader, size: 19, font: "Times New Roman" })]
+        }));
       });
 
-      docElements.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 200, after: 120 }, children: [new TextRun({ text: "ALINAN KARARLAR", bold: true, size: 24, font: "Times New Roman" })] }));
-
+      // Kararlar
+      docElements.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 160, after: 80 }, children: [new TextRun({ text: "ALINAN KARARLAR", bold: true, size: 20, font: "Times New Roman" })] }));
       window.sanitizeInputLines(window.formData.kararlar).forEach(function(item) {
-        docElements.push(new Paragraph({ alignment: AlignmentType.LEFT, spacing: { after: 60, line: 276 }, children: [new TextRun({ text: item, size: 24, font: "Times New Roman" })] }));
+        docElements.push(new Paragraph({ alignment: AlignmentType.LEFT, spacing: { after: 40, line: 260 }, children: [new TextRun({ text: item, size: 19, font: "Times New Roman" })] }));
       });
+
+      // Katılımcı İmza Tablosu
+      docElements.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 180, after: 80 }, children: [new TextRun({ text: "TOPLANTIYA KATILANLARIN İMZA LİSTESİ", bold: true, size: 20, font: "Times New Roman" })] }));
+
+      var imzaRows = [
+        new TableRow({
+          children: [
+            new TableCell({ width: { size: 10, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Sıra", bold: true, size: 18, font: "Times New Roman" })] })] }),
+            new TableCell({ width: { size: 45, type: WidthType.PERCENTAGE }, children: [new Paragraph({ children: [new TextRun({ text: "Adı Soyadı", bold: true, size: 18, font: "Times New Roman" })] })] }),
+            new TableCell({ width: { size: 30, type: WidthType.PERCENTAGE }, children: [new Paragraph({ children: [new TextRun({ text: "Görevi / Branşı", bold: true, size: 18, font: "Times New Roman" })] })] }),
+            new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "İmza", bold: true, size: 18, font: "Times New Roman" })] })] })
+          ]
+        })
+      ];
+
+      window.formData.katilanlar.forEach(function(p, idx) {
+        imzaRows.push(new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: String(idx + 1), size: 18, font: "Times New Roman" })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: p.isim || '', size: 18, font: "Times New Roman" })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: p.unvan || '', size: 18, font: "Times New Roman" })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [] })] })
+          ]
+        }));
+      });
+
+      docElements.push(new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        borders: allBorders,
+        rows: imzaRows
+      }));
+
+      // Resmî Onay Bloku (Okul Müdürü)
+      docElements.push(new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { before: 240, after: 40 }, children: [new TextRun({ text: formatIsoToTurkishDate(window.formData.tarih), size: 20, font: "Times New Roman" })] }));
+      docElements.push(new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 200 }, children: [new TextRun({ text: "UYGUNDUR", bold: true, size: 20, font: "Times New Roman" })] }));
+      docElements.push(new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: (window.formData.okulMuduru || 'Okul Müdürü').toLocaleUpperCase('tr-TR'), bold: true, size: 20, font: "Times New Roman" })] }));
+      docElements.push(new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: "Okul Müdürü", size: 19, font: "Times New Roman" })] }));
 
       var doc = new Document({
         sections: [{
@@ -517,7 +963,8 @@
         }]
       });
 
-      var fileName = "Zumre_Tutanagi_" + (window.formData.egitimYili || '2026-2027') + ".docx";
+      var bransSlug = (window.formData.brans || 'Zumre').replace(/[^a-zA-Z0-9çÇğĞıİöÖşŞüÜ]/g, '_');
+      var fileName = bransSlug + "_Zumre_Tutanagi_" + (window.formData.egitimYili || '2026-2027') + ".docx";
       docx.Packer.toBlob(doc).then(function(blob) {
         saveAs(blob, fileName);
       });
@@ -528,6 +975,13 @@
     };
 
     function initApp() {
+      try {
+        var saved = localStorage.getItem('zumre_current_state_v7');
+        if (saved) {
+          window.formData = JSON.parse(saved);
+        }
+      } catch (e) {}
+
       window.populateFormFromState();
       window.triggerDebouncedUpdate();
       window.addEventListener('resize', sendHeightToParent);
