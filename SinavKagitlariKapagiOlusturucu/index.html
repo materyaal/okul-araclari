@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Otomatik Sınav Kapı Etiketi Oluşturucu</title>
+  
+  <!-- CSS Kütüphaneleri -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- JS Kütüphaneleri (SheetJS, PDF.js, html2pdf.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+
+  <style>
+    :root {
+      --card-border-color: #000000;
+      --card-header-bg: #f8f9fa;
+      --card-accent-color: #000000;
+      
+      --font-ders-adi: 12pt;
+      --font-sinif: 12.5pt;
+      --font-ogretmen: 12pt;
+      --font-tarih-saat: 11pt;
+      --font-kelebek: 11pt;
+      --font-girmeyenler: 10.5pt;
+      --font-etiket-baslik: 10pt;
+      --font-sag-sinif: 46pt;
+    }
+
+    [data-theme="lacivert"] {
+      --card-border-color: #0f2c59;
+      --card-header-bg: #e8eef8;
+      --card-accent-color: #0f2c59;
+    }
+
+    [data-theme="bordo"] {
+      --card-border-color: #6b0f1a;
+      --card-header-bg: #fcebee;
+      --card-accent-color: #6b0f1a;
+    }
+
+    [data-theme="yesil"] {
+      --card-border-color: #1b4332;
+      --card-header-bg: #e9f5ed;
+      --card-accent-color: #1b4332;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 6px;
+      overflow-x: hidden !important;
+      overflow-y: visible !important;
+      background-color: #f4f6f9;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: #333;
+      box-sizing: border-box;
+      touch-action: manipulation;
+    }
+
+    .main-wrapper {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    /* Dokunmatik Hedef Standartları (44x44px) */
+    .touch-btn {
+      min-height: 44px;
+      min-width: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .kart-sil-btn {
+      position: absolute;
+      top: -12px;
+      right: -12px;
+      background: #dc3545;
+      color: #fff;
+      border: 3px solid #fff;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      font-size: 18px;
+      font-weight: bold;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      z-index: 10;
+      transition: transform 0.15s;
+    }
+    .kart-sil-btn:hover {
+      transform: scale(1.1);
+      background: #bb2d3b;
+    }
+
+    /* Canlı Önizleme Alanı */
+    .preview-card-wrapper {
+      background: #e9ecef;
+      border: 1px solid #ced4da;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 15px;
+      margin-bottom: 20px;
+    }
+
+    .print-preview-container {
+      width: 100%;
+      overflow: visible;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* A4 Sayfa Responsive Oranı (Ekran Modu) */
+    @media screen {
+      .a4-sayfa {
+        background: #ffffff;
+        border: 1px solid #dcdcdc;
+        padding: 3% 4%;
+        margin: 0 auto;
+        width: 100%;
+        max-width: 210mm;
+        aspect-ratio: 210 / 297;
+        height: auto;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 2%;
+      }
+
+      .sinif-kart {
+        border: 2.5px solid var(--card-border-color);
+        background: #fff;
+        display: flex;
+        flex: 1 1 31%;
+        min-height: 0;
+        box-sizing: border-box;
+        position: relative;
+        border-radius: 2px;
+      }
+    }
+
+    /* Yazdırma Modu */
+    @media print {
+      body {
+        background: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      .no-print, .kart-sil-btn {
+        display: none !important;
+      }
+
+      .preview-card-wrapper {
+        background: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      #printArea {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+
+      .a4-sayfa {
+        width: 210mm !important;
+        height: 297mm !important;
+        padding: 7mm 9mm !important;
+        margin: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        page-break-after: always;
+        break-after: page;
+        box-sizing: border-box !important;
+        aspect-ratio: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+      }
+
+      .sinif-kart {
+        height: 87mm !important;
+        flex: none !important;
+        border: 2.5px solid var(--card-border-color) !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+        display: flex !important;
+      }
+
+      [contenteditable="true"] {
+        background: transparent !important;
+        box-shadow: none !important;
+      }
+    }
+
+    /* Kart İçi Düzen */
+    .sol-tablo {
+      width: 72%;
+      border-right: 2.5px solid var(--card-border-color);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .satir {
+      display: flex;
+      border-bottom: 2px solid var(--card-border-color);
+      flex: 1;
+      align-items: stretch;
+    }
+
+    .satir:last-child {
+      border-bottom: none;
+    }
+
+    .etiket {
+      width: 40%;
+      font-weight: 800;
+      padding: 0 8px;
+      border-right: 2px solid var(--card-border-color);
+      font-size: var(--font-etiket-baslik) !important;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      background: var(--card-header-bg);
+      color: var(--card-accent-color);
+      line-height: 1.15;
+    }
+
+    .deger {
+      width: 60%;
+      padding: 2px 8px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      color: #000 !important;
+      min-height: 26px;
+      word-break: break-word;
+      line-height: 1.15;
+      white-space: pre-wrap;
+    }
+
+    .satir-ders-adi .deger { font-size: var(--font-ders-adi) !important; }
+    .satir-tarih-saat .deger { font-size: var(--font-tarih-saat) !important; }
+    .satir-sinif .deger { font-size: var(--font-sinif) !important; }
+    .satir-ogretmen .deger { font-size: var(--font-ogretmen) !important; }
+    .satir-kelebek .deger { font-size: var(--font-kelebek) !important; }
+    .satir-girmeyenler .deger { font-size: var(--font-girmeyenler) !important; }
+
+    .sag-panel {
+      width: 28%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 4px;
+      background: #ffffff;
+      box-sizing: border-box;
+    }
+
+    .kart-logo-kapsayici {
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin-bottom: 4px;
+    }
+    .kart-logo {
+      max-height: 36px;
+      max-width: 90%;
+      object-fit: contain;
+    }
+
+    .sag-sinif-etiket {
+      font-size: var(--font-sag-sinif) !important;
+      font-weight: 900;
+      text-align: center;
+      line-height: 0.95;
+      word-break: break-word;
+      color: var(--card-accent-color);
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    [contenteditable="true"] {
+      outline: none;
+      transition: background-color 0.2s, box-shadow 0.2s;
+    }
+    @media screen {
+      [contenteditable="true"]:hover {
+        background-color: #fffde7;
+        box-shadow: inset 0 0 0 1px #fbc02d;
+      }
+      [contenteditable="true"]:focus {
+        background-color: #ffffff;
+        box-shadow: inset 0 0 0 2px #0d6efd;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+  <!-- CDN Yükleme Hatası Bildirimi -->
+  <div id="cdnErrorBanner" class="alert alert-danger py-2 px-3 mb-3 d-none no-print" role="alert">
+    <strong>⚠️ Kütüphane Yükleme Uyarısı:</strong> PDF/Excel işleme modülleri internet kesintisi nedeniyle yüklenemedi. Manuel sekmesini kullanarak doğrudan aralık ile etiket üretebilirsiniz.
+  </div>
+
+  <!-- KONTROL FORMU -->
+  <div class="bg-white p-3 p-md-4 rounded-3 shadow-sm mb-3 no-print border">
+    
+    <!-- Yöntem Seçici -->
+    <div class="card mb-3 border-2 border-primary shadow-sm">
+      <div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center py-2 px-3 gap-2 border-bottom">
+        <span class="fw-bold text-dark fs-6">📌 Sınıf Belirleme Yöntemi:</span>
+        
+        <div class="btn-group" role="group" aria-label="Sınıf Yöntemi">
+          <input type="radio" class="btn-check" name="yontemSecim" id="yontemDosya" autocomplete="off" checked>
+          <label class="btn btn-outline-primary fw-bold px-3 py-2 touch-btn" for="yontemDosya" style="cursor: pointer;">
+            📁 1. Yöntem: Dosyadan Oku (PDF / Excel)
+          </label>
+
+          <input type="radio" class="btn-check" name="yontemSecim" id="yontemManuel" autocomplete="off">
+          <label class="btn btn-outline-primary fw-bold px-3 py-2 touch-btn" for="yontemManuel" style="cursor: pointer;">
+            ✍️ 2. Yöntem: Manuel Toplu Sınıf (9A-9K vb.)
+          </label>
+        </div>
+      </div>
+      
+      <div class="card-body p-3">
+        <!-- 1. Dosyadan Oku -->
+        <div id="dosyaYuklemeAlani" class="row g-3">
+          <div class="col-md-6">
+            <label for="programFile" class="form-label fw-bold">Ders Programı Yükle (.pdf / .xlsx / .xls)</label>
+            <input type="file" id="programFile" class="form-control" accept=".xlsx, .xls, .pdf" />
+            <small class="text-muted d-block mt-1" id="fileStatus">e-Okul PDF çıktısı veya Sınıf/Gün/Saat Excel dosyasını seçin.</small>
+          </div>
+          
+          <div class="col-md-6">
+            <label for="logoFile" class="form-label fw-bold">Okul Logosu Yükle (.png, .jpg, .svg)</label>
+            <div class="input-group">
+              <input type="file" id="logoFile" class="form-control" accept="image/*" />
+              <button type="button" id="logoSilBtn" class="btn btn-danger fw-bold touch-btn" title="Kayıtlı Logoyu Sil" style="display: none;">
+                🗑️ Logoyu Kaldır
+              </button>
+            </div>
+            <small class="text-muted d-block mt-1" id="logoStatus">İsteğe bağlı. Kartların sağ üst köşesinde gösterilir.</small>
+          </div>
+        </div>
+
+        <!-- 2. Manuel / Aralık Giriş -->
+        <div id="manuelGirisAlani" style="display: none;">
+          <div class="alert alert-primary py-2 px-3 mb-2 small border-primary">
+            💡 <strong>Aralık Desteği:</strong> Sınıf aralıklarını tire ile yazabilirsiniz (Örn: <code>9A-9K</code>, <code>10A-10S</code>, <code>11C-11H</code>, <code>12A-12L</code>). Sistem aradaki tüm sınıfları otomatik türetir.
+          </div>
+
+          <div class="d-flex flex-wrap gap-1 mb-2">
+            <span class="small text-muted align-self-center me-1">Hızlı Şablonlar:</span>
+            <button type="button" class="btn btn-sm btn-outline-dark py-1 px-2 small fw-semibold touch-btn" onclick="window.materyaalAralikEkle('9A-9K')">+ 9A-9K</button>
+            <button type="button" class="btn btn-sm btn-outline-dark py-1 px-2 small fw-semibold touch-btn" onclick="window.materyaalAralikEkle('10A-10S')">+ 10A-10S</button>
+            <button type="button" class="btn btn-sm btn-outline-dark py-1 px-2 small fw-semibold touch-btn" onclick="window.materyaalAralikEkle('11C-11H')">+ 11C-11H</button>
+            <button type="button" class="btn btn-sm btn-outline-dark py-1 px-2 small fw-semibold touch-btn" onclick="window.materyaalAralikEkle('12A-12L')">+ 12A-12L</button>
+            <button type="button" class="btn btn-sm btn-primary py-1 px-2 small fw-bold touch-btn" onclick="window.materyaalAralikEkle('9A-9K, 10A-10S, 11C-11H, 12A-12L')">+ Tüm Okul (9-12)</button>
+            <button type="button" class="btn btn-sm btn-outline-danger py-1 px-2 small ms-auto fw-semibold touch-btn" id="manuelTemizleBtn">Temizle</button>
+          </div>
+
+          <textarea id="manuelSiniflarText" class="form-control font-monospace" rows="2" placeholder="Örn: 9A-9K, 10A-10S, 11C-11H, 12A-12L, 9MES, 10AÇIK..."></textarea>
+          
+          <div id="sinifOnizlemeKutusu" class="mt-2 text-success small fw-bold"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <!-- Ders Adı & Tema -->
+      <div class="col-md-6">
+        <label for="dersAdi" class="form-label fw-bold">Sınav Ders Adı</label>
+        <input type="text" id="dersAdi" class="form-control" placeholder="Örn: MATEMATİK / TÜRK DİLİ VE EDEBİYATI..." />
+      </div>
+
+      <div class="col-md-6">
+        <label for="renkTemasi" class="form-label fw-bold">Renk Teması</label>
+        <select id="renkTemasi" class="form-select">
+          <option value="siyah" selected>Klasik Siyah (Varsayılan)</option>
+          <option value="lacivert">Kurumsal Lacivert</option>
+          <option value="bordo">Bordo</option>
+          <option value="yesil">Milli Eğitim Yeşili</option>
+        </select>
+      </div>
+
+      <!-- FONT AYARLARI -->
+      <div class="col-12">
+        <button type="button" id="fontAyarToggleBtn" class="btn btn-sm btn-outline-secondary w-100 fw-bold py-2 shadow-sm touch-btn">
+          🔤 Kart Yazı Boyutlarını Özelleştir (Her Alan İçin Ayrı Font Ayarı) ▾
+        </button>
+
+        <div id="fontAyarPaneli" class="mt-2 p-3 bg-light border rounded shadow-sm" style="display: none;">
+          <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+            <span class="fw-bold text-dark small">Kutucukların Yazı Boyutunu Anında Değiştirin:</span>
+            <button type="button" id="fontSifirlaBtn" class="btn btn-xs btn-outline-danger py-1 px-3 fw-bold small touch-btn">Varsayılana Sıfırla</button>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-3 col-6">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <label class="form-label small fw-bold mb-0">Ders Adı:</label>
+                <span id="lblDersAdi" class="badge bg-primary">12pt</span>
+              </div>
+              <div class="input-group input-group-sm">
+                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsDersAdi', -0.5)">-</button>
+                <input type="range" id="fsDersAdi" class="form-range form-control px-2" min="8" max="22" value="12" step="0.5">
+                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsDersAdi', 0.5)">+</button>
+              </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <label class="form-label small fw-bold mb-0">Sınıf (Sol):</label>
+                <span id="lblSinif" class="badge bg-primary">12.5pt</span>
+              </div>
+              <div class="input-group input-group-sm">
+                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsSinif', -0.5)">-</button>
+                <input type="range" id="fsSinif" class="form-range form-control px-2" min="8" max="22" value="12.5" step="0.5">
+                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsSinif', 0.5)">+</button>
+              </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <label class="form-label small fw-bold mb-0">Öğretmen:</label>
+                <span id="lblOgretmen" class="badge bg-primary">12pt</span>
+              </div>
+              <div class="input-group input-group-sm">
+                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsOgretmen', -0.5)">-</button>
+                <input type="range" id="fsOgretmen" class="form-range form-control px-2" min="8" max="22" value="12" step="0.5">
+                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsOgretmen', 0.5)">+</button>
+              </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <label class="form-label small fw-bold mb-0">Tarih / Saat:</label>
+                <span id="lblTarihSaat" class="badge bg-primary">11pt</span>
+              </div>
+              <div class="input-group input-group-sm">
+                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsTarihSaat', -0.5)">-</button>
+                <input type="range" id="fsTarihSaat" class="form-range form-control px-2" min="7" max="18" value="11" step="0.5">
+                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsTarihSaat', 0.5)">+</button>
+              </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <label class="form-label small fw-bold mb-0">Kelebek / Sıra No:</label>
+                <span id="lblKelebek" class="badge bg-primary">11pt</span>
+              </div>
+              <div class="input-group input-group-sm">
+                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsKelebek', -0.5)">-</button>
+                <input type="range" id="fsKelebek" class="form-range form-control px-2" min="7" max="18" value="11" step="0.5">
+                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsKelebek', 0.5)">+</button>
+              </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <label class="form-label small fw-bold mb-0">Girmeyenler:</label>
+                <span id="lblGirmeyenler" class="badge bg-primary">10.5pt</span>
+              </div>
+              <div class="input-group input-group-sm">
+                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsGirmeyenler', -0.5)">-</button>
+                <input type="range" id="fsGirmeyenler" class="form-range form-control px-2" min="7" max="18" value="10.5" step="0.5">
+                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsGirmeyenler', 0.5)">+</button>
+              </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <label class="form-label small fw-bold mb-0">Başlık Etiketleri:</label>
+                <span id="lblEtiketBaslik" class="badge bg-primary">10pt</span>
+              </div>
+              <div class="input-group input-group-sm">
+                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsEtiketBaslik', -0.5)">-</button>
+                <input type="range" id="fsEtiketBaslik" class="form-range form-control px-2" min="7" max="16" value="10" step="0.5">
+                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsEtiketBaslik', 0.5)">+</button>
+              </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <label class="form-label small fw-bold mb-0">Sağ Büyük Sınıf:</label>
+                <span id="lblSagSinif" class="badge bg-primary">46pt</span>
+              </div>
+              <div class="input-group input-group-sm">
+                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsSagSinif', -2)">-</button>
+                <input type="range" id="fsSagSinif" class="form-range form-control px-2" min="20" max="75" value="46" step="1">
+                <button class="btn btn-outline-secondary touch-btn" type="button" onclick="window.materyaalFontAdim('fsSagSinif', 2)">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sınav Tarihi ve Saati -->
+      <div class="col-md-3">
+        <label for="sinavTarihi" class="form-label fw-bold">Sınav Tarihi</label>
+        <input type="date" id="sinavTarihi" class="form-control" />
+      </div>
+
+      <div class="col-md-3">
+        <label for="gercekSaat" class="form-label fw-bold">Sınav Başlama Saati</label>
+        <input type="time" id="gercekSaat" class="form-control" />
+      </div>
+
+      <div class="col-md-3">
+        <label for="sinavGunu" class="form-label fw-bold">Programdaki Gün</label>
+        <select id="sinavGunu" class="form-select">
+          <option value="Pazartesi" selected>Pazartesi</option>
+          <option value="Salı">Salı</option>
+          <option value="Çarşamba">Çarşamba</option>
+          <option value="Perşembe">Perşembe</option>
+          <option value="Cuma">Cuma</option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label for="sinavSaati" class="form-label fw-bold">Programdaki Ders Saati</label>
+        <select id="sinavSaati" class="form-select">
+          <option value="1">1. Ders</option>
+          <option value="2">2. Ders</option>
+          <option value="3">3. Ders</option>
+          <option value="4" selected>4. Ders</option>
+          <option value="5">5. Ders</option>
+          <option value="6">6. Ders</option>
+          <option value="7">7. Ders</option>
+          <option value="8">8. Ders</option>
+        </select>
+      </div>
+
+      <!-- Kapsam Filtresi -->
+      <div class="col-12">
+        <label for="sinifFiltre" class="form-label fw-bold">Kapsam / Sınıf Filtresi</label>
+        <select id="sinifFiltre" class="form-select">
+          <option value="TUMU" selected>Tüm Sınıflar</option>
+          <option value="9">Sadece 9. Sınıflar</option>
+          <option value="10">Sadece 10. Sınıflar</option>
+          <option value="11">Sadece 11. Sınıflar</option>
+          <option value="12">Sadece 12. Sınıflar</option>
+        </select>
+      </div>
+
+      <!-- İSTEĞE BAĞLI ALANLAR -->
+      <div class="col-12">
+        <div class="p-3 bg-light border rounded">
+          <label class="form-label fw-bold text-dark mb-2">
+            Kart Alanları ve Satır Seçenekleri 
+            <small class="text-muted fw-normal">(Ders Adı, Sınıf ve Görevli Öğretmen ana iskelettir)</small>
+          </label>
+          <div class="row g-2">
+            <div class="col-md-4 col-12">
+              <div class="form-check form-switch p-2 bg-white border rounded">
+                <input class="form-check-input ms-0 me-2" type="checkbox" id="tarihSaatGoster" style="cursor: pointer;">
+                <label class="form-check-label fw-bold small" for="tarihSaatGoster" style="cursor: pointer;">
+                  + Tarih / Saat Satırı
+                </label>
+              </div>
+            </div>
+            <div class="col-md-4 col-12">
+              <div class="form-check form-switch p-2 bg-white border rounded">
+                <input class="form-check-input ms-0 me-2" type="checkbox" id="kelebekAktif" style="cursor: pointer;">
+                <label class="form-check-label fw-bold small" for="kelebekAktif" style="cursor: pointer;">
+                  + Sıra / Kelebek No Satırı
+                </label>
+              </div>
+            </div>
+            <div class="col-md-4 col-12">
+              <div class="form-check form-switch p-2 bg-white border rounded">
+                <input class="form-check-input ms-0 me-2" type="checkbox" id="girmeyenlerGoster" checked style="cursor: pointer;">
+                <label class="form-check-label fw-bold small" for="girmeyenlerGoster" style="cursor: pointer;">
+                  Sınava Girmeyenler Satırı
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Öğretmen Dağıtım Ayarı -->
+      <div class="col-12 p-3 bg-light border rounded">
+        <label for="ogretmenAyar" class="form-label fw-bold text-danger">Görevli Öğretmen Dağıtım Ayarı</label>
+        <div class="d-flex flex-wrap gap-3 align-items-start">
+          <select id="ogretmenAyar" class="form-select border-danger" style="max-width: 380px;">
+            <option value="otomatik" selected>Derse Giren Öğretmeni Getir (Programdan)</option>
+            <option value="liste">Öğretmen Listesi Yapıştır (Sınıflara Sırayla Dağıt)</option>
+            <option value="sabit">Sistemden Ben Gireyim (Tüm Sınıflara Ortak)</option>
+            <option value="bos">Boş Bırak (Tıklayarak Anında Yazmak İçin)</option>
+            <option value="gizle">Görevli Öğretmen Satırını Tamamen Kaldır</option>
+          </select>
+          
+          <input type="text" id="sabitOgretmenIsim" class="form-control" placeholder="Tüm sınıflara yazılacak isim..." style="display: none; max-width: 280px;">
+          
+          <div id="listeKutusu" class="w-100 mt-2" style="display: none;">
+            <textarea id="ogretmenListesi" class="form-control border-primary" rows="3" placeholder="Görevli öğretmen isimlerini alt alta veya virgülle ayırarak yapıştırın..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aksiyon Butonları -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mt-4 pt-3 border-top gap-2">
+      <div>
+        <button type="button" id="olusturBtn" class="btn btn-primary px-4 py-2 fw-bold me-2 touch-btn">Şablonları Oluştur</button>
+        <button type="button" id="manuelKartBtn" class="btn btn-outline-secondary px-3 py-2 fw-bold touch-btn">+ Boş Yedek Kart Ekle</button>
+      </div>
+      
+      <div class="d-flex flex-wrap gap-2">
+        <button type="button" id="taslakKaydetBtn" class="btn btn-outline-warning text-dark px-3 py-2 fw-bold touch-btn">💾 Taslağı Kaydet</button>
+        <button type="button" id="taslakYukleBtn" class="btn btn-outline-info text-dark px-3 py-2 fw-bold touch-btn">📂 Kayıtlı Taslağı Yükle</button>
+        <button type="button" id="pdfIndirBtn" class="btn btn-danger px-3 py-2 fw-bold touch-btn" style="display:none;">📥 PDF İndir</button>
+        <button type="button" id="yazdirBtn" class="btn btn-success px-4 py-2 fw-bold touch-btn" style="display:none;">🖨️ Yazdır</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CANLI BASKI VE ÖNİZLEME ALANI -->
+  <div class="preview-card-wrapper" id="previewCardSection" style="display: none;">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary no-print gap-2">
+      <h5 class="fw-bold text-dark m-0 d-flex align-items-center gap-2">
+        <span>📄 Canlı A4 Baskı Önizlemesi</span>
+        <span id="onizlemeBilgiRozet" class="badge bg-primary fs-6">0 Sayfa / 0 Kart</span>
+      </h5>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-danger fw-bold px-3 touch-btn" onclick="document.getElementById('pdfIndirBtn').click()">
+          📥 PDF İndir
+        </button>
+        <button type="button" class="btn btn-success fw-bold px-3 touch-btn" onclick="window.print()">
+          🖨️ Yazdır
+        </button>
+      </div>
+    </div>
+
+    <div class="print-preview-container">
+      <div id="printArea"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  window.addEventListener('DOMContentLoaded', () => {
+    if (typeof XLSX === 'undefined' || typeof pdfjsLib === 'undefined') {
+      const banner = document.getElementById('cdnErrorBanner');
+      if (banner) banner.classList.remove('d-none');
+    }
+  });
+
+  const TURKISH_ALPHABET = ['A','B','C','Ç','D','E','F','G','Ğ','H','I','İ','J','K','L','M','N','O','Ö','P','R','S','Ş','T','U','Ü','V','Y','Z'];
+
+  const state = {
+    classScheduleMap: {},
+    discoveredClasses: [],
+    activeCards: [],
+    uploadedLogoBase64: ""
+  };
+
+  const elements = {
+    yontemDosya: document.getElementById('yontemDosya'),
+    yontemManuel: document.getElementById('yontemManuel'),
+    dosyaYuklemeAlani: document.getElementById('dosyaYuklemeAlani'),
+    manuelGirisAlani: document.getElementById('manuelGirisAlani'),
+    programFile: document.getElementById('programFile'),
+    fileStatus: document.getElementById('fileStatus'),
+    logoFile: document.getElementById('logoFile'),
+    logoSilBtn: document.getElementById('logoSilBtn'),
+    logoStatus: document.getElementById('logoStatus'),
+    dersAdi: document.getElementById('dersAdi'),
+    renkTemasi: document.getElementById('renkTemasi'),
+    
+    fontAyarToggleBtn: document.getElementById('fontAyarToggleBtn'),
+    fontAyarPaneli: document.getElementById('fontAyarPaneli'),
+    fontSifirlaBtn: document.getElementById('fontSifirlaBtn'),
+    fsDersAdi: document.getElementById('fsDersAdi'),
+    fsSinif: document.getElementById('fsSinif'),
+    fsOgretmen: document.getElementById('fsOgretmen'),
+    fsTarihSaat: document.getElementById('fsTarihSaat'),
+    fsKelebek: document.getElementById('fsKelebek'),
+    fsGirmeyenler: document.getElementById('fsGirmeyenler'),
+    fsEtiketBaslik: document.getElementById('fsEtiketBaslik'),
+    fsSagSinif: document.getElementById('fsSagSinif'),
+    lblDersAdi: document.getElementById('lblDersAdi'),
+    lblSinif: document.getElementById('lblSinif'),
+    lblOgretmen: document.getElementById('lblOgretmen'),
+    lblTarihSaat: document.getElementById('lblTarihSaat'),
+    lblKelebek: document.getElementById('lblKelebek'),
+    lblGirmeyenler: document.getElementById('lblGirmeyenler'),
+    lblEtiketBaslik: document.getElementById('lblEtiketBaslik'),
+    lblSagSinif: document.getElementById('lblSagSinif'),
+
+    sinavTarihi: document.getElementById('sinavTarihi'),
+    gercekSaat: document.getElementById('gercekSaat'),
+    sinavGunu: document.getElementById('sinavGunu'),
+    sinavSaati: document.getElementById('sinavSaati'),
+    sinifFiltre: document.getElementById('sinifFiltre'),
+    tarihSaatGoster: document.getElementById('tarihSaatGoster'),
+    kelebekAktif: document.getElementById('kelebekAktif'),
+    girmeyenlerGoster: document.getElementById('girmeyenlerGoster'),
+    ogretmenAyar: document.getElementById('ogretmenAyar'),
+    sabitOgretmenIsim: document.getElementById('sabitOgretmenIsim'),
+    listeKutusu: document.getElementById('listeKutusu'),
+    ogretmenListesi: document.getElementById('ogretmenListesi'),
+    olusturBtn: document.getElementById('olusturBtn'),
+    manuelKartBtn: document.getElementById('manuelKartBtn'),
+    taslakKaydetBtn: document.getElementById('taslakKaydetBtn'),
+    taslakYukleBtn: document.getElementById('taslakYukleBtn'),
+    pdfIndirBtn: document.getElementById('pdfIndirBtn'),
+    yazdirBtn: document.getElementById('yazdirBtn'),
+    previewCardSection: document.getElementById('previewCardSection'),
+    onizlemeBilgiRozet: document.getElementById('onizlemeBilgiRozet'),
+    printArea: document.getElementById('printArea'),
+    manuelSiniflarText: document.getElementById('manuelSiniflarText'),
+    sinifOnizlemeKutusu: document.getElementById('sinifOnizlemeKutusu'),
+    manuelTemizleBtn: document.getElementById('manuelTemizleBtn')
+  };
+
+  const SETTINGS_KEY = 'materyaal_kapietiketi_settings';
+  const DRAFT_KEY = 'materyaal_kapietiketi_draft_cards';
+  const LOGO_KEY = 'materyaal_kapietiketi_logo';
+
+  function notifyParentHeight() {
+    try {
+      const height = document.documentElement.scrollHeight || document.body.scrollHeight;
+      window.parent.postMessage({ type: 'setHeight', height: height + 30 }, '*');
+    } catch(e) {}
+  }
+
+  window.addEventListener('resize', notifyParentHeight);
+  if (window.ResizeObserver) {
+    new ResizeObserver(notifyParentHeight).observe(document.body);
+  }
+
+  // --- FONT PANELİ ---
+  elements.fontAyarToggleBtn.addEventListener('click', function () {
+    const isHidden = (elements.fontAyarPaneli.style.display === 'none' || !elements.fontAyarPaneli.style.display);
+    elements.fontAyarPaneli.style.display = isHidden ? 'block' : 'none';
+    this.innerHTML = isHidden 
+      ? '🔼 Kart Yazı Boyutlarını Gizle' 
+      : '🔤 Kart Yazı Boyutlarını Özelleştir (Her Alan İçin Ayrı Font Ayarı) ▾';
+    notifyParentHeight();
+  });
+
+  const fontInputs = [
+    { el: elements.fsDersAdi, lbl: elements.lblDersAdi, varName: '--font-ders-adi', def: '12' },
+    { el: elements.fsSinif, lbl: elements.lblSinif, varName: '--font-sinif', def: '12.5' },
+    { el: elements.fsOgretmen, lbl: elements.lblOgretmen, varName: '--font-ogretmen', def: '12' },
+    { el: elements.fsTarihSaat, lbl: elements.lblTarihSaat, varName: '--font-tarih-saat', def: '11' },
+    { el: elements.fsKelebek, lbl: elements.lblKelebek, varName: '--font-kelebek', def: '11' },
+    { el: elements.fsGirmeyenler, lbl: elements.lblGirmeyenler, varName: '--font-girmeyenler', def: '10.5' },
+    { el: elements.fsEtiketBaslik, lbl: elements.lblEtiketBaslik, varName: '--font-etiket-baslik', def: '10' },
+    { el: elements.fsSagSinif, lbl: elements.lblSagSinif, varName: '--font-sag-sinif', def: '46' }
+  ];
+
+  function applySingleFont(item, val) {
+    item.el.value = val;
+    item.lbl.innerText = val + 'pt';
+    document.documentElement.style.setProperty(item.varName, val + 'pt');
+    document.body.style.setProperty(item.varName, val + 'pt');
+  }
+
+  fontInputs.forEach(item => {
+    item.el.addEventListener('input', function () {
+      applySingleFont(item, this.value);
+      saveSettingsToLocalStorage();
+    });
+  });
+
+  window.materyaalFontAdim = function(inputId, step) {
+    const item = fontInputs.find(f => f.el.id === inputId);
+    if (!item) return;
+    let current = parseFloat(item.el.value) || parseFloat(item.def);
+    let min = parseFloat(item.el.min);
+    let max = parseFloat(item.el.max);
+    let updated = Math.min(max, Math.max(min, current + step));
+    applySingleFont(item, updated);
+    saveSettingsToLocalStorage();
+  };
+
+  elements.fontSifirlaBtn.addEventListener('click', function () {
+    fontInputs.forEach(item => {
+      applySingleFont(item, item.def);
+    });
+    saveSettingsToLocalStorage();
+  });
+
+  // --- ARALIK AYRIŞTIRICI ---
+  function expandClassRange(token) {
+    token = token.trim().toUpperCase();
+    if (!token) return [];
+
+    const rangeMatch = token.match(/^(\d{1,2})\s*([\/\\-])?\s*([A-ZÇĞİÖŞÜ])\s*(?:[-–—]|TO|\.\.)\s*(\d{1,2})?\s*([\/\\-])?\s*([A-ZÇĞİÖŞÜ])$/i);
+
+    if (rangeMatch) {
+      const grade1 = rangeMatch[1];
+      const sep1 = rangeMatch[2] || '';
+      const letter1 = rangeMatch[3];
+      const grade2 = rangeMatch[4] || grade1;
+      const letter2 = rangeMatch[6];
+
+      const startGrade = parseInt(grade1);
+      const endGrade = parseInt(grade2);
+      const stepGrade = startGrade <= endGrade ? 1 : -1;
+
+      const idx1 = TURKISH_ALPHABET.indexOf(letter1);
+      const idx2 = TURKISH_ALPHABET.indexOf(letter2);
+
+      if (idx1 !== -1 && idx2 !== -1) {
+        const stepLetter = idx1 <= idx2 ? 1 : -1;
+        const result = [];
+
+        for (let g = startGrade; (stepGrade === 1 ? g <= endGrade : g >= endGrade); g += stepGrade) {
+          for (let i = idx1; (stepLetter === 1 ? i <= idx2 : i >= idx2); i += stepLetter) {
+            result.push(`${g}${sep1}${TURKISH_ALPHABET[i]}`);
+          }
+        }
+        return result;
+      }
+    }
+
+    return [token];
+  }
+
+  function parseClassInput(inputText) {
+    if (!inputText) return [];
+    const tokens = inputText.split(/[,;\n\r]+/).map(t => t.trim()).filter(Boolean);
+    const expanded = [];
+    tokens.forEach(t => {
+      expanded.push(...expandClassRange(t));
+    });
+    return Array.from(new Set(expanded));
+  }
+
+  function updateClassPreview() {
+    const raw = elements.manuelSiniflarText.value;
+    const parsed = parseClassInput(raw);
+    if (parsed.length > 0) {
+      elements.sinifOnizlemeKutusu.innerHTML = `✓ ${parsed.length} Sınıf Oluşturulacak: <span class="text-muted fw-normal">${parsed.slice(0, 15).join(', ')}${parsed.length > 15 ? '...' : ''}</span>`;
+    } else {
+      elements.sinifOnizlemeKutusu.innerHTML = '';
+    }
+    notifyParentHeight();
+  }
+
+  elements.manuelSiniflarText.addEventListener('input', () => {
+    updateClassPreview();
+    saveSettingsToLocalStorage();
+  });
+
+  window.materyaalAralikEkle = function(aralikMetni) {
+    const mevcut = elements.manuelSiniflarText.value.trim();
+    if (mevcut) {
+      elements.manuelSiniflarText.value = mevcut + ', ' + aralikMetni;
+    } else {
+      elements.manuelSiniflarText.value = aralikMetni;
+    }
+    updateClassPreview();
+    saveSettingsToLocalStorage();
+  };
+
+  elements.manuelTemizleBtn.addEventListener('click', function () {
+    elements.manuelSiniflarText.value = '';
+    updateClassPreview();
+    saveSettingsToLocalStorage();
+  });
+
+  function handleYontemDegisimi() {
+    if (elements.yontemManuel.checked) {
+      elements.dosyaYuklemeAlani.style.display = 'none';
+      elements.manuelGirisAlani.style.display = 'block';
+    } else {
+      elements.dosyaYuklemeAlani.style.display = 'flex';
+      elements.manuelGirisAlani.style.display = 'none';
+    }
+    saveSettingsToLocalStorage();
+    notifyParentHeight();
+  }
+
+  elements.yontemDosya.addEventListener('change', handleYontemDegisimi);
+  elements.yontemManuel.addEventListener('change', handleYontemDegisimi);
+
+  // --- LOCALSTORAGE & AYAR YÖNETİMİ ---
+  function saveSettingsToLocalStorage() {
+    const settings = {
+      manuelModAktif: elements.yontemManuel.checked,
+      dersAdi: elements.dersAdi.value,
+      renkTemasi: elements.renkTemasi.value,
+      
+      fsDersAdi: elements.fsDersAdi.value,
+      fsSinif: elements.fsSinif.value,
+      fsOgretmen: elements.fsOgretmen.value,
+      fsTarihSaat: elements.fsTarihSaat.value,
+      fsKelebek: elements.fsKelebek.value,
+      fsGirmeyenler: elements.fsGirmeyenler.value,
+      fsEtiketBaslik: elements.fsEtiketBaslik.value,
+      fsSagSinif: elements.fsSagSinif.value,
+
+      sinavTarihi: elements.sinavTarihi.value,
+      gercekSaat: elements.gercekSaat.value,
+      sinavGunu: elements.sinavGunu.value,
+      sinavSaati: elements.sinavSaati.value,
+      sinifFiltre: elements.sinifFiltre.value,
+      tarihSaatGoster: elements.tarihSaatGoster.checked,
+      kelebekAktif: elements.kelebekAktif.checked,
+      girmeyenlerGoster: elements.girmeyenlerGoster.checked,
+      ogretmenAyar: elements.ogretmenAyar.value,
+      sabitOgretmenIsim: elements.sabitOgretmenIsim.value,
+      ogretmenListesi: elements.ogretmenListesi.value,
+      manuelSiniflarText: elements.manuelSiniflarText.value
+    };
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  }
+
+  function loadSettingsFromLocalStorage() {
+    const savedLogo = localStorage.getItem(LOGO_KEY);
+    if (savedLogo) {
+      state.uploadedLogoBase64 = savedLogo;
+      elements.logoStatus.innerHTML = '<span class="text-success fw-bold">✓ Hafızadaki logo aktif.</span>';
+      elements.logoSilBtn.style.display = 'inline-block';
+    } else {
+      elements.logoSilBtn.style.display = 'none';
+    }
+
+    const saved = localStorage.getItem(SETTINGS_KEY);
+    if (!saved) return;
+    try {
+      const s = JSON.parse(saved);
+      if (s.manuelModAktif !== undefined) {
+        if (s.manuelModAktif) elements.yontemManuel.checked = true;
+        else elements.yontemDosya.checked = true;
+        handleYontemDegisimi();
+      }
+      if (s.dersAdi !== undefined) elements.dersAdi.value = s.dersAdi;
+      if (s.renkTemasi !== undefined) {
+        elements.renkTemasi.value = s.renkTemasi;
+        applyTheme(s.renkTemasi);
+      }
+
+      fontInputs.forEach(item => {
+        const key = item.el.id;
+        if (s[key] !== undefined) {
+          applySingleFont(item, s[key]);
+        }
+      });
+
+      if (s.sinavTarihi !== undefined) elements.sinavTarihi.value = s.sinavTarihi;
+      if (s.gercekSaat !== undefined) elements.gercekSaat.value = s.gercekSaat;
+      if (s.sinavGunu !== undefined) elements.sinavGunu.value = s.sinavGunu;
+      if (s.sinavSaati !== undefined) elements.sinavSaati.value = s.sinavSaati;
+      if (s.sinifFiltre !== undefined) elements.sinifFiltre.value = s.sinifFiltre;
+      if (s.tarihSaatGoster !== undefined) elements.tarihSaatGoster.checked = s.tarihSaatGoster;
+      if (s.kelebekAktif !== undefined) elements.kelebekAktif.checked = s.kelebekAktif;
+      if (s.girmeyenlerGoster !== undefined) elements.girmeyenlerGoster.checked = s.girmeyenlerGoster;
+      if (s.manuelSiniflarText !== undefined) {
+        elements.manuelSiniflarText.value = s.manuelSiniflarText;
+        updateClassPreview();
+      }
+      if (s.ogretmenAyar !== undefined) {
+        elements.ogretmenAyar.value = s.ogretmenAyar;
+        elements.ogretmenAyar.dispatchEvent(new Event('change'));
+      }
+      if (s.sabitOgretmenIsim !== undefined) elements.sabitOgretmenIsim.value = s.sabitOgretmenIsim;
+      if (s.ogretmenListesi !== undefined) elements.ogretmenListesi.value = s.ogretmenListesi;
+    } catch (e) {
+      console.warn("Ayar yükleme hatası:", e);
+    }
+  }
+
+  function applyTheme(themeName) {
+    document.documentElement.setAttribute('data-theme', themeName);
+  }
+
+  elements.renkTemasi.addEventListener('change', function () {
+    applyTheme(this.value);
+    saveSettingsToLocalStorage();
+  });
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function normalizeText(str) {
+    if(!str) return "";
+    return str.toUpperCase()
+      .replace(/İ/g, 'I').replace(/Ğ/g, 'G').replace(/Ü/g, 'U')
+      .replace(/Ş/g, 'S').replace(/Ö/g, 'O').replace(/Ç/g, 'C')
+      .trim();
+  }
+
+  function formatDateTR(dateStr) {
+    if (!dateStr) return "";
+    const parts = dateStr.split('-');
+    if (parts.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
+    return dateStr;
+  }
+
+  function buildTarihSaatMetni(tarihVal, saatVal, dersSaatiVal) {
+    const tarihTR = formatDateTR(tarihVal);
+    const parcalar = [];
+    if (tarihTR) parcalar.push(tarihTR);
+    if (saatVal) parcalar.push(`| ${saatVal}`);
+    if (dersSaatiVal) parcalar.push(`(${dersSaatiVal}. Ders)`);
+    return parcalar.join(' ').trim();
+  }
+
+  // --- LOGO SIKIŞTIRMA VE KAYDETME ---
+  function compressImageAndSave(file, maxWidth, maxHeight, quality, callback) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedBase64 = canvas.toDataURL('image/png', quality);
+        callback(compressedBase64);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  elements.logoFile.addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    compressImageAndSave(file, 300, 300, 0.85, function(compressedBase64) {
+      state.uploadedLogoBase64 = compressedBase64;
+      try {
+        localStorage.setItem(LOGO_KEY, compressedBase64);
+        elements.logoStatus.innerHTML = '<span class="text-success fw-bold">✓ Logo kalıcı hafızaya kaydedildi!</span>';
+      } catch (err) {
+        console.warn("LocalStorage kotası aşıldı:", err);
+        elements.logoStatus.innerHTML = '<span class="text-warning fw-bold">⚠️ Tarayıcı hafıza kotası aşıldı. Logo oturum süresince geçerlidir.</span>';
+      }
+      elements.logoSilBtn.style.display = 'inline-block';
+      if (state.activeCards.length > 0) renderAllCards();
+      notifyParentHeight();
+    });
+  });
+
+  elements.logoSilBtn.addEventListener('click', function () {
+    localStorage.removeItem(LOGO_KEY);
+    state.uploadedLogoBase64 = "";
+    elements.logoFile.value = "";
+    elements.logoSilBtn.style.display = 'none';
+    elements.logoStatus.innerHTML = '<span class="text-muted">Logo kaldırıldı.</span>';
+    if (state.activeCards.length > 0) renderAllCards();
+    notifyParentHeight();
+  });
+
+  // --- ÖĞRETMEN AYARLARI ---
+  elements.ogretmenAyar.addEventListener('change', function () {
+    const ayar = this.value;
+    elements.sabitOgretmenIsim.style.display = (ayar === 'sabit') ? 'block' : 'none';
+    elements.listeKutusu.style.display = (ayar === 'liste') ? 'block' : 'none';
+    if (ayar === 'sabit') elements.sabitOgretmenIsim.focus();
+    if (ayar === 'liste') elements.ogretmenListesi.focus();
+    saveSettingsToLocalStorage();
+    notifyParentHeight();
+  });
+
+  [elements.dersAdi, elements.sinavTarihi, elements.gercekSaat, elements.sinavGunu, elements.sinavSaati, elements.sinifFiltre, elements.tarihSaatGoster, elements.kelebekAktif, elements.girmeyenlerGoster, elements.sabitOgretmenIsim, elements.ogretmenListesi].forEach(el => {
+    el.addEventListener('input', saveSettingsToLocalStorage);
+    el.addEventListener('change', saveSettingsToLocalStorage);
+  });
+
+  // --- DOSYA YÜKLEME (EXCEL & PDF) ---
+  elements.programFile.addEventListener('change', async function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const fileExt = file.name.split('.').pop().toLowerCase();
+    elements.fileStatus.innerHTML = '<span class="text-info fw-bold">Dosya taranıyor...</span>';
+
+    if (fileExt === 'xlsx' || fileExt === 'xls') {
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        try {
+          const data = new Uint8Array(evt.target.result);
+          parseExcelFormat(data);
+          if (state.discoveredClasses.length > 0) {
+            elements.fileStatus.innerHTML = `<span class="text-success fw-bold">✓ Excel Başarıyla Ayrıştırıldı! (${state.discoveredClasses.length} Sınıf Bulundu).</span>`;
+          } else {
+            elements.fileStatus.innerHTML = '<span class="text-warning fw-bold">Excel içinde Sınıf/Gün/Saat sütunları tespit edilemedi.</span>';
+          }
+        } catch (err) {
+          console.error(err);
+          elements.fileStatus.innerHTML = '<span class="text-danger fw-bold">Excel okunurken hata oluştu!</span>';
+        }
+        notifyParentHeight();
+      };
+      reader.readAsArrayBuffer(file);
+
+    } else if (fileExt === 'pdf') {
+      const reader = new FileReader();
+      reader.onload = async function (evt) {
+        try {
+          const typedarray = new Uint8Array(evt.target.result);
+          await parsePdfSpatialEOkul(typedarray);
+
+          if (state.discoveredClasses.length > 0) {
+            elements.fileStatus.innerHTML = `<span class="text-success fw-bold">✓ PDF Başarıyla Ayrıştırıldı! (${state.discoveredClasses.length} Sınıf Bulundu).</span>`;
+          } else {
+            elements.fileStatus.innerHTML = '<span class="text-warning fw-bold">PDF içinde sınıf yapısı tespit edilemedi.</span>';
+          }
+        } catch (err) {
+          console.error(err);
+          elements.fileStatus.innerHTML = '<span class="text-danger fw-bold">PDF okunurken hata oluştu!</span>';
+        }
+        notifyParentHeight();
+      };
+      reader.readAsArrayBuffer(file);
+    }
+  });
+
+  function parseExcelFormat(dataArray) {
+    state.classScheduleMap = {};
+    state.discoveredClasses = [];
+
+    const workbook = XLSX.read(dataArray, { type: 'array' });
+    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
+
+    function findKey(row, keywords, excludeWords = []) {
+      const keys = Object.keys(row);
+      const cleanKeys = keys.map(k => ({
+        original: k,
+        clean: normalizeText(k).replace(/[\s_.-]/g, '')
+      }));
+
+      for (const kw of keywords) {
+        const normKw = normalizeText(kw).replace(/[\s_.-]/g, '');
+        for (const item of cleanKeys) {
+          if (excludeWords.some(ew => item.clean.includes(normalizeText(ew).replace(/[\s_.-]/g, '')))) continue;
+          if (item.clean === normKw || item.clean.startsWith(normKw)) {
+            return item.original;
+          }
+        }
+      }
+
+      for (const kw of keywords) {
+        const normKw = normalizeText(kw).replace(/[\s_.-]/g, '');
+        for (const item of cleanKeys) {
+          if (excludeWords.some(ew => item.clean.includes(normalizeText(ew).replace(/[\s_.-]/g, '')))) continue;
+          if (item.clean.includes(normKw)) {
+            return item.original;
+          }
+        }
+      }
+      return null;
+    }
+
+    function cleanDay(val) {
+      const g = normalizeText(String(val));
+      if (g.includes('PAZART') || g === '1') return 'Pazartesi';
+      if (g.includes('SAL') || g === '2') return 'Salı';
+      if (g.includes('CARS') || g === '3') return 'Çarşamba';
+      if (g.includes('PERS') || g === '4') return 'Perşembe';
+      if (g.includes('CUM') || g === '5') return 'Cuma';
+      return String(val).trim();
+    }
+
+    rows.forEach(row => {
+      const sinifK = findKey(row, ['sinifadi', 'sinif', 'snf', 'sube', 'grup', 'derslik']);
+      const gunK = findKey(row, ['gunadi', 'gun', 'tarih', 'day']);
+      const saatK = findKey(row, ['derssaati', 'kacinci', 'dersno', 'period', 'saat']);
+      const ogrK = findKey(row, ['ogretmenadi', 'ogretmen', 'adisoyadi', 'adsoyad', 'egitmen', 'hoca', 'ogrt'], ['dersadi', 'sinifadi', 'gunadi']);
+
+      if (sinifK && gunK && saatK) {
+        const s = String(row[sinifK]).trim().toUpperCase();
+        const g = cleanDay(row[gunK]);
+        const saatRaw = String(row[saatK]);
+        const stMatch = saatRaw.match(/\b([1-9]|10)\b/);
+        const st = stMatch ? stMatch[1] : saatRaw.replace(/[^0-9]/g, '');
+        const ogr = ogrK ? String(row[ogrK]).trim() : "";
+
+        if (s) {
+          if (!state.classScheduleMap[s]) {
+            state.classScheduleMap[s] = {};
+            state.discoveredClasses.push(s);
+          }
+          if (!state.classScheduleMap[s][g]) {
+            state.classScheduleMap[s][g] = {};
+          }
+          state.classScheduleMap[s][g][st] = ogr;
+        }
+      }
+    });
+
+    state.discoveredClasses = Array.from(new Set(state.discoveredClasses));
+    state.discoveredClasses.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+  }
+
+  function extractLinesByY(items, tolerance = 4) {
+    const rowsMap = new Map();
+    items.forEach(item => {
+      if (!item.str || !item.str.trim()) return;
+      const y = Math.round(item.transform[5]);
+      let matchedY = Array.from(rowsMap.keys()).find(k => Math.abs(k - y) <= tolerance);
+      if (matchedY === undefined) {
+        matchedY = y;
+        rowsMap.set(matchedY, []);
+      }
+      rowsMap.get(matchedY).push({ x: item.transform[4], text: item.str.trim() });
+    });
+
+    const sortedY = Array.from(rowsMap.keys()).sort((a, b) => b - a);
+    return sortedY.map(y => {
+      return rowsMap.get(y).sort((a, b) => a.x - b.x).map(i => i.text).join(" ");
+    });
+  }
+
+  async function parsePdfSpatialEOkul(typedarray) {
+    state.classScheduleMap = {};
+    state.discoveredClasses = [];
+
+    const pdf = await pdfjsLib.getDocument(typedarray).promise;
+
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      const items = textContent.items;
+
+      const pageFullText = items.map(i => i.str).join(" ");
+      const classMatch = pageFullText.match(/Sınıf\s*:\s*([0-9]{1,2}\s*[A-ZĞÜŞİÖÇ]+)/i);
+      if (!classMatch) continue;
+
+      const className = classMatch[1].replace(/\s+/g, '').toUpperCase();
+      if (!state.classScheduleMap[className]) {
+        state.classScheduleMap[className] = {};
+        state.discoveredClasses.push(className);
+      }
+
+      const summaryTable = [];
+      const summaryRegexPipe = /(?:(\d+)\s*\|\s*)?([A-Z0-9\.\-\_]{2,15})\s*\|\s*([^|]+)\s*\|\s*[^|]*\|\s*\d+\s*\|\s*([A-ZÇĞİÖŞÜa-zçğıöşü\s\-]+?)(?=\s*\||\s*$|\n|\r)/g;
+      let sMatch;
+      while ((sMatch = summaryRegexPipe.exec(pageFullText)) !== null) {
+        summaryTable.push({
+          code: sMatch[2].trim(),
+          name: sMatch[3].trim(),
+          teacher: sMatch[4].trim()
+        });
+      }
+
+      if (summaryTable.length === 0) {
+        const geometricLines = extractLinesByY(items);
+        geometricLines.forEach(line => {
+          const fallbackMatch = line.match(/^\s*(?:\d+\s+)?([A-Z0-9\.\-\_]{2,15})\s+(.+?)\s+\d+\s+([A-ZÇĞİÖŞÜa-zçğıöşü\s\-]{4,})(?:\s+[\d\-]+)?\s*$/);
+          if (fallbackMatch) {
+            summaryTable.push({
+              code: fallbackMatch[1].trim(),
+              name: fallbackMatch[2].trim(),
+              teacher: fallbackMatch[3].trim()
+            });
+          }
+        });
+      }
+
+      const hourXBounds = [];
+      items.forEach(item => {
+        const hMatch = item.str.match(/^\(([1-9]|10)\)$/);
+        if (hMatch) hourXBounds.push({ hour: parseInt(hMatch[1]), x: item.transform[4] });
+      });
+      hourXBounds.sort((a, b) => a.x - b.x);
+
+      const days = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma"];
+      const dayYBounds = [];
+      items.forEach(item => {
+        days.forEach(day => {
+          if (item.str.trim() === day) dayYBounds.push({ day: day, y: item.transform[5] });
+        });
+      });
+      dayYBounds.sort((a, b) => b.y - a.y);
+
+      dayYBounds.forEach((dBound, dIdx) => {
+        const dayName = dBound.day;
+        if (!state.classScheduleMap[className][dayName]) {
+          state.classScheduleMap[className][dayName] = {};
+        }
+
+        const topY = dBound.y + 12;
+        const bottomY = (dIdx < dayYBounds.length - 1) ? dayYBounds[dIdx + 1].y + 12 : dBound.y - 35;
+
+        hourXBounds.forEach((hBound, hIdx) => {
+          const hourNum = hBound.hour;
+          const leftX = hBound.x - 10;
+          const rightX = (hIdx < hourXBounds.length - 1) ? hourXBounds[hIdx + 1].x - 10 : hBound.x + 55;
+
+          const cellTexts = items.filter(item => {
+            const ix = item.transform[4];
+            const iy = item.transform[5];
+            return (ix >= leftX && ix < rightX && iy <= topY && iy > bottomY);
+          }).map(i => i.str.trim()).filter(t => t.length > 0);
+
+          const cellTextCombined = cellTexts.join(" ");
+          const matchedTeacher = findTeacherForCell(cellTextCombined, summaryTable);
+          if (matchedTeacher) {
+            state.classScheduleMap[className][dayName][hourNum] = matchedTeacher;
+          }
+        });
+      });
+    }
+
+    state.discoveredClasses = Array.from(new Set(state.discoveredClasses));
+    state.discoveredClasses.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+  }
+
+  function findTeacherForCell(combinedText, summaryTable) {
+    if (!combinedText || summaryTable.length === 0) return "";
+    const normCombined = normalizeText(combinedText);
+
+    for (const item of summaryTable) {
+      const normCode = normalizeText(item.code);
+      if (normCode && normCombined.includes(normCode)) return item.teacher;
+    }
+    for (const item of summaryTable) {
+      const normCode = normalizeText(item.code);
+      const altCode1 = normCode.replace(/5/g, 'S');
+      const altCode2 = normCode.replace(/S/g, '5');
+      if (normCombined.includes(altCode1) || normCombined.includes(altCode2)) return item.teacher;
+    }
+    for (const item of summaryTable) {
+      const tNameParts = item.teacher.split(/\s+/);
+      if (tNameParts.length >= 2) {
+        const surname = normalizeText(tNameParts[tNameParts.length - 1]);
+        if (surname.length >= 3 && normCombined.includes(surname.substring(0, 3))) return item.teacher;
+      }
+    }
+    return "";
+  }
+
+  // --- KARTLARI EKRANA BASMA (RENDER) ---
+  function renderAllCards() {
+    if (state.activeCards.length === 0) {
+      elements.printArea.innerHTML = '';
+      elements.yazdirBtn.style.display = 'none';
+      elements.pdfIndirBtn.style.display = 'none';
+      elements.previewCardSection.style.display = 'none';
+      notifyParentHeight();
+      return;
+    }
+
+    const toplamKart = state.activeCards.length;
+    const toplamSayfa = Math.ceil(toplamKart / 3);
+    elements.onizlemeBilgiRozet.innerText = `${toplamSayfa} A4 Sayfa / ${toplamKart} Kapı Kartı`;
+    elements.previewCardSection.style.display = 'block';
+
+    let htmlOutput = `
+      <div class="no-print d-flex justify-content-between align-items-center mb-3 px-2">
+        <small class="text-secondary">✍️ Kutucuklara dokunarak içerikleri düzenleyebilirsiniz. Sağ üstteki <strong>(×)</strong> butonundan kart silebilirsiniz.</small>
+        <button type="button" class="btn btn-sm btn-outline-primary fw-bold touch-btn" onclick="window.materyaalHizliKartEkle()">+ Yedek Kart Ekle</button>
+      </div>`;
+
+    for (let i = 0; i < state.activeCards.length; i += 3) {
+      const sayfaGrubu = state.activeCards.slice(i, i + 3);
+      htmlOutput += '<div class="a4-sayfa">';
+
+      sayfaGrubu.forEach((kart) => {
+        let tarihSaatHTML = "";
+        if (kart.tarihSaatGoster && kart.tarihSaatMetni) {
+          tarihSaatHTML = `
+            <div class="satir satir-tarih-saat">
+              <div class="etiket">TARİH / SAAT</div>
+              <div class="deger" contenteditable="true" autocorrect="off" autocapitalize="sentences" spellcheck="false" inputmode="text" oninput="window.materyaalGuncelle('${kart.id}', 'tarihSaatMetni', this.innerText)">${escapeHtml(kart.tarihSaatMetni)}</div>
+            </div>`;
+        }
+
+        let ogretmenHTML = "";
+        if (kart.ogretmenSatiriGoster) {
+          ogretmenHTML = `
+            <div class="satir satir-ogretmen">
+              <div class="etiket">GÖREVLİ ÖĞRETMEN</div>
+              <div class="deger text-primary" contenteditable="true" autocorrect="off" autocapitalize="sentences" spellcheck="false" inputmode="text" title="Tıklayıp Düzenle" oninput="window.materyaalGuncelle('${kart.id}', 'ogretmenAdi', this.innerText)">${escapeHtml(kart.ogretmenAdi)}</div>
+            </div>`;
+        }
+
+        let kelebekHTML = "";
+        if (kart.kelebekGoster) {
+          kelebekHTML = `
+            <div class="satir satir-kelebek">
+              <div class="etiket">SIRA / ÖĞRENCİ NO</div>
+              <div class="deger" contenteditable="true" autocorrect="off" autocapitalize="sentences" spellcheck="false" inputmode="text" placeholder="Örn: 101 - 145" oninput="window.materyaalGuncelle('${kart.id}', 'kelebekBilgisi', this.innerText)">${escapeHtml(kart.kelebekBilgisi || "")}</div>
+            </div>`;
+        }
+
+        let girmeyenlerHTML = "";
+        if (kart.girmeyenlerGoster) {
+          girmeyenlerHTML = `
+            <div class="satir satir-girmeyenler">
+              <div class="etiket">SINAVA GİRMEYENLER</div>
+              <div class="deger" contenteditable="true" autocorrect="off" autocapitalize="sentences" spellcheck="false" inputmode="text" oninput="window.materyaalGuncelle('${kart.id}', 'girmeyenler', this.innerText)">${escapeHtml(kart.girmeyenler || "")}</div>
+            </div>`;
+        }
+
+        let logoHTML = "";
+        if (state.uploadedLogoBase64) {
+          logoHTML = `<div class="kart-logo-kapsayici"><img src="${state.uploadedLogoBase64}" class="kart-logo" alt="Okul Logo" /></div>`;
+        }
+
+        htmlOutput += `
+          <div class="sinif-kart" data-id="${kart.id}">
+            <button type="button" class="kart-sil-btn no-print" title="Bu Kartı Sil" onclick="window.materyaalKartSil('${kart.id}')">×</button>
+            
+            <div class="sol-tablo">
+              <div class="satir satir-ders-adi">
+                <div class="etiket">DERSİN ADI</div>
+                <div class="deger" contenteditable="true" autocorrect="off" autocapitalize="sentences" spellcheck="false" inputmode="text" oninput="window.materyaalGuncelle('${kart.id}', 'dersAdi', this.innerText)">${escapeHtml(kart.dersAdi)}</div>
+              </div>
+              ${tarihSaatHTML}
+              <div class="satir satir-sinif">
+                <div class="etiket">SINIF</div>
+                <div class="deger" contenteditable="true" autocorrect="off" autocapitalize="sentences" spellcheck="false" inputmode="text" oninput="window.materyaalGuncelle('${kart.id}', 'sinifAdi', this.innerText)">${escapeHtml(kart.sinifAdi)}</div>
+              </div>
+              ${ogretmenHTML}
+              ${kelebekHTML}
+              ${girmeyenlerHTML}
+            </div>
+
+            <div class="sag-panel">
+              ${logoHTML}
+              <div class="sag-sinif-etiket" contenteditable="true" autocorrect="off" autocapitalize="sentences" spellcheck="false" inputmode="text" oninput="window.materyaalGuncelle('${kart.id}', 'sinifAdi', this.innerText)">${escapeHtml(kart.sinifAdi)}</div>
+            </div>
+          </div>`;
+      });
+
+      htmlOutput += '</div>';
+    }
+
+    elements.printArea.innerHTML = htmlOutput;
+    elements.yazdirBtn.style.display = 'inline-block';
+    elements.pdfIndirBtn.style.display = 'inline-block';
+    notifyParentHeight();
+  }
+
+  // Global Kart İşlemleri
+  window.materyaalKartSil = function (cardId) {
+    state.activeCards = state.activeCards.filter(c => c.id !== cardId);
+    renderAllCards();
+  };
+
+  window.materyaalGuncelle = function (cardId, field, val) {
+    const card = state.activeCards.find(c => c.id === cardId);
+    if (card) card[field] = val;
+  };
+
+  window.materyaalHizliKartEkle = function () {
+    elements.manuelKartBtn.click();
+  };
+
+  // --- KARTLARI OLUŞTUR ---
+  elements.olusturBtn.addEventListener('click', function () {
+    saveSettingsToLocalStorage();
+
+    const dersAdiInput = elements.dersAdi.value.trim();
+    const dersAdi = dersAdiInput || 'SINAV DERSİ';
+    const gun = elements.sinavGunu.value;
+    const saat = elements.sinavSaati.value;
+    const filtre = elements.sinifFiltre.value;
+    const ogretmenAyar = elements.ogretmenAyar.value;
+    const sabitIsim = elements.sabitOgretmenIsim.value.trim();
+    
+    const tarihSaatGoster = elements.tarihSaatGoster.checked;
+    const kelebekAktif = elements.kelebekAktif.checked;
+    const girmeyenlerGoster = elements.girmeyenlerGoster.checked;
+    
+    const tarihSaatMetni = buildTarihSaatMetni(elements.sinavTarihi.value, elements.gercekSaat.value, saat);
+
+    let yapistirilanOgretmenler = [];
+    if (ogretmenAyar === 'liste') {
+      yapistirilanOgretmenler = elements.ogretmenListesi.value
+        .split(/[\n,]+/)
+        .map(isim => isim.trim())
+        .filter(isim => isim.length > 0);
+    }
+
+    let targetClasses = [];
+    const manuelKullan = elements.yontemManuel.checked;
+    const manuelText = elements.manuelSiniflarText.value.trim();
+
+    if (manuelKullan || (manuelText && state.discoveredClasses.length === 0)) {
+      targetClasses = parseClassInput(manuelText);
+    } else {
+      targetClasses = Array.from(new Set(state.discoveredClasses));
+    }
+
+    if (targetClasses.length === 0) {
+      alert("Lütfen önce bir ders programı dosyası (PDF/Excel) yükleyin veya 'Manuel Toplu Sınıf' kutusuna sınıf aralıklarını yazın.");
+      return;
+    }
+
+    if (filtre !== "TUMU") {
+      targetClasses = targetClasses.filter(s => s.startsWith(filtre));
+    }
+
+    targetClasses.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+
+    let listeSayaci = 0;
+    state.activeCards = [];
+
+    targetClasses.forEach((sinifAdi, index) => {
+      let ogretmenAdi = "";
+      if (ogretmenAyar === 'otomatik') {
+        ogretmenAdi = state.classScheduleMap[sinifAdi]?.[gun]?.[saat] || "";
+      } else if (ogretmenAyar === 'sabit') {
+        ogretmenAdi = sabitIsim;
+      } else if (ogretmenAyar === 'liste') {
+        if (listeSayaci < yapistirilanOgretmenler.length) {
+          ogretmenAdi = yapistirilanOgretmenler[listeSayaci];
+          listeSayaci++;
+        }
+      }
+
+      state.activeCards.push({
+        id: 'c_' + Date.now() + '_' + index,
+        dersAdi: dersAdi,
+        sinifAdi: sinifAdi,
+        ogretmenAdi: ogretmenAdi,
+        tarihSaatMetni: tarihSaatMetni,
+        tarihSaatGoster: tarihSaatGoster,
+        ogretmenSatiriGoster: (ogretmenAyar !== 'gizle'),
+        kelebekGoster: kelebekAktif,
+        kelebekBilgisi: "",
+        girmeyenlerGoster: girmeyenlerGoster,
+        girmeyenler: ""
+      });
+    });
+
+    renderAllCards();
+  });
+
+  // --- MANUEL BOŞ KART EKLEME ---
+  elements.manuelKartBtn.addEventListener('click', function () {
+    const dersAdi = elements.dersAdi.value.trim() || 'SINAV DERSİ';
+    const saat = elements.sinavSaati.value;
+    const tarihSaatMetni = buildTarihSaatMetni(elements.sinavTarihi.value, elements.gercekSaat.value, saat);
+
+    const yeniKart = {
+      id: 'c_manual_' + Date.now(),
+      dersAdi: dersAdi,
+      sinifAdi: 'YEDEK SALON',
+      ogretmenAdi: '',
+      tarihSaatMetni: tarihSaatMetni,
+      tarihSaatGoster: elements.tarihSaatGoster.checked,
+      ogretmenSatiriGoster: (elements.ogretmenAyar.value !== 'gizle'),
+      kelebekGoster: elements.kelebekAktif.checked,
+      kelebekBilgisi: '',
+      girmeyenlerGoster: elements.girmeyenlerGoster.checked,
+      girmeyenler: ''
+    };
+
+    state.activeCards.push(yeniKart);
+    renderAllCards();
+  });
+
+  // --- TASLAK KAYDETME & YÜKLEME ---
+  elements.taslakKaydetBtn.addEventListener('click', function () {
+    if (state.activeCards.length === 0) {
+      alert("Kaydedilecek bir etiket şablonu bulunamadı. Lütfen önce 'Şablonları Oluştur' butonuna basın.");
+      return;
+    }
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(state.activeCards));
+    saveSettingsToLocalStorage();
+    alert("✓ Taslak ve yaptığınız tüm düzenlemeler tarayıcı hafızasına kaydedildi!");
+  });
+
+  elements.taslakYukleBtn.addEventListener('click', function () {
+    const savedDraft = localStorage.getItem(DRAFT_KEY);
+    if (!savedDraft) {
+      alert("Tarayıcıda kayıtlı bir taslak bulunamadı.");
+      return;
+    }
+    try {
+      state.activeCards = JSON.parse(savedDraft);
+      renderAllCards();
+      alert("✓ Kayıtlı taslak başarıyla yüklendi.");
+    } catch (err) {
+      alert("Taslak yüklenirken hata oluştu.");
+    }
+  });
+
+  // --- İSTEMCİ TARAFLI PDF İNDİR ---
+  elements.pdfIndirBtn.addEventListener('click', function () {
+    const printElement = document.getElementById('printArea');
+    if (!printElement || !printElement.innerHTML.trim()) {
+      alert("İndirilecek şablon bulunamadı.");
+      return;
+    }
+
+    const dersAdi = (elements.dersAdi.value.trim() || 'Sinav').replace(/[^a-zA-Z0-9çğıöşüÇĞİÖŞÜ_]/g, '_');
+    
+    const clone = printElement.cloneNode(true);
+    clone.querySelectorAll('.no-print, .kart-sil-btn').forEach(el => el.remove());
+
+    const opt = {
+      margin: 0,
+      filename: `${dersAdi}_Kapi_Etiketleri.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, logging: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    if (window.html2pdf) {
+      const btn = elements.pdfIndirBtn;
+      const originalText = btn.innerText;
+      btn.innerText = '⏳ Hazırlanıyor...';
+      btn.disabled = true;
+
+      html2pdf().set(opt).from(clone).save().then(() => {
+        btn.innerText = originalText;
+        btn.disabled = false;
+      }).catch(err => {
+        console.error("PDF oluşturma hatası:", err);
+        btn.innerText = originalText;
+        btn.disabled = false;
+        window.print();
+      });
+    } else {
+      window.print();
+    }
+  });
+
+  // --- YAZDIRMA ---
+  elements.yazdirBtn.addEventListener('click', () => {
+    window.print();
+  });
+
+  loadSettingsFromLocalStorage();
+  setTimeout(notifyParentHeight, 500);
+
+})();
+</script>
+
+</body>
+</html>
