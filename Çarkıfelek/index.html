@@ -61,12 +61,14 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
-    html, body {
+    body {
       width: 100%;
-      min-height: 100%;
       background-color: var(--bg-main);
       color: var(--text-main);
       overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 2rem;
     }
 
     header {
@@ -103,15 +105,16 @@
       font-size: 0.85rem;
       font-weight: 600;
       outline: none;
+      cursor: pointer;
     }
 
     .btn {
       background-color: var(--accent);
       color: #fff;
       border: none;
-      padding: 0.65rem 1rem;
+      padding: 0.75rem 1rem;
       border-radius: var(--radius);
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
@@ -134,12 +137,11 @@
       color: var(--text-main);
     }
 
-    /* Ana Taşıyıcı: Masaüstünde 2 Sütun, Mobilde Tek Sütun */
     .main-container {
       display: flex;
       flex-direction: column;
       width: 100%;
-      max-width: 1400px;
+      max-width: 1300px;
       margin: 0 auto;
     }
 
@@ -150,7 +152,6 @@
       }
     }
 
-    /* Sol / Üst: Çark Alanı */
     .wheel-section {
       width: 100%;
       display: flex;
@@ -166,14 +167,14 @@
         flex: 1.1;
         position: sticky;
         top: 60px;
-        padding: 2rem;
+        padding: 2rem 1rem;
       }
     }
 
     .wheel-container {
       position: relative;
-      width: min(84vw, 360px);
-      height: min(84vw, 360px);
+      width: min(80vw, 340px);
+      height: min(80vw, 340px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -181,10 +182,10 @@
 
     @media (min-width: 901px) {
       .wheel-container {
-        width: min(65vh, 520px);
-        height: min(65vh, 520px);
-        max-width: 520px;
-        max-height: 520px;
+        width: min(65vh, 500px);
+        height: min(65vh, 500px);
+        max-width: 500px;
+        max-height: 500px;
       }
     }
 
@@ -234,14 +235,14 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 72px;
-      height: 72px;
+      width: 76px;
+      height: 76px;
       border-radius: 50%;
       background: radial-gradient(circle, #ffffff 0%, #cbd5e1 100%);
       color: #0b1329;
       border: 5px solid var(--bg-panel);
       font-weight: 850;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       cursor: pointer;
       z-index: 6;
       box-shadow: 0 4px 15px rgba(0,0,0,0.4);
@@ -253,8 +254,8 @@
 
     @media (min-width: 901px) {
       .center-spin-btn {
-        width: 84px;
-        height: 84px;
+        width: 86px;
+        height: 86px;
         font-size: 1rem;
       }
     }
@@ -270,7 +271,6 @@
       border-color: var(--border-color);
     }
 
-    /* Sağ / Alt: Kontrol Paneli */
     .controls-section {
       width: 100%;
       padding: 1rem;
@@ -282,7 +282,7 @@
     @media (min-width: 901px) {
       .controls-section {
         flex: 0.9;
-        padding: 2rem 1.5rem 3rem 0;
+        padding: 2rem 1.5rem 2rem 0;
       }
     }
 
@@ -297,7 +297,7 @@
     }
 
     .card-title {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: var(--text-main);
       display: flex;
@@ -320,14 +320,14 @@
       border: 1px solid var(--border-color);
       border-radius: 8px;
       color: var(--text-main);
-      padding: 0.65rem 0.75rem;
-      font-size: 0.9rem;
+      padding: 0.75rem;
+      font-size: 0.95rem;
       outline: none;
     }
 
     textarea {
       resize: vertical;
-      min-height: 110px;
+      min-height: 120px;
       line-height: 1.4;
       user-select: text;
       -webkit-user-select: text;
@@ -341,27 +341,32 @@
     .toggle-row {
       display: flex;
       flex-direction: column;
-      gap: 0.65rem;
-      padding: 0.2rem 0;
+      gap: 0.8rem;
+      padding: 0.4rem 0;
     }
 
     .toggle-container {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      background: var(--bg-main);
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
     }
 
     .toggle-label {
-      font-size: 0.85rem;
-      font-weight: 500;
+      font-size: 0.9rem;
+      font-weight: 600;
       color: var(--text-main);
     }
 
     .switch {
       position: relative;
       display: inline-block;
-      width: 44px;
-      height: 24px;
+      width: 46px;
+      height: 26px;
+      flex-shrink: 0;
     }
 
     .switch input {
@@ -383,8 +388,8 @@
     .slider:before {
       position: absolute;
       content: "";
-      height: 16px;
-      width: 16px;
+      height: 18px;
+      width: 18px;
       left: 3px;
       bottom: 3px;
       background-color: white;
@@ -401,7 +406,6 @@
       transform: translateX(20px);
     }
 
-    /* Modal */
     .modal-backdrop {
       position: fixed;
       top: 0; left: 0; width: 100vw; height: 100vh;
@@ -427,7 +431,7 @@
       border: 2px solid var(--accent);
       border-radius: 16px;
       padding: 1.5rem;
-      max-width: 420px;
+      max-width: 440px;
       width: 100%;
       text-align: center;
       box-shadow: 0 20px 40px rgba(0,0,0,0.5);
@@ -448,7 +452,7 @@
     }
 
     .winner-name {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       font-weight: 800;
       color: var(--text-main);
       margin: 1rem 0;
@@ -497,7 +501,6 @@
   </header>
 
   <div class="main-container">
-    <!-- Çark Alanı -->
     <section class="wheel-section">
       <div class="wheel-container">
         <div class="pointer" id="wheelPointer">
@@ -509,10 +512,8 @@
       </div>
     </section>
 
-    <!-- Kontrol Paneli -->
     <section class="controls-section">
       
-      <!-- Hazır Şablonlar -->
       <div class="card">
         <div class="card-title">
           <span>📚 Hazır Etkinlik Şablonları</span>
@@ -525,7 +526,6 @@
         </select>
       </div>
 
-      <!-- Sınıf / Liste Yönetimi -->
       <div class="card">
         <div class="card-title">
           <span>💾 Kayıtlı Sınıflar & Listeler</span>
@@ -542,7 +542,6 @@
         </div>
       </div>
 
-      <!-- Liste Giriş ve Ayarlar -->
       <div class="card">
         <div class="card-title">
           <span>📋 Çark Elemanları</span>
@@ -577,7 +576,6 @@
     </section>
   </div>
 
-  <!-- Kazanan Modalı -->
   <div class="modal-backdrop" id="winnerModal">
     <div class="modal-box">
       <div class="modal-tag">🎉 Günün Şanslı Öğesi / Görevi</div>
@@ -592,6 +590,20 @@
   <canvas id="confettiCanvas"></canvas>
 
   <script>
+    /* Dinamik İframe Yükseklik Bildirimi (Auto-Resizer) */
+    function sendHeightToParent() {
+      const height = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'setHeight', height: height }, '*');
+      }
+    }
+
+    if (window.ResizeObserver) {
+      new ResizeObserver(sendHeightToParent).observe(document.body);
+    }
+    window.addEventListener('load', sendHeightToParent);
+    window.addEventListener('resize', sendHeightToParent);
+
     const PRESET_TEMPLATES = {
       homework: [
         "Evde bir deney yap",
@@ -960,6 +972,7 @@
       items = cleanAndParseInput(itemsTextarea.value);
       itemCountBadge.textContent = `${items.length} Eleman`;
       drawWheel();
+      sendHeightToParent();
     }
 
     function setListContent(arr, saveSnapshot = true) {
@@ -970,6 +983,7 @@
       itemsTextarea.value = items.join('\n');
       itemCountBadge.textContent = `${items.length} Eleman`;
       drawWheel();
+      sendHeightToParent();
     }
 
     function removeItemFromCurrentList(itemToRemove) {
@@ -979,6 +993,7 @@
         itemsTextarea.value = items.join('\n');
         itemCountBadge.textContent = `${items.length} Eleman`;
         drawWheel();
+        sendHeightToParent();
       }
     }
 
@@ -1095,6 +1110,7 @@
       renderSavedListsDropdown();
       setListContent(PRESET_TEMPLATES.homework);
       templatesSelect.value = 'homework';
+      setTimeout(sendHeightToParent, 300);
     });
   </script>
 </body>
