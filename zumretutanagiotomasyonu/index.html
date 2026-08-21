@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zümre Tutanağı Otomasyonu (MEB Uyumlu)</title>
+  
+  <!-- DIŞ KÜTÜPHANELER (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+  <!-- STİL KODLARI (AÇIK TEMA & RESMÎ YAZIŞMA STANDARTLARI) -->
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 0; }
+    .a4-page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 15mm;
+      margin: 0 auto;
+      background: #ffffff;
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 10.5pt;
+      line-height: 1.25;
+      color: #111111;
+      transform-origin: top center;
+      transition: transform 0.2s ease;
+    }
+    @media print {
+      body * { visibility: hidden; }
+      #a4-preview-card, #a4-preview-card * { visibility: visible; }
+      #a4-preview-card {
+        position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0;
+        box-shadow: none;
+        transform: none !important;
+      }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-slate-50 text-slate-800 min-h-screen py-6 px-4">
+
+    <!-- Üst Nav Bar -->
+    <header class="max-w-5xl mx-auto bg-white border border-slate-200 shadow-sm rounded-xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4 no-print">
+      <div class="flex items-center space-x-3">
+        <div class="bg-blue-700 text-white font-extrabold px-3 py-1.5 rounded-lg text-sm shadow-sm">MEB</div>
+        <div>
+          <h1 class="font-bold text-slate-900 text-base md:text-lg leading-tight">Zümre Tutanağı Otomasyonu (Mevzuat &amp; TYMM Uyumlu)</h1>
+          <p class="text-xs text-slate-500">Resmî Yazışma Yönetmeliği (12pt / 1,5cm) &amp; 02/01/2024 Yönerge Standartlarında</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-2">
+        <button type="button" onclick="window.resetToDefaultData()" class="px-3.5 py-2 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg text-xs font-bold transition flex items-center space-x-1" title="Boş görünüyorsa tüm alanları 1. Sınıf tam şablonuyla doldurur">
+          <span>🔄 Varsayılan Metinleri Yükle</span>
+        </button>
+        <button type="button" onclick="window.togglePreviewVisibility()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition flex items-center space-x-1">
+          <span id="btn-toggle-pv-icon">👁️</span>
+          <span id="btn-toggle-pv-text">Ön Gösterimi Gizle / Göster</span>
+        </button>
+        <button type="button" onclick="window.openHistoryModal()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">
+          📜 Geçmiş Taslaklar
+        </button>
+        <button type="button" onclick="window.triggerPrint()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-sm">
+          🖨️ Yazdır / PDF
+        </button>
+      </div>
+    </header>
+
+    <!-- FORM DÜZENLEME ALANI (ÜST KISIM) -->
+    <main class="max-w-5xl mx-auto space-y-6 no-print">
+
+      <!-- 1. İdari ve Kurumsal Bilgiler Kutusu -->
+      <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 space-y-4">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-blue-900 border-b border-slate-100 pb-2 flex items-center justify-between">
+          <span>1. Okul ve Toplantı İdari Bilgileri</span>
+          <span class="text-[10px] font-normal text-slate-400">Tüm veriler anlık işlenir</span>
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Kurum / Okul Adı</label>
+            <input type="text" id="inp-okul" oninput="window.handleInputChange('okul', this.value)" placeholder="Örn: Atatürk İlkokulu Müdürlüğü" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">İl / İlçe M.E.M.</label>
+            <input type="text" id="inp-ilce" oninput="window.handleInputChange('ilce', this.value)" placeholder="Örn: Kadıköy / İstanbul" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Eğitim-Öğretim Yılı</label>
+            <input type="text" id="inp-egitimYili" oninput="window.handleInputChange('egitimYili', this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Ders / Sınıf / Branş</label>
+            <input type="text" id="inp-brans" oninput="window.handleInputChange('brans', this.value)" placeholder="Örn: 1. Sınıf veya Türkçe" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Toplantı Dönemi / Türü</label>
+            <select id="inp-donem" onchange="window.handleInputChange('donem', this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+              <option value="1. Sınıf Sene Başı Zümre Toplantısı">1. Sınıf Sene Başı Zümre Toplantısı</option>
+              <option value="Sene Başı Zümre Toplantısı">Sene Başı Zümre Toplantısı</option>
+              <option value="1. Dönem II. Zümre Toplantısı">1. Dönem II. Zümre Toplantısı</option>
+              <option value="2. Dönem Başı Zümre Toplantısı">2. Dönem Başı Zümre Toplantısı</option>
+              <option value="Sene Sonu Zümre Toplantısı">Sene Sonu Zümre Toplantısı</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Toplantı Yeri</label>
+            <input type="text" id="inp-toplantiYeri" oninput="window.handleInputChange('toplantiYeri', this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Toplantı Tarihi</label>
+            <input type="text" id="inp-tarih" oninput="window.handleInputChange('tarih', this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Toplantı Saati</label>
+            <input type="text" id="inp-saat" oninput="window.handleInputChange('saat', this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Zümre Başkanı Adı</label>
+            <input type="text" id="inp-baskan" oninput="window.handleInputChange('baskan', this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Okul Müdürü Adı</label>
+            <input type="text" id="inp-okulMuduru" oninput="window.handleInputChange('okulMuduru', this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"/>
+          </div>
+        </div>
+
+        <!-- MEB 02/01/2024 Yönergesi Zümre Başkanı Seçim Kriteri Paneli -->
+        <div class="bg-blue-50/60 border border-blue-100 rounded-lg p-3 space-y-2">
+          <label class="block text-xs font-bold text-blue-900">
+            ⚖️ MEB Zümre Yönergesi (02/01/2024) - Başkan Seçim Dayanağı Hiyerarşisi
+          </label>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <select id="inp-baskanKriter" onchange="window.handleInputChange('baskanKriter', this.value)" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white outline-none">
+                <option value="İstekli Öğretmenler Arasından Seçilmiştir">1. İstekli Adaylar Arasından Seçim</option>
+                <option value="Alanında Doktora Derecesine Sahip Olma Önceliği">2. Alanında Doktora Derecesine Sahip Öğretmen</option>
+                <option value="Başöğretmen Unvanına Sahip Olma Önceliği">3. Başöğretmen Unvanına Sahip Öğretmen</option>
+                <option value="Alanında Yüksek Lisans Derecesine Sahip Olma Önceliği">4. Alanında Yüksek Lisans Yapan Öğretmen</option>
+                <option value="Uzman Öğretmen Unvanına Sahip Olma Önceliği">5. Uzman Öğretmen Unvanına Sahip Öğretmen</option>
+                <option value="Önceki Dönem Zümre Başkanlığı Görevini Yürütmüş Olma">6. Önceki Dönem Başkanlık Deneyimi</option>
+                <option value="Mesleki Kıdemi En Yüksek Öğretmen Olma Önceliği">7. Mesleki Kıdem Esasına Göre Belirleme</option>
+              </select>
+            </div>
+            <div>
+              <input type="text" id="inp-baskanMebbisNo" oninput="window.handleInputChange('baskanMebbisNo', this.value)" placeholder="MEBBİS Modül Kayıt / Onay Referansı (Opsiyonel)" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white outline-none"/>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 2. Katılımcı Öğretmen Yönetim Kutusu -->
+      <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-5 space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-blue-900">2. Katılımcı Öğretmen Listesi ve Unvan Seçimi</h2>
+          <button type="button" onclick="window.addParticipantRow()" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-bold">
+            + Öğretmen Ekle
+          </button>
+        </div>
+        <div id="participant-list-container" class="space-y-2"></div>
+      </div>
+
+      <!-- 3. Metin Alanları (Gündem, Görüşmeler, Kararlar) -->
+      <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-5 space-y-5">
+        
+        <!-- Gündem Maddeleri -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-xs font-bold uppercase text-slate-700">Gündem Maddeleri (1-36 Maddeler Eksiksiz)</label>
+            <div class="space-x-2">
+              <button type="button" onclick="window.loadPresetGundem('1SINIF')" class="text-xs text-blue-600 hover:underline font-bold">1. Sınıf Şablonunu Yükle</button>
+              <button type="button" onclick="window.copyFieldText('txt-gundem')" class="text-xs text-slate-500 hover:text-blue-600">📄 Kopyala</button>
+            </div>
+          </div>
+          <textarea id="txt-gundem" rows="8" oninput="window.handleInputChange('gundemText', this.value)" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs outline-none leading-relaxed font-mono"></textarea>
+        </div>
+
+        <!-- Görüşmeler Metni -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-xs font-bold uppercase text-slate-700">Gündem Maddelerinin Görüşülmesi (36 Maddenin Tamamı Müzakere Edilmiş Detaylı Metin)</label>
+            <div class="space-x-2">
+              <button type="button" onclick="window.loadPresetGorusmeler('1SINIF')" class="text-xs text-blue-600 hover:underline font-bold">1. Sınıf Görüşmelerini Yükle</button>
+              <button type="button" onclick="window.copyFieldText('txt-gorusmeler')" class="text-xs text-slate-500 hover:text-blue-600">📄 Kopyala</button>
+            </div>
+          </div>
+          <textarea id="txt-gorusmeler" rows="18" oninput="window.handleInputChange('gorusmeler', this.value)" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs outline-none leading-relaxed font-mono"></textarea>
+        </div>
+
+        <!-- Alınan Kararlar -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-xs font-bold uppercase text-slate-700">Alınan Kararlar (36 Madde Karar Metni)</label>
+            <div class="space-x-2">
+              <button type="button" onclick="window.loadPresetKararlar('1SINIF')" class="text-xs text-blue-600 hover:underline font-bold">1. Sınıf Kararlarını Yükle</button>
+              <button type="button" onclick="window.copyFieldText('txt-kararlar')" class="text-xs text-slate-500 hover:text-blue-600">📄 Kopyala</button>
+            </div>
+          </div>
+          <textarea id="txt-kararlar" rows="10" oninput="window.handleInputChange('kararlar', this.value)" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs outline-none leading-relaxed font-mono"></textarea>
+        </div>
+
+      </div>
+
+      <!-- İndirme / Denetleme Butonu -->
+      <div class="pt-2">
+        <button type="button" onclick="window.runAuditAndGenerate()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-xl transition shadow-md flex items-center justify-center space-x-2 text-sm">
+          <span>🔍 Akıllı Denetleyici ile Doğrula ve Resmî Word (.docx) İndir</span>
+        </button>
+      </div>
+
+    </main>
+
+    <!-- AŞAĞI KISIM: CANLI A4 ÖN GÖSTERİMİ -->
+    <section id="preview-section-wrapper" class="max-w-5xl mx-auto mt-10 space-y-4">
+      
+      <div class="bg-white border border-slate-200 p-3 rounded-xl shadow-sm flex flex-wrap items-center justify-between gap-2 no-print text-xs">
+        <div class="flex items-center space-x-2 font-semibold text-slate-700">
+          <span class="font-bold text-blue-900">📄 CANLI ÖN GÖSTERİM (Resmî Format)</span>
+          <span id="stat-words" class="bg-blue-50 px-2 py-0.5 rounded text-blue-700">0 Kelime</span>
+          <span id="stat-decisions" class="bg-emerald-50 px-2 py-0.5 rounded text-emerald-700">0 Karar</span>
+        </div>
+
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400">Ölçek:</span>
+          <button type="button" onclick="window.setZoom(0.65)" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 rounded font-mono text-[11px]">%65</button>
+          <button type="button" onclick="window.setZoom(0.85)" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 rounded font-mono text-[11px]">%85</button>
+          <button type="button" onclick="window.setZoom(1.0)" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 rounded font-mono text-[11px]">%100</button>
+        </div>
+      </div>
+
+      <!-- A4 Sayfası Çerçevesi -->
+      <div class="overflow-x-auto pb-12">
+        <div id="a4-preview-card" class="a4-page border border-slate-300 rounded-sm space-y-4">
+          
+          <div class="text-center font-bold space-y-0.5">
+            <div id="pv-okulMudurlugu">....................................................... MÜDÜRLÜĞÜNE</div>
+            <div class="pt-2 text-[11pt] text-blue-950" id="pv-baslik1">2026-2027 EĞİTİM-ÖĞRETİM YILI</div>
+            <div class="text-[11pt] text-blue-950" id="pv-baslik2">1. SINIF SENE BAŞI ZÜMRE TOPLANTI TUTANAĞI</div>
+          </div>
+
+          <!-- Üst Bilgi Yazısı -->
+          <div class="text-justify indent-8 text-[10pt] leading-relaxed" id="pv-ustYazi">
+            2026-2027 Eğitim-Öğretim Yılı 1. Sınıf Sene Başı Zümre Toplantısı 01.08.2026 tarihinde saat 15:30'te aşağıdaki gündem maddelerini görüşmek üzere Öğretmenler Odasında Zümre Başkanı Öğretmen1 başkanlığında yapılacaktır. Gereğini bilgilerinize arz ederim.
+          </div>
+
+          <!-- Gündem Maddeleri Bölümü -->
+          <div class="space-y-1 pt-2">
+            <div class="font-bold text-center text-[10.5pt] uppercase border-b border-slate-300 pb-0.5">GÜNDEM MADDELERİ</div>
+            <ol class="list-decimal list-inside text-[9.5pt] space-y-0.5 text-slate-900" id="pv-gundemMaddeleri"></ol>
+          </div>
+
+          <!-- Gündem Görüşmeleri Bölümü -->
+          <div class="space-y-1 pt-3">
+            <div class="font-bold text-center text-[10.5pt] uppercase border-b border-slate-300 pb-0.5">GÜNDEM MADDELERİNİN GÖRÜŞÜLMESİ</div>
+            <div class="space-y-2 text-[9.5pt] text-slate-900 text-justify" id="pv-gorusmeler"></div>
+          </div>
+
+          <!-- Alınan Kararlar Bölümü -->
+          <div class="space-y-1 pt-3">
+            <div class="font-bold text-center text-[10.5pt] uppercase border-b border-slate-300 pb-0.5">ALINAN KARARLAR</div>
+            <ol class="list-decimal list-inside text-[9.5pt] space-y-0.5 text-slate-900" id="pv-kararlar"></ol>
+          </div>
+
+          <!-- Katılımcı Tablosu ve İmza Sirküsü -->
+          <div class="pt-4 space-y-2">
+            <div class="font-bold text-center text-[10pt] uppercase">TOPLANTIYA KATILANLAR</div>
+            <table class="w-full border-collapse border border-slate-400 text-xs">
+              <thead>
+                <tr class="bg-slate-100 font-bold">
+                  <th class="border border-slate-400 p-1.5 w-12 text-center">Sıra</th>
+                  <th class="border border-slate-400 p-1.5 text-left">Adı Soyadı</th>
+                  <th class="border border-slate-400 p-1.5 text-left">Görevi</th>
+                  <th class="border border-slate-400 p-1.5 w-28 text-center">İmza</th>
+                </tr>
+              </thead>
+              <tbody id="pv-imzaTableBody"></tbody>
+            </table>
+          </div>
+
+          <!-- Okul Müdürü Onay Bloğu -->
+          <div class="pt-6 text-center space-y-1 border-t border-slate-200">
+            <div class="font-bold text-xs" id="pv-onayTarihi">01.08.2026</div>
+            <div class="font-bold text-sm text-blue-950">UYGUNDUR</div>
+            <div class="font-bold text-xs pt-1" id="pv-okulMuduruOnay">[Okul Müdürü Adı Soyadı]</div>
+            <div class="text-slate-600 text-[9pt]">Okul Müdürü</div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- MODAL: AKILLI BELGE DENETLEYİCİSİ -->
+    <div id="audit-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full p-6 space-y-4 border border-slate-200">
+        <div class="flex items-center justify-between border-b pb-3 border-slate-100">
+          <h3 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+            <span>🔍 Akıllı Belge Denetleme Raporu</span>
+          </h3>
+          <button type="button" onclick="window.closeAuditModal()" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+        </div>
+        <div id="audit-results-list" class="space-y-2 max-h-96 overflow-y-auto pr-1 text-xs"></div>
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-end space-x-2">
+          <button type="button" onclick="window.closeAuditModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold">Düzeltme Yap</button>
+          <button type="button" onclick="window.confirmAndDownloadWord()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow">Word (.docx) İndir</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: GEÇMİŞ TASLAKLAR -->
+    <div id="history-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 no-print">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4 border border-slate-200">
+        <div class="flex items-center justify-between border-b pb-3 border-slate-100">
+          <h3 class="text-base font-bold text-slate-800">📜 Kayıtlı Geçmiş Taslaklar (Son 10)</h3>
+          <button type="button" onclick="window.closeHistoryModal()" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+        </div>
+        <div id="history-items-container" class="space-y-2 max-h-80 overflow-y-auto pr-1 text-xs"></div>
+        <div class="pt-2 text-right">
+          <button type="button" onclick="window.closeHistoryModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold">Kapat</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- JAVASCRIPT KODLARI -->
+  <script>
+    var DEFAULT_GUNDEM = "1) Açılış Ve Yoklama\n" +
+      "2) Toplantı Gündeminin Okunması\n" +
+      "3) Önceki Toplantıda Alınan Kararların Değerlendirilmesi\n" +
+      "4) Zümre Yönergesi, Görev Dağılımı Ve Toplantı İşleyişinin Görüşülmesi\n" +
+      "5) Planlamaların Okulun Amaçları, Öğretim Programı Ve Türkiye Yüzyılı Maarif Modeli'ne Uygunluğunun Değerlendirilmesi\n" +
+      "6) Türkiye Yüzyılı Maarif Modeli Ve Öğretim Programındaki Değişikliklerin Değerlendirilmesi\n" +
+      "7) Öğretim Programı, Tema, Konu, Kazanım Ve Öğrenme Çıktıları, Yıllık Planlar, Ders Planlarının Düzenlenmesi Ve Çalışma Takviminin Görüşülmesi\n" +
+      "8) Uyum Haftasında Yapılacak Çalışmaların Planlanması\n" +
+      "9) İlk Okuma Yazma Süreci, Çizgi Çalışmaları, Harf Grupları Ve Tema Takviminin Görüşülmesi\n" +
+      "10) Atatürkçülük Konularının Derslerle İlişkilendirilmesinin Görüşülmesi\n" +
+      "11) Öğretim Yöntem Ve Teknikleri İle Okul Temelli Planlama Kapsamında Yapılacak Çalışmaların Görüşülmesi\n" +
+      "12) Öğrenme Çıktıları, Etkinlikler, Öğrenme Kanıtları Ve Ölçme Değerlendirme Araçlarının Görüşülmesi\n" +
+      "13) Gözlem, Etkinlik Katılımı, Görev Takibi, Oyun Temelli Değerlendirme Ve Öğrenci Gelişim İzleme Çalışmalarının Planlanması\n" +
+      "14) Uygulamalı Derslerde Ürün, Etkinlik Ve Beceri Değerlendirme Çalışmalarının Görüşülmesi\n" +
+      "15) Öğrenci Başarı Durumu, Gelişim Düzeyi, Kazanım Eksikleri Ve Destekleyici Çalışmaların Görüşülmesi\n" +
+      "16) Ders Kitapları, Ders Araç Gereçleri, Öğretim Materyalleri, Kaynaklar Ve Bilişim Araçlarının Kullanımının Değerlendirilmesi\n" +
+      "17) Okulun Fiziki Mekânları, Sınıf, Kütüphane, Spor Alanı Ve Diğer Eğitim Ortamlarının Kullanımının Planlanması\n" +
+      "18) Okulun Çevre İmkânlarının Analiz Edilmesi Ve Bu İmkânlara Dayalı Gezi, Gözlem, Araştırma, Proje Ve Okul Dışı Öğrenme Çalışmalarının Planlanması\n" +
+      "19) Bep, Özel Eğitim, Farklılaştırılmış Öğretim, Zenginleştirme Ve Destekleme Çalışmalarının Görüşülmesi\n" +
+      "20) Serbest Etkinlik Dersine Yönelik Planlamaların Görüşülmesi\n" +
+      "21) Ders Ziyareti, Geri Dönüt, Mesleki Paylaşım Ve Zümreler Arası İş Birliği Çalışmalarının Planlanması\n" +
+      "22) Akademik, Bilimsel Ve Teknolojik Gelişmelerin Derslere Yansıtılmasının Görüşülmesi\n" +
+      "23) Araştırma, Geliştirme, Tasarım Ve Girişimcilik Becerilerine Yönelik Çalışmaların Planlanması\n" +
+      "24) Disiplinler Arası Çalışmaların Planlanması\n" +
+      "25) Okuryazarlık Becerileri, Üst Düzey Düşünme Ve Sosyal-Duygusal Öğrenme Becerilerine Yönelik Çalışmaların Planlanması\n" +
+      "26) Öğrencilerin Bedensel, Zihinsel, Duygusal, Sosyal Ve Ahlaki Gelişimine Yönelik Çalışmaların Görüşülmesi\n" +
+      "27) Erdem-Değer-Eylem Çerçevesi İle Millî, Manevi Ve Ahlaki Değerler Kapsamında Yapılacak Çalışmaların Planlanması\n" +
+      "28) Program Dışı Etkinlikler Kapsamında Sosyal Sorumluluk, Sosyal-Kültürel, Sanatsal Ve Sportif Etkinliklerin Planlanması\n" +
+      "29) Yarışma, Proje Ve Etkinliklere Katılım Çalışmalarının Görüşülmesi\n" +
+      "30) Okul Aile İş Birliği, Veli Toplantıları, İhtiyaç Listeleri Ve Beslenme Saatine İlişkin Planlamaların Görüşülmesi\n" +
+      "31) Önleme, Müdahale Ve Yönlendirme Çalışmalarının Planlanması\n" +
+      "32) Okul İçi Ve Okul Dışı Faaliyetler İçin İhtiyaçların Belirlenmesi\n" +
+      "33) İş Sağlığı Ve Güvenliği Tedbirlerinin Değerlendirilmesi\n" +
+      "34) 28 Temmuz 2026 Tarihli Ve 33323 Sayılı Resmî Gazete’de Yayımlanan Millî Eğitim Bakanlığı Okul Öncesi Eğitim Ve İlköğretim Kurumları Yönetmeliğinde Değişiklik Yapılmasına Dair Yönetmeliğin İncelenmesi\n" +
+      "35) Dilek Ve Temenniler\n" +
+      "36) Kapanış";
+
+    var DEFAULT_GORUSMELER = "1) Açılış Ve Yoklama\n" +
+      "Toplantı Öğretmen1 tarafından açıldı ve katılımcıların yoklaması alındı. Toplantının birinci sınıf zümre çalışmaları kapsamında yürütüleceği belirtilerek gündem maddelerine geçmeden önce toplantı düzeni hatırlatıldı. Öğretmen1, görüşmelerin belirlenen gündem çerçevesinde ve tutanak düzenine uygun şekilde yapılmasının yararlı olacağını ifade etti. Yapılan değerlendirmelerin ortak çalışma anlayışını güçlendirecek şekilde sürdürülmesi uygun görüldü.\n\n" +
+      "2) Toplantı Gündeminin Okunması\n" +
+      "Gündem maddeleri toplantı başlangıcında okunarak katılımcıların bilgisine sunuldu. Öğretmen1, görüşmelerin gündem sırasına göre yürütülmesinin toplantının verimliliğini artıracağını belirtti. Öğretmen2, ihtiyaç duyulması hâlinde ek önerilerin dilek ve temenniler bölümünde ayrıca ele alınabileceğini ifade etti. Gündem maddeleri üzerinde ortak anlayış sağlanarak görüşmelere geçildi.\n\n" +
+      "3) Önceki Toplantıda Alınan Kararların Değerlendirilmesi\n" +
+      "Önceki toplantıda alınan kararların uygulanma durumu ayrıntılı biçimde gözden geçirildi. Öğretmen2, tamamlanan çalışmalar ile sürdürülmesi gereken uygulamaların ayrı ayrı değerlendirilmesinin ikinci dönem planlamalarına katkı sağlayacağını ifade etti. Öğretmen1, kararların öğrenci gelişimi, veli iş birliği ve sınıf içi uygulamalar üzerindeki etkilerinin izlenmesi gerektiğini belirtti. Yapılan değerlendirmelerin ortak çalışma anlayışını güçlendirecek şekilde sürdürülmesi uygun görüldü.\n\n" +
+      "4) Zümre Yönergesi, Görev Dağılımı Ve Toplantı İşleyişinin Görüşülmesi\n" +
+      "Zümre çalışmalarının düzenli yürütülmesi için görev paylaşımı, toplantı işleyişi ve tutanak düzeni üzerinde duruldu. Öğretmen1, öğretmenler arasında koordinasyonun sağlanmasının yıl boyunca yapılacak çalışmaları kolaylaştıracağını belirtti. Öğretmen1, görevlerin açık biçimde belirlenmesinin uygulamada yaşanabilecek belirsizlikleri azaltacağını ifade etti. Toplantı sürecinde alınacak kararların izlenebilir ve uygulanabilir olmasına dikkat edilmesi gerektiği değerlendirildi.\n\n" +
+      "5) Planlamaların Okulun Amaçları, Öğretim Programı Ve Türkiye Yüzyılı Maarif Modeli'ne Uygunluğunun Değerlendirilmesi\n" +
+      "Planlamaların okulun amaçları, öğretim programı ve birinci sınıf düzeyindeki öğrenci ihtiyaçlarıyla uyumu değerlendirildi. Öğretmen1, ders süreçlerinin öğretim programındaki öğrenme çıktıları ve kazanımlarla bağlantılı yürütülmesi gerektiğini belirtti. Öğretmen2, Türkiye Yüzyılı Maarif Modeli kapsamındaki beceri ve değer odaklı yaklaşımın etkinliklere yansıtılmasının önemini ifade etti. Planlamaların öğrenci gelişimini destekleyecek, uygulanabilir ve takip edilebilir nitelikte hazırlanması benimsendi.\n\n" +
+      "6) Türkiye Yüzyılı Maarif Modeli Ve Öğretim Programındaki Değişikliklerin Değerlendirilmesi\n" +
+      "Türkiye Yüzyılı Maarif Modeli kapsamında öne çıkan beceri, değer ve bütüncül gelişim yaklaşımı zümre çalışmalarıyla ilişkilendirildi. Öğretmen2, modelde yer alan öğrenme çıktılarının ders etkinlikleriyle desteklenmesi gerektiğini ifade etti. Öğretmen2, sınıf düzeyine uygun etkinliklerin öğrencilerin aktif katılımını artıracağını belirtti. Modelin uygulanmasında öğretmenler arasında örnek etkinlik ve materyal paylaşımının sürdürülmesi uygun görüldü.\n\n" +
+      "7) Öğretim Programı, Tema, Konu, Kazanım Ve Öğrenme Çıktıları, Yıllık Planlar, Ders Planlarının Düzenlenmesi Ve Çalışma Takviminin Görüşülmesi\n" +
+      "Öğretim programı, tema ve konu dağılımları ile kazanım ve öğrenme çıktıları birinci sınıf düzeyi dikkate alınarak incelendi. Öğretmen1, yıllık planlar ile ders planlarının öğretim programı ve çalışma takvimiyle uyumlu biçimde düzenlenmesinin öğretim sürecinin bütünlüğünü sağlayacağını belirtti. Öğretmen1, öğrencilerin hazırbulunuşluk ve gelişim düzeylerine göre ders planlarında gerekli düzenlemelerin yapılabileceğini ifade etti. Planların öğretim programına uygun, uygulanabilir ve öğrenci ihtiyaçlarını karşılayacak biçimde yürütülmesi benimsendi.\n\n" +
+      "8) Uyum Haftasında Yapılacak Çalışmaların Planlanması\n" +
+      "Sene başı uyum, hazırbulunuşluk ve tekrar çalışmaları birinci sınıf öğrencileriin derse uyumu açısından değerlendirildi. Öğretmen2, öğrencilerin önceki öğrenmelerinin gözden geçirilmesinin yeni kazanımlara geçişi kolaylaştıracağını ifade etti. Öğretmen2, sınıf içi gözlemlerden yararlanılarak destek ihtiyacı olan öğrencilerin belirlenmesi gerektiğini belirtti. Uyum sürecinde aile bilgilendirmesi ve rehberlik desteğinden yararlanılması uygun görüldü.\n\n" +
+      "9) İlk Okuma Yazma Süreci, Çizgi Çalışmaları, Harf Grupları Ve Tema Takviminin Görüşülmesi\n" +
+      "Birinci sınıf ilk okuma yazma öğretim süreci öğretim programındaki sıra, öğrenme çıktıları ve öğrenci hazırbulunuşluğu açısından değerlendirildi. Öğretmen1, ses, harf, hece, kelime ve cümle çalışmalarının programda belirtilen esaslar doğrultusunda yürütülmesi gerektiğini ifade etti. Öğretmen2, yazmaya hazırlık, doğru kalem tutma, çizgi çalışmaları, okuma akıcılığı ve anlamaya yönelik etkinliklerin öğrenci gelişimine göre desteklenmesinin önemini belirtti. Öğrenciler arasındaki bireysel farklılıkların dikkate alınarak süreçte gerekli destekleyici çalışmalara yer verilmesi benimsendi.\n\n" +
+      "10) Atatürkçülük Konularının Derslerle İlişkilendirilmesinin Görüşülmesi\n" +
+      "Atatürkçülük konuları ile millî, manevi ve ahlaki değerler kapsamında yapılacak çalışmalar planlama yönüyle ele alındı. Öğretmen2, belirli gün ve haftaların ders kazanımlarıyla ilişkilendirilerek işlenmesinin öğrencilerde farkındalık oluşturacağını ifade etti. Öğretmen2, değerler eğitimi çalışmalarının yalnızca etkinlik düzeyinde kalmaması, sınıf içi davranışlara da yansıtılması gerektiğini belirtti. Bu çalışmaların yaş düzeyine uygun örnek olay, okuma metni, drama ve sınıf içi etkinliklerle desteklenmesi uygun görüldü.\n\n" +
+      "11) Öğretim Yöntem Ve Teknikleri İle Okul Temelli Planlama Kapsamında Yapılacak Çalışmaların Görüşülmesi\n" +
+      "Birinci sınıf derslerinde kullanılacak öğretim yöntem ve teknikleri ile okul temelli planlama kapsamında gerçekleştirilebilecek çalışmalar değerlendirildi. Öğretmen1, oyunlaştırma, soru cevap, drama, gösterip yaptırma, grup çalışması ve uygulamalı etkinliklerin öğrenme çıktısına ve öğrenci düzeyine göre seçilmesi gerektiğini belirtti. Öğretmen1, okulun öğrenci profili, fiziki imkânları ve çevre özelliklerinin okul temelli planlama çalışmalarında dikkate alınmasının önemini ifade etti. Öğrencilerin aktif katılımını sağlayan ve farklı öğrenme ihtiyaçlarını dikkate alan uygulamalara öncelik verilmesi benimsendi.\n\n" +
+      "12) Öğrenme Çıktıları, Etkinlikler, Öğrenme Kanıtları Ve Ölçme Değerlendirme Araçlarının Görüşülmesi\n" +
+      "Öğrenme çıktıları, ders etkinlikleri, öğrenme kanıtları ve kullanılacak ölçme değerlendirme araçları birlikte değerlendirildi. Öğretmen2, birinci sınıfta değerlendirme sürecinin öğrencilerin gelişimini izlemeye ve öğrenmeyi desteklemeye yönelik yürütülmesi gerektiğini ifade etti. Öğretmen2, gözlem formları, kontrol listeleri, öğrenci ürünleri, etkinlik katılımı, görev takibi ve benzeri araçların ihtiyaca göre kullanılabileceğini belirtti. Ölçme değerlendirme sonuçlarının öğrenciye uygun geri bildirim vermek ve öğretim sürecini düzenlemek amacıyla kullanılması benimsendi.\n\n" +
+      "13) Gözlem, Etkinlik Katılımı, Görev Takibi, Oyun Temelli Değerlendirme Ve Öğrenci Gelişim İzleme Çalışmalarının Planlanması\n" +
+      "Gözlem, etkinlik katılımı, görev takibi ve oyun temelli değerlendirme çalışmaları öğrenci gelişimini izleme yönüyle ele alındı. Öğretmen1, öğrencilerin akademik ve sosyal gelişimlerinin düzenli gözlem formlarıyla takip edilmesinin önemini belirtti. Öğretmen2, bireysel ve grup etkinliklerinde öğrencilerin sorumluluk alma, iletişim kurma ve yönerge takip etme becerilerinin izlenmesi gerektiğini ifade etti. Bu verilerin dönem içi destek çalışmalarında ve veli bilgilendirmelerinde kullanılabileceği değerlendirildi.\n\n" +
+      "14) Uygulamalı Derslerde Ürün, Etkinlik Ve Beceri Değerlendirme Çalışmalarının Görüşülmesi\n" +
+      "Uygulamalı derslerde ürün, etkinlik ve beceri değerlendirme çalışmaları derslerin niteliğine göre ele alındı. Öğretmen2, öğrencilerin ortaya koyduğu ürünlerin yalnızca sonuç olarak değil, hazırlık ve uygulama süreciyle birlikte değerlendirilmesi gerektiğini ifade etti. Öğretmen2, beceri gelişimini izlemek için sade, anlaşılır ve yaş düzeyine uygun ölçütlerin kullanılmasının yararlı olacağını belirtti. Değerlendirme sonuçlarının öğrenciyi destekleyici geri bildirimlerle paylaşılması uygun görüldü.\n\n" +
+      "15) Öğrenci Başarı Durumu, Gelişim Düzeyi, Kazanım Eksikleri Ve Destekleyici Çalışmaların Görüşülmesi\n" +
+      "Öğrencilerin başarı ve gelişim düzeyleri, ders içi gözlemler, etkinliklere katılım, görev tamamlama ve öğrenme çıktılarındaki ilerlemeleri dikkate alınarak değerlendirildi. Öğretmen1, öğrencilerin güçlü yönleri ile desteklenmesi gereken alanların düzenli olarak izlenmesinin önemini belirtti. Öğretmen1, eksik veya geç gelişen öğrenmeler için tekrar, bireysel destek, farklı etkinlik ve veli iş birliği gibi çalışmaların planlanabileceğini ifade etti. Öğrenci gelişiminin süreç boyunca izlenmesi ve gerekli desteklerin zamanında sağlanması benimsendi.\n\n" +
+      "16) Ders Kitapları, Ders Araç Gereçleri, Öğretim Materyalleri, Kaynaklar Ve Bilişim Araçlarının Kullanımının Değerlendirilmesi\n" +
+      "Ders kitapları, ders araç gereçleri, öğretim materyalleri, kaynaklar ve bilişim araçlarının kullanımı eğitim öğretim süreci açısından değerlendirildi. Öğretmen2, kullanılacak materyallerin öğretim programına, öğrenme çıktısına ve birinci sınıf öğrencilerinin gelişim düzeyine uygun olması gerektiğini ifade etti. Öğretmen2, somut materyaller ile uygun dijital içeriklerin öğrenmeyi destekleyici biçimde kullanılmasının öğrencilerin derse katılımını artıracağını belirtti. Araç gereç ihtiyaçlarının okul imkânları dikkate alınarak belirlenmesi ve materyallerin güvenli, verimli ve amacına uygun kullanılması benimsendi.\n\n" +
+      "17) Okulun Fiziki Mekânları, Sınıf, Kütüphane, Spor Alanı Ve Diğer Eğitim Ortamlarının Kullanımının Planlanması\n" +
+      "Okulun fiziki mekânları ile sınıf, kütüphane, spor alanı ve diğer eğitim ortamlarının öğretim sürecinde kullanımı değerlendirildi. Öğretmen1, öğrenme ortamlarının öğrencilerin yaş özelliklerine, güvenliğine ve yapılacak etkinliğin amacına uygun biçimde düzenlenmesi gerektiğini belirtti. Öğretmen2, okulun mevcut fiziki imkânlarından daha etkili yararlanmak için öğretmenler arasında planlı iş birliği yapılmasının önemini ifade etti. Eğitim ortamlarının erişilebilir, güvenli ve öğrenmeyi destekleyici biçimde kullanılması benimsendi.\n\n" +
+      "18) Okulun Çevre İmkânlarının Analiz Edilmesi Ve Bu İmkânlara Dayalı Gezi, Gözlem, Araştırma, Proje Ve Okul Dışı Öğrenme Çalışmalarının Planlanması\n" +
+      "Okulun bulunduğu çevrenin sosyal, kültürel, doğal ve fiziki imkânları eğitim öğretim çalışmaları açısından analiz edildi. Öğretmen1, çevrede bulunan kütüphane, park, müze, kurum, kuruluş ve benzeri imkânlardan öğretim programındaki öğrenme çıktılarıyla ilişkilendirilerek yararlanılabileceğini ifade etti. Öğretmen1, öğrencilerin yaş düzeyine uygun gezi, gözlem, araştırma, proje ve okul dışı öğrenme çalışmalarının planlanmasının öğrenmenin günlük yaşamla ilişkilendirilmesine katkı sağlayacağını belirtti. Yapılacak çalışmalarda güvenlik, izin süreçleri, erişilebilirlik ve ilgili kurumlarla iş birliğinin dikkate alınması benimsendi.\n\n" +
+      "19) Bep, Özel Eğitim, Farklılaştırılmış Öğretim, Zenginleştirme Ve Destekleme Çalışmalarının Görüşülmesi\n" +
+      "BEP, özel eğitim, farklılaştırılmış öğretim, zenginleştirme ve destekleme çalışmaları öğrenci ihtiyaçları doğrultusunda ele alındı. Öğretmen1, bireysel farklılıkların öğretim sürecinde dikkate alınmasının öğrenci başarısını artıracağını belirtti. Öğretmen2, destek gereksinimi olan öğrenciler için uyarlama, ek süre, farklı materyal ve bireysel takip uygulamalarının planlanması gerektiğini ifade etti. Zenginleştirme çalışmalarının da öğrencilerin ilgi ve yeteneklerini geliştirecek biçimde yürütülmesi uygun görüldü.\n\n" +
+      "20) Serbest Etkinlik Dersine Yönelik Planlamaların Görüşülmesi\n" +
+      "Serbest etkinlik dersine yönelik planlamalar öğrencilerin sosyal, kültürel ve kişisel gelişimleri açısından değerlendirildi. Öğretmen2, etkinliklerin öğrencilerin ilgi alanlarını ortaya çıkaracak ve sınıf içi paylaşımı artıracak biçimde düzenlenmesi gerektiğini ifade etti. Öğretmen2, okuma, oyun, drama, sanat, spor ve değerler eğitimi çalışmalarının dengeli biçimde kullanılmasının yararlı olacağını belirtti. Serbest etkinlik dersinde öğrenci katılımını artıracak esnek ve uygulanabilir planlamalar yapılması benimsendi.\n\n" +
+      "21) Ders Ziyareti, Geri Dönüt, Mesleki Paylaşım Ve Zümreler Arası İş Birliği Çalışmalarının Planlanması\n" +
+      "Ders ziyareti, geri dönüt, mesleki paylaşım ve zümreler arası iş birliği çalışmaları değerlendirildi. Öğretmen1, öğretmenler arası deneyim paylaşımının sınıf içi uygulamaları geliştireceğini belirtti. Öğretmen1, geri dönütlerin yapıcı bir dille ve mesleki gelişimi destekleyecek biçimde paylaşılması gerektiğini ifade etti. Zümreler arası iş birliğinin ortak etkinlik, materyal paylaşımı ve uygulama bütünlüğü açısından sürdürülmesi uygun görüldü.\n\n" +
+      "22) Akademik, Bilimsel Ve Teknolojik Gelişmelerin Derslere Yansıtılmasının Görüşülmesi\n" +
+      "Akademik, bilimsel ve teknolojik gelişmelerin derslere yansıtılması konusu ele alındı. Öğretmen2, öğretmenlerin güncel gelişmeleri takip ederek uygun olanları sınıf içi uygulamalara aktarmasının önemli olduğunu ifade etti. Öğretmen2, teknolojinin öğretim sürecinde amaç değil, öğrenmeyi destekleyen bir araç olarak kullanılması gerektiğini belirtti. Uygun dijital içeriklerin, güvenli ve pedagojik ölçütlere dikkat edilerek kullanılması benimsendi.\n\n" +
+      "23) Araştırma, Geliştirme, Tasarım Ve Girişimcilik Becerilerine Yönelik Çalışmaların Planlanması\n" +
+      "Araştırma, geliştirme, tasarım ve girişimcilik becerilerine yönelik çalışmalar değerlendirildi. Öğretmen1, öğrencilerin merak etme, soru sorma, çözüm üretme ve ürün ortaya koyma becerilerinin desteklenmesi gerektiğini belirtti. Öğretmen2, yaş düzeyine uygun küçük araştırma görevleri ve tasarım etkinliklerinin öğrencilerin öğrenmeye katılımını artıracağını ifade etti. Bu çalışmaların ders kazanımlarıyla ilişkilendirilerek planlı biçimde yürütülmesi uygun görüldü.\n\n" +
+      "24) Disiplinler Arası Çalışmaların Planlanması\n" +
+      "Disiplinler arası çalışmaların planlanması, ders kazanımlarının bütüncül biçimde ele alınması açısından değerlendirildi. Öğretmen2, farklı derslerde ortak temaların kullanılmasının öğrencilerin öğrenmeleri arasında bağlantı kurmasını kolaylaştıracağını ifade etti. Öğretmen2, etkinliklerin yalnızca aynı hafta içinde yapılmasıyla sınırlı kalmaması, ortak hedef ve ürünlere dayalı biçimde planlanması gerektiğini belirtti. Zümreler arasında iş birliği yapılarak uygulanabilir çalışmaların belirlenmesi benimsendi.\n\n" +
+      "25) Okuryazarlık Becerileri, Üst Düzey Düşünme Ve Sosyal-Duygusal Öğrenme Becerilerine Yönelik Çalışmaların Planlanması\n" +
+      "Öğretim programının gerektirdiği okuryazarlık becerileri, üst düzey düşünme ve sosyal-duygusal öğrenme becerilerinin geliştirilmesine yönelik çalışmalar değerlendirildi. Öğretmen1, öğrencilerin bilgiye ulaşma, anlama, yorumlama, problem çözme ve karar verme becerilerinin yaş düzeyine uygun etkinliklerle desteklenmesi gerektiğini belirtti. Öğretmen1, öz farkındalık, iletişim, iş birliği, sorumluluk alma, duygu düzenleme ve sosyal etkileşim becerilerinin sınıf içi çalışmalarla geliştirilebileceğini ifade etti. Bu becerilerin ayrı bir çalışma alanı olarak değil, derslerin ve günlük sınıf yaşantısının doğal bir parçası olarak ele alınması benimsendi.\n\n" +
+      "26) Öğrencilerin Bedensel, Zihinsel, Duygusal, Sosyal Ve Ahlaki Gelişimine Yönelik Çalışmaların Görüşülmesi\n" +
+      "Öğrencilerin bedensel, zihinsel, duygusal, sosyal ve ahlaki gelişimlerinin bir bütün olarak desteklenmesine yönelik çalışmalar değerlendirildi. Öğretmen2, birinci sınıf öğrencilerinin gelişim özelliklerinin ders planlama ve sınıf içi uygulamalarda dikkate alınması gerektiğini ifade etti. Öğretmen2, oyun, hareket, iletişim, sorumluluk, öz bakım, iş birliği ve olumlu davranış geliştirmeye yönelik etkinliklerin dengeli biçimde kullanılmasının yararlı olacağını belirtti. Öğrencilerin bütüncül gelişiminin okul, aile ve gerekli durumlarda rehberlik birimleriyle iş birliği içinde desteklenmesi benimsendi.\n\n" +
+      "27) Erdem-Değer-Eylem Çerçevesi İle Millî, Manevi Ve Ahlaki Değerler Kapsamında Yapılacak Çalışmaların Planlanması\n" +
+      "Öğrencilerin öğretim programlarının gerektirdiği Erdem-Değer-Eylem Çerçevesinde edinecekleri değerler ile millî, manevi ve ahlaki değerlerin eğitim öğretim sürecine yansıtılması değerlendirildi. Öğretmen2, değerlerin yalnızca bilgi düzeyinde ele alınmaması, öğrencilerin davranış ve günlük yaşamlarına yansıyacak etkinliklerle desteklenmesi gerektiğini belirtti. Öğretmen2, sorumluluk, saygı, yardımseverlik, dürüstlük, sevgi ve iş birliği gibi değerlerin sınıf içi yaşantılar, örnek olaylar, metinler, oyunlar ve sosyal etkinliklerle ilişkilendirilebileceğini ifade etti. Değer çalışmalarının öğretim programı ve öğrenci gelişim düzeyine uygun biçimde yürütülmesi benimsendi.\n\n" +
+      "28) Program Dışı Etkinlikler Kapsamında Sosyal Sorumluluk, Sosyal-Kültürel, Sanatsal Ve Sportif Etkinliklerin Planlanması\n" +
+      "Program dışı etkinlikler kapsamında gerçekleştirilebilecek sosyal sorumluluk, sosyal-kültürel, sanatsal ve sportif çalışmalar öğrencilerin bütüncül gelişimi açısından değerlendirildi. Öğretmen1, etkinliklerin öğrencilerin ilgi ve yeteneklerini geliştirecek, sorumluluk alma ve iş birliği becerilerini destekleyecek biçimde planlanması gerektiğini belirtti. Öğretmen2, öğrencilerin yaş düzeyi, okul imkânları ve güvenlik koşullarının etkinlik seçiminde dikkate alınmasının önemini ifade etti. Çalışmaların okul takvimi ve ilgili mevzuata uygun biçimde yürütülmesi benimsendi.\n\n" +
+      "29) Yarışma, Proje Ve Etkinliklere Katılım Çalışmalarının Görüşülmesi\n" +
+      "Öğrencilerin yaş ve gelişim düzeylerine uygun yarışma, proje ve etkinliklere katılım imkânları değerlendirildi. Öğretmen2, katılım sağlanacak çalışmaların öğrencilerin öğrenme, üretme, paylaşma ve kendini ifade etme becerilerini desteklemesi gerektiğini belirtti. Öğretmen2, öğrencilerin başarı baskısı altında bırakılmadan gönüllülük, ilgi ve yeteneklerinin dikkate alınmasının önemli olduğunu ifade etti. Uygun etkinliklerin okul yönetimi ve velilerle gerekli iş birliği sağlanarak yürütülmesi benimsendi.\n\n" +
+      "30) Okul Aile İş Birliği, Veli Toplantıları, İhtiyaç Listeleri Ve Beslenme Saatine İlişkin Planlamaların Görüşülmesi\n" +
+      "Okul aile iş birliği, veli toplantıları, ihtiyaç listeleri ve beslenme saatine ilişkin planlamalar değerlendirildi. Öğretmen1, öğrencilerin gelişiminin okul ve aile tarafından ortak biçimde desteklenmesi gerektiğini belirtti. Öğretmen1, veli bilgilendirmelerinin düzenli yapılmasının çalışma alışkanlığı, devam, beslenme ve sınıf kurallarına uyum açısından yararlı olacağını ifade etti. İhtiyaçların zamanında belirlenmesi ve veli iletişiminin resmî, açık ve düzenli biçimde sürdürülmesi benimsendi.\n\n" +
+      "31) Önleme, Müdahale Ve Yönlendirme Çalışmalarının Planlanması\n" +
+      "Önleme, müdahale ve yönlendirme çalışmaları öğrencilerin güvenli ve sağlıklı gelişimi açısından ele alındı. Öğretmen2, erken fark edilen akademik, sosyal veya davranışsal güçlüklerde okul rehberlik servisiyle iş birliği yapılması gerektiğini ifade etti. Öğretmen2, aile ve okul idaresiyle kurulacak düzenli iletişimin sorunların çözümünü kolaylaştıracağını belirtti. Gerekli durumlarda öğrencilerin uygun destek hizmetlerine yönlendirilmesi ve sürecin gizlilik ilkesine uygun yürütülmesi benimsendi.\n\n" +
+      "32) Okul İçi Ve Okul Dışı Faaliyetler İçin İhtiyaçların Belirlenmesi\n" +
+      "Yıl içerisinde gerçekleştirilecek okul içi ve okul dışı faaliyetler için gerekli araç gereç, materyal, fiziki ortam, ulaşım, izin ve diğer ihtiyaçlar değerlendirildi. Öğretmen2, faaliyetlerin uygulanabilir biçimde planlanabilmesi için ihtiyaçların önceden belirlenmesinin önemli olduğunu ifade etti. Öğretmen2, okulun mevcut imkânlarından öncelikle yararlanılması ve gerekli durumlarda okul yönetimi, veliler veya ilgili kurumlarla iş birliği yapılabileceğini belirtti. İhtiyaçların eğitim amaçları, öğrenci güvenliği ve kaynakların verimli kullanımı dikkate alınarak planlanması benimsendi.\n\n" +
+      "33) İş Sağlığı Ve Güvenliği Tedbirlerinin Değerlendirilmesi\n" +
+      "İş sağlığı ve güvenliği ile öğrenci sağlığına yönelik tedbirler eğitim ortamlarının güvenliği açısından değerlendirildi. Öğretmen2, sınıf, bahçe, merdiven, spor alanı ve etkinlik ortamlarında güvenlik kurallarının düzenli hatırlatılması gerektiğini ifade etti. Öğretmen2, öğrencilerin yaş düzeyine uygun sorumluluklar kazanmalarının güvenli okul kültürünü güçlendireceğini belirtti. Risk oluşturabilecek durumların zamanında bildirilmesi ve gerekli tedbirlerin okul yönetimiyle birlikte alınması uygun görüldü.\n\n" +
+      "34) 28 Temmuz 2026 Tarihli Ve 33323 Sayılı Resmî Gazete’de Yayımlanan Millî Eğitim Bakanlığı Okul Öncesi Eğitim Ve İlköğretim Kurumları Yönetmeliğinde Değişiklik Yapılmasına Dair Yönetmeliğin İncelenmesi\n" +
+      "28 Temmuz 2026 tarihli ve 33323 sayılı Resmî Gazete’de yayımlanan Millî Eğitim Bakanlığı Okul Öncesi Eğitim ve İlköğretim Kurumları Yönetmeliğinde Değişiklik Yapılmasına Dair Yönetmelik incelendi. Yönetmelikte zümre öğretmenler kurulunda; öğretim programı, Erdem-Değer-Eylem Çerçevesinde öğrencilerin edinecekleri değerler, okuryazarlık becerileri, sosyal-duygusal öğrenme becerileri, program dışı etkinlikler, okul temelli planlama kapsamında yapılacak çalışmalar, farklılaştırılmış öğretim, ders planlarının düzenlenmesi, öğretim yöntem ve teknikleri, ölçme-değerlendirme araçları, öğrencilerin başarı ve gelişim düzeyi ile okulun fiziki mekânlarının ve ders araç gereçlerinin kullanımının görüşülmesi gerektiği değerlendirildi. Ayrıca okulun çevre imkânlarının analiz edilmesi ve eğitim-öğretim çalışmalarında gerekli iş birliğinin sağlanması gerektiği üzerinde duruldu. Mevcut zümre gündem maddelerinin söz konusu düzenlemeler doğrultusunda yürütülmesi benimsendi.\n\n" +
+      "35) Dilek Ve Temenniler\n" +
+      "Dilek ve temenniler bölümünde öğretmenlerin eğitim öğretim sürecine ilişkin önerileri alındı. Öğretmen2, zümre çalışmalarının iş birliği içinde sürdürülmesinin öğrencilerin gelişimine olumlu katkı sağlayacağını ifade etti. Öğretmen1, paylaşılan görüşlerin uygulanabilir olanlarının dönem içi çalışmalarda dikkate alınacağını belirtti. Toplantının verimli geçmesi ve alınan kararların hayırlı olması temenni edildi.\n\n" +
+      "36) Kapanış\n" +
+      "Gündem maddelerinin tamamı görüşüldükten sonra toplantının kapanış bölümüne geçildi. Öğretmen1, katkılarından dolayı zümre öğretmenlerine teşekkür etti. Alınan kararların eğitim öğretim sürecine düzenli biçimde yansıtılması gerektiği belirtildi. Toplantı iyi dilek ve temennilerle sona erdirildi.";
+
+    var DEFAULT_KARARLAR = "1) Toplantının açılışının yapılmasına ve yoklamanın alınmasına karar verildi.\n" +
+      "2) Toplantı gündeminin okunarak görüşmelere gündem sırasına göre devam edilmesine karar verildi.\n" +
+      "3) Önceki toplantıda alınan kararların uygulanma durumunun izlenmesine karar verildi.\n" +
+      "4) Zümre yönergesi, görev dağılımı ve toplantı işleyişinin belirlenen esaslara göre yürütülmesine karar verildi.\n" +
+      "5) Planlamaların okulun amaçları, öğretim programı ve Türkiye Yüzyılı Maarif Modeli'ne uygun şekilde yürütülmesine karar verildi.\n" +
+      "6) Türkiye Yüzyılı Maarif Modeli ve öğretim programındaki değişikliklerin zümre çalışmaları kapsamında takip edilmesine karar verildi.\n" +
+      "7) Öğretim programı, tema, konu, kazanım ve öğrenme çıktıları ile yıllık planların, ders planlarının ve çalışma takviminin birbiriyle uyumlu biçimde düzenlenmesine karar verildi.\n" +
+      "8) Uyum haftasında yapılacak çalışmaların öğrenci ihtiyaçları ve okul imkânları doğrultusunda planlanmasına karar verildi.\n" +
+      "9) İlk okuma yazma süreci, çizgi çalışmaları, harf grupları ve tema takviminin birinci sınıf düzeyine uygun olarak planlanmasına karar verildi.\n" +
+      "10) Atatürkçülük konularının derslerle ve sınıf içi etkinliklerle ilişkilendirilmesine karar verildi.\n" +
+      "11) Öğretim yöntem ve tekniklerinin öğrenci düzeyi ve öğrenme çıktısına uygun seçilmesine, okul temelli planlama kapsamında okulun ihtiyaç ve imkânlarına uygun çalışmalar yapılmasına karar verildi.\n" +
+      "12) Öğrenme çıktılarının izlenmesinde gözlem, kontrol listesi, etkinlik, öğrenci ürünü ve benzeri uygun ölçme değerlendirme araçlarının kullanılmasına karar verildi.\n" +
+      "13) Gözlem, etkinlik katılımı, görev takibi, oyun temelli değerlendirme ve öğrenci gelişim izleme çalışmalarının düzenli yapılmasına karar verildi.\n" +
+      "14) Uygulamalı derslerde ürün, etkinlik ve beceri değerlendirme çalışmalarının kazanımlara uygun yürütülmesine karar verildi.\n" +
+      "15) Öğrencilerin başarı ve gelişim düzeylerinin düzenli izlenmesine, eksik öğrenmeler için gerekli destekleyici çalışmaların planlanmasına karar verildi.\n" +
+      "16) Ders kitapları, ders araç gereçleri, öğretim materyalleri, kaynaklar ve bilişim araçlarının öğretim programına ve öğrenci düzeyine uygun, güvenli ve verimli biçimde kullanılmasına karar verildi.\n" +
+      "17) Okulun fiziki mekânları ve eğitim ortamlarının öğrenci güvenliği, dersin amacı ve öğrenme ihtiyaçları doğrultusunda planlı biçimde kullanılmasına karar verildi.\n" +
+      "18) Okulun çevre imkânlarının analiz edilmesine; uygun çevre olanaklarından gezi, gözlem, araştırma, proje ve okul dışı öğrenme çalışmalarında yararlanılmasına ve gerekli kurumlarla iş birliği yapılmasına karar verildi.\n" +
+      "19) BEP, özel eğitim, farklılaştırılmış öğretim, zenginleştirme ve destekleme çalışmalarının öğrenci ihtiyaçlarına göre yürütülmesine karar verildi.\n" +
+      "20) Serbest etkinlik dersine yönelik planlamaların öğrenci gelişimini destekleyecek şekilde yapılmasına karar verildi.\n" +
+      "21) Ders ziyareti, geri dönüt, mesleki paylaşım ve zümreler arası iş birliği çalışmalarının planlı şekilde yürütülmesine karar verildi.\n" +
+      "22) Akademik, bilimsel ve teknolojik gelişmelerin derslere uygun şekilde yansıtılmasına karar verildi.\n" +
+      "23) Araştırma, geliştirme, tasarım ve girişimcilik becerilerine yönelik çalışmaların öğrenci düzeyine uygun planlanmasına karar verildi.\n" +
+      "24) Disiplinler arası çalışmaların öğrenme alanlarıyla ilişkilendirilerek planlanmasına karar verildi.\n" +
+      "25) Okuryazarlık becerileri, üst düzey düşünme ve sosyal-duygusal öğrenme becerilerinin ders ve sınıf içi etkinliklerle düzenli olarak desteklenmesine karar verildi.\n" +
+      "26) Öğrencilerin bedensel, zihinsel, duygusal, sosyal ve ahlaki gelişimlerini bütüncül biçimde destekleyen çalışmaların yürütülmesine karar verildi.\n" +
+      "27) Öğrencilerin Erdem-Değer-Eylem Çerçevesinde edinecekleri değerler ile millî, manevi ve ahlaki değerlerin dersler ve günlük okul yaşantısıyla ilişkilendirilmesine karar verildi.\n" +
+      "28) Program dışı etkinlikler kapsamında sosyal sorumluluk, sosyal-kültürel, sanatsal ve sportif çalışmaların öğrenci düzeyi, okul imkânları ve güvenlik koşulları dikkate alınarak planlanmasına karar verildi.\n" +
+      "29) Öğrencilerin yaş ve gelişim düzeylerine uygun yarışma, proje ve etkinliklere katılımlarının ilgi, yetenek ve gönüllülük esasına göre desteklenmesine karar verildi.\n" +
+      "30) Okul aile iş birliği, veli toplantıları, ihtiyaç listeleri ve beslenme saatine ilişkin planlamaların yapılmasına karar verildi.\n" +
+      "31) Önleme, müdahale ve yönlendirme çalışmalarının ilgili birimlerle iş birliği içinde yürütülmesine karar verildi.\n" +
+      "32) Okul içi ve okul dışı faaliyetler için gerekli araç gereç, materyal, fiziki ortam ve diğer ihtiyaçların önceden belirlenerek gerekli planlamaların yapılmasına karar verildi.\n" +
+      "33) İş sağlığı ve güvenliği tedbirlerinin eğitim öğretim süreçlerinde dikkate alınmasına karar verildi.\n" +
+      "34) Zümre çalışmalarının 28 Temmuz 2026 tarihli Yönetmelik değişikliğinde belirtilen hususlar doğrultusunda yürütülmesine; öğretim programı, Erdem-Değer-Eylem Çerçevesi, okuryazarlık ve sosyal-duygusal öğrenme becerileri, program dışı etkinlikler, okul temelli planlama, farklılaştırılmış öğretim, ders planları, öğretim yöntem ve teknikleri, ölçme-değerlendirme, öğrenci başarı ve gelişimi, eğitim ortamları ve ders araç gereçlerine ilişkin çalışmaların zümre toplantılarında değerlendirilmesine; okulun çevre imkânlarının analiz edilmesine ve gerekli iş birliklerinin yapılmasına karar verildi.\n" +
+      "35) Dilek ve temenniler bölümünde paylaşılan görüşlerin zümre çalışmalarında dikkate alınmasına karar verildi.\n" +
+      "36) Toplantının gündem maddeleri tamamlandıktan sonra kapatılmasına karar verildi.";
+
+    window.formData = {
+      okul: ".......................................................MÜDÜRLÜĞÜNE",
+      ilce: "KADIKÖY / İSTANBUL",
+      egitimYili: "2026-2027",
+      brans: "1. SINIF",
+      donem: "SENE BAŞI",
+      toplantiYeri: "Öğretmenler Odası",
+      tarih: "01.08.2026",
+      saat: "15:30",
+      baskan: "Öğretmen1",
+      baskanKriter: "İstekli Öğretmenler Arasından Seçilmiştir",
+      baskanMebbisNo: "",
+      okulMuduru: "Okul Müdürü",
+      katilanlar: [
+        { isim: "Öğretmen1", unvan: "Zümre Başkanı" },
+        { isim: "Öğretmen2", unvan: "1/.. Sınıf Öğretmeni" }
+      ],
+      gundemText: DEFAULT_GUNDEM,
+      gorusmeler: DEFAULT_GORUSMELER,
+      kararlar: DEFAULT_KARARLAR
+    };
+
+    var debounceTimer;
+
+    window.triggerDebouncedUpdate = function() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function() {
+        window.updatePreview();
+        window.calculateStats();
+        window.saveFormState();
+      }, 200);
+    };
+
+    window.handleInputChange = function(key, val) {
+      window.formData[key] = val;
+      window.triggerDebouncedUpdate();
+    };
+
+    window.resetToDefaultData = function() {
+      window.formData.gundemText = DEFAULT_GUNDEM;
+      window.formData.gorusmeler = DEFAULT_GORUSMELER;
+      window.formData.kararlar = DEFAULT_KARARLAR;
+      localStorage.removeItem('zumre_current_state_v6');
+      window.populateFormFromState();
+      window.triggerDebouncedUpdate();
+      alert('Tüm metinler 1. Sınıf eksiksiz şablon verileriyle sıfırlandı.');
+    };
+
+    window.loadPresetGundem = function(type) {
+      var el = document.getElementById('txt-gundem');
+      if (el) {
+        el.value = DEFAULT_GUNDEM;
+        window.handleInputChange('gundemText', DEFAULT_GUNDEM);
+      }
+    };
+
+    window.loadPresetGorusmeler = function(type) {
+      var el = document.getElementById('txt-gorusmeler');
+      if (el) {
+        el.value = DEFAULT_GORUSMELER;
+        window.handleInputChange('gorusmeler', DEFAULT_GORUSMELER);
+      }
+    };
+
+    window.loadPresetKararlar = function(type) {
+      var el = document.getElementById('txt-kararlar');
+      if (el) {
+        el.value = DEFAULT_KARARLAR;
+        window.handleInputChange('kararlar', DEFAULT_KARARLAR);
+      }
+    };
+
+    window.renderParticipantInputs = function() {
+      var container = document.getElementById('participant-list-container');
+      if (!container) return;
+      container.innerHTML = window.formData.katilanlar.map(function(p, idx) {
+        return '<div class="flex items-center space-x-2">' +
+          '<input type="text" value="' + p.isim + '" oninput="window.updateParticipant(' + idx + ', \'isim\', this.value)" placeholder="Ad Soyad" class="flex-1 border border-slate-300 rounded p-1.5 text-xs outline-none"/>' +
+          '<input type="text" value="' + p.unvan + '" oninput="window.updateParticipant(' + idx + ', \'unvan\', this.value)" placeholder="Görevi / Unvanı" class="w-48 border border-slate-300 rounded p-1.5 text-xs outline-none"/>' +
+          '<button type="button" onclick="window.removeParticipantRow(' + idx + ')" class="p-1.5 text-red-500 hover:bg-red-50 rounded text-xs">✕</button>' +
+        '</div>';
+      }).join('');
+    };
+
+    window.addParticipantRow = function() {
+      window.formData.katilanlar.push({ isim: "", unvan: "Sınıf Öğretmeni" });
+      window.renderParticipantInputs();
+      window.triggerDebouncedUpdate();
+    };
+
+    window.removeParticipantRow = function(idx) {
+      if (window.formData.katilanlar.length > 1) {
+        window.formData.katilanlar.splice(idx, 1);
+        window.renderParticipantInputs();
+        window.triggerDebouncedUpdate();
+      }
+    };
+
+    window.updateParticipant = function(idx, field, val) {
+      window.formData.katilanlar[idx][field] = val;
+      window.triggerDebouncedUpdate();
+    };
+
+    window.sanitizeInputLines = function(rawText) {
+      if (!rawText) return [];
+      return rawText
+        .split('\n')
+        .map(function(line) { return line.trim(); })
+        .filter(function(line) { return line.length > 0; });
+    };
+
+    window.calculateStats = function() {
+      var allText = (window.formData.gorusmeler || '') + ' ' + (window.formData.kararlar || '');
+      var words = allText.trim().split(/\s+/).filter(function(w) { return w.length > 0; }).length;
+      var decisions = window.sanitizeInputLines(window.formData.kararlar).length;
+
+      var elWords = document.getElementById('stat-words');
+      var elDecisions = document.getElementById('stat-decisions');
+
+      if (elWords) elWords.innerText = words + " Kelime";
+      if (elDecisions) elDecisions.innerText = decisions + " Karar";
+    };
+
+    window.updatePreview = function() {
+      var setElText = function(id, text) { var el = document.getElementById(id); if (el) el.innerText = text; };
+
+      setElText('pv-okulMudurlugu', (window.formData.okul || '................ MÜDÜRLÜĞÜNE').toLocaleUpperCase('tr'));
+      setElText('pv-baslik1', (window.formData.egitimYili || '2026-2027') + " EĞİTİM-ÖĞRETİM YILI");
+      setElText('pv-baslik2', ((window.formData.brans || '') + " " + (window.formData.donem || '') + " TUTANAĞI").toLocaleUpperCase('tr'));
+
+      var baskanKriterStr = window.formData.baskanKriter ? " (MEB Yönergesi uyarınca: " + window.formData.baskanKriter + ")" : "";
+      var ustYaziStr = (window.formData.egitimYili || '2026-2027') + " Eğitim-Öğretim Yılı " + (window.formData.brans || '') + " " + (window.formData.donem || '') + " " + (window.formData.tarih || '') + " tarihinde saat " + (window.formData.saat || '') + "'te aşağıdaki gündem maddelerini görüşmek üzere " + (window.formData.toplantiYeri || 'Öğretmenler Odasında') + " Zümre Başkanı " + (window.formData.baskan || '') + baskanKriterStr + " başkanlığında yapılacaktır. Gereğini bilgilerinize arz ederim.";
+      setElText('pv-ustYazi', ustYaziStr);
+
+      var gundemLines = window.sanitizeInputLines(window.formData.gundemText);
+      var elGundem = document.getElementById('pv-gundemMaddeleri');
+      if (elGundem) elGundem.innerHTML = gundemLines.map(function(item) { return '<li class="mb-0.5">' + item.replace(/^(\d+[\.\)]|\-|•|\*)\s*/, '') + '</li>'; }).join('');
+
+      var gorusmeLines = window.sanitizeInputLines(window.formData.gorusmeler);
+      var elGorus = document.getElementById('pv-gorusmeler');
+      if (elGorus) elGorus.innerHTML = gorusmeLines.map(function(item) { 
+        if (item.match(/^(\d+[\.\)]|[A-Z0-9\s\-]{4,}:)/)) {
+          return '<div class="font-bold text-slate-900 pt-1.5 border-t border-slate-100 mt-1">' + item + '</div>';
+        }
+        return '<p class="indent-6 mb-1 text-justify">' + item + '</p>'; 
+      }).join('');
+
+      var kararLines = window.sanitizeInputLines(window.formData.kararlar);
+      var elKarar = document.getElementById('pv-kararlar');
+      if (elKarar) elKarar.innerHTML = kararLines.map(function(item) { return '<li class="mb-0.5">' + item.replace(/^(\d+[\.\)]|\-|•|\*)\s*/, '') + '</li>'; }).join('');
+
+      var elImzaBody = document.getElementById('pv-imzaTableBody');
+      if (elImzaBody) {
+        elImzaBody.innerHTML = window.formData.katilanlar.map(function(p, idx) {
+          return '<tr>' +
+            '<td class="border border-slate-400 p-1.5 text-center font-bold">' + (idx + 1) + '</td>' +
+            '<td class="border border-slate-400 p-1.5 font-semibold">' + p.isim + '</td>' +
+            '<td class="border border-slate-400 p-1.5">' + p.unvan + '</td>' +
+            '<td class="border border-slate-400 p-1.5 text-center text-slate-300 text-[8pt]">İmza</td>' +
+          '</tr>';
+        }).join('');
+      }
+
+      setElText('pv-onayTarihi', window.formData.tarih || '');
+      setElText('pv-okulMuduruOnay', window.formData.okulMuduru || '[Okul Müdürü Adı Soyadı]');
+    };
+
+    window.runDocumentAudit = function() {
+      var auditLog = [];
+      
+      var gundemCount = window.sanitizeInputLines(window.formData.gundemText).length;
+      var gorusmeHeadings = window.sanitizeInputLines(window.formData.gorusmeler).filter(function(l) { return l.match(/^(\d+[\.\)]|[A-Z0-9\s\-]{4,}:)/); }).length;
+      var kararCount = window.sanitizeInputLines(window.formData.kararlar).length;
+
+      if (gundemCount === kararCount) {
+        auditLog.push({ type: 'success', msg: 'Sayısal Eşitlik Tam: ' + gundemCount + ' Gündem, ' + gorusmeHeadings + ' Görüşme Başlığı, ' + kararCount + ' Karar Maddesi mevcut.' });
+      } else {
+        auditLog.push({ type: 'warning', msg: 'Madde Uyumsuzluğu: Gündem (' + gundemCount + '), Görüşme Başlığı (' + gorusmeHeadings + '), Karar (' + kararCount + '). Tüm maddelerin müzakere edildiğinden emin olunuz!' });
+      }
+
+      var fullText = (window.formData.gorusmeler || '') + ' ' + (window.formData.kararlar || '');
+      var requiredTerms = [
+        { key: "Türkiye Yüzyılı Maarif Modeli", name: "TYMM Müfredat Reformu" },
+        { key: "Erdem-Değer-Eylem", name: "Erdem-Değer-Eylem Çerçevesi" },
+        { key: "İş Sağlığı Ve Güvenliği", name: "İSG Tedbirleri" },
+        { key: "BEP", name: "Bireyselleştirilmiş Eğitim Planı (BEP)" },
+        { key: "Ölçme", name: "Ölçme ve Değerlendirme Esasları" }
+      ];
+
+      requiredTerms.forEach(function(item) {
+        if (fullText.toLocaleUpperCase('tr').indexOf(item.key.toLocaleUpperCase('tr')) !== -1) {
+          auditLog.push({ type: 'success', msg: 'Mevzuat Varlığı Onaylandı: ' + item.name });
+        } else {
+          auditLog.push({ type: 'warning', msg: 'Mevzuat Eksikliği: Metinde "' + item.name + '" kavramı tespit edilemedi!' });
+        }
+      });
+
+      var hasChair = window.formData.katilanlar.some(function(p) { return p.unvan.toLowerCase().indexOf('başkan') !== -1; });
+      if (hasChair) {
+        auditLog.push({ type: 'success', msg: 'Zümre Başkanı katılımcı listesinde doğrulandı.' });
+      } else {
+        auditLog.push({ type: 'error', msg: 'İmza Sirküsü Hatası: Katılımcılar arasında Zümre Başkanı unvanlı öğretmen bulunamadı!' });
+      }
+
+      if (window.formData.okulMuduru && window.formData.okulMuduru.length > 3) {
+        auditLog.push({ type: 'success', msg: 'Onay Makamı (Okul Müdürü) tanımlandı: ' + window.formData.okulMuduru });
+      } else {
+        auditLog.push({ type: 'error', msg: 'Okul Müdürü adı boş bırakılamaz!' });
+      }
+
+      return auditLog;
+    };
+
+    window.runAuditAndGenerate = function() {
+      var results = window.runDocumentAudit();
+      var container = document.getElementById('audit-results-list');
+      if (container) {
+        container.innerHTML = results.map(function(r) {
+          var color = r.type === 'error' ? 'bg-red-50 text-red-700 border-red-200' : (r.type === 'warning' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200');
+          var icon = r.type === 'error' ? '❌' : (r.type === 'warning' ? '⚠️' : '✅');
+          return '<div class="p-2 border rounded-lg flex items-center space-x-2 ' + color + '"><span>' + icon + '</span><span>' + r.msg + '</span></div>';
+        }).join('');
+      }
+      var modal = document.getElementById('audit-modal');
+      if (modal) modal.classList.remove('hidden');
+    };
+
+    window.closeAuditModal = function() {
+      var modal = document.getElementById('audit-modal');
+      if (modal) modal.classList.add('hidden');
+    };
+
+    window.confirmAndDownloadWord = function() {
+      window.closeAuditModal();
+      window.generateWordDocument();
+    };
+
+    window.generateWordDocument = function() {
+      var Document = docx.Document;
+      var Paragraph = docx.Paragraph;
+      var TextRun = docx.TextRun;
+      var Table = docx.Table;
+      var TableRow = docx.TableRow;
+      var TableCell = docx.TableCell;
+      var WidthType = docx.WidthType;
+      var AlignmentType = docx.AlignmentType;
+
+      var baskanKriterStr = window.formData.baskanKriter ? " (MEB Yönergesi uyarınca: " + window.formData.baskanKriter + ")" : "";
+
+      var docElements = [
+        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: (window.formData.okul || 'MÜDÜRLÜĞÜNE').toLocaleUpperCase('tr'), bold: true, size: 24, font: "Times New Roman" })] }),
+        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: (window.formData.egitimYili || '2026-2027') + " EĞİTİM-ÖĞRETİM YILI", bold: true, size: 24, font: "Times New Roman" })] }),
+        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 }, children: [new TextRun({ text: ((window.formData.brans || '') + " " + (window.formData.donem || '') + " TUTANAĞI").toLocaleUpperCase('tr'), bold: true, size: 24, font: "Times New Roman", color: "0F2043" })] }),
+
+        new Paragraph({ 
+          alignment: AlignmentType.JUSTIFY, 
+          indent: { firstLine: 708 },
+          spacing: { after: 200, line: 276 }, 
+          children: [new TextRun({ text: (window.formData.egitimYili || '2026-2027') + " Eğitim-Öğretim Yılı " + (window.formData.brans || '') + " " + (window.formData.donem || '') + " " + (window.formData.tarih || '') + " tarihinde saat " + (window.formData.saat || '') + "'te aşağıdaki gündem maddelerini görüşmek üzere " + (window.formData.toplantiYeri || 'Öğretmenler Odası') + "'nda Zümre Başkanı " + (window.formData.baskan || '') + baskanKriterStr + " başkanlığında yapılacaktır. Gereğini bilgilerinize arz ederim.", size: 24, font: "Times New Roman" })] 
+        }),
+
+        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 100, after: 120 }, children: [new TextRun({ text: "GÜNDEM MADDELERİ", bold: true, size: 24, font: "Times New Roman", color: "0F2043" })] })
+      ];
+
+      window.sanitizeInputLines(window.formData.gundemText).forEach(function(item) {
+        docElements.push(new Paragraph({ 
+          alignment: AlignmentType.LEFT,
+          spacing: { after: 60, line: 276 }, 
+          children: [new TextRun({ text: item, size: 24, font: "Times New Roman" })] 
+        }));
+      });
+
+      docElements.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 240, after: 120 }, children: [new TextRun({ text: "GÜNDEM MADDELERİNİN GÖRÜŞÜLMESİ", bold: true, size: 24, font: "Times New Roman", color: "0F2043" })] }));
+
+      window.sanitizeInputLines(window.formData.gorusmeler).forEach(function(item) {
+        if (item.match(/^(\d+[\.\)]|[A-Z0-9\s\-]{4,}:)/)) {
+          docElements.push(new Paragraph({ 
+            alignment: AlignmentType.LEFT,
+            spacing: { before: 140, after: 60, line: 276 }, 
+            children: [new TextRun({ text: item, bold: true, size: 24, font: "Times New Roman", color: "0F2043" })] 
+          }));
+        } else {
+          docElements.push(new Paragraph({ 
+            alignment: AlignmentType.JUSTIFY, 
+            indent: { firstLine: 708 },
+            spacing: { after: 100, line: 276 }, 
+            children: [new TextRun({ text: item, size: 24, font: "Times New Roman" })] 
+          }));
+        }
+      });
+
+      docElements.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 240, after: 120 }, children: [new TextRun({ text: "ALINAN KARARLAR", bold: true, size: 24, font: "Times New Roman", color: "0F2043" })] }));
+
+      window.sanitizeInputLines(window.formData.kararlar).forEach(function(item) {
+        docElements.push(new Paragraph({ 
+          alignment: AlignmentType.LEFT,
+          spacing: { after: 60, line: 276 }, 
+          children: [new TextRun({ text: item, size: 24, font: "Times New Roman" })] 
+        }));
+      });
+
+      var tableRows = [
+        new TableRow({
+          children: [
+            new TableCell({ width: { size: 1000, type: WidthType.DXA }, shading: { fill: "F0F4F8" }, margins: { top: 120, bottom: 120, left: 180, right: 180 }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Sıra", bold: true, size: 20, font: "Times New Roman" })] })] }),
+            new TableCell({ width: { size: 4500, type: WidthType.DXA }, shading: { fill: "F0F4F8" }, margins: { top: 120, bottom: 120, left: 180, right: 180 }, children: [new Paragraph({ children: [new TextRun({ text: "Adı Soyadı", bold: true, size: 20, font: "Times New Roman" })] })] }),
+            new TableCell({ width: { size: 3200, type: WidthType.DXA }, shading: { fill: "F0F4F8" }, margins: { top: 120, bottom: 120, left: 180, right: 180 }, children: [new Paragraph({ children: [new TextRun({ text: "Görevi", bold: true, size: 20, font: "Times New Roman" })] })] }),
+            new TableCell({ width: { size: 1500, type: WidthType.DXA }, shading: { fill: "F0F4F8" }, margins: { top: 120, bottom: 120, left: 180, right: 180 }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "İmza", bold: true, size: 20, font: "Times New Roman" })] })] })
+          ]
+        })
+      ];
+
+      window.formData.katilanlar.forEach(function(p, idx) {
+        tableRows.push(new TableRow({
+          children: [
+            new TableCell({ width: { size: 1000, type: WidthType.DXA }, margins: { top: 120, bottom: 120, left: 180, right: 180 }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: (idx + 1).toString(), size: 20, font: "Times New Roman" })] })] }),
+            new TableCell({ width: { size: 4500, type: WidthType.DXA }, margins: { top: 120, bottom: 120, left: 180, right: 180 }, children: [new Paragraph({ children: [new TextRun({ text: p.isim, size: 20, font: "Times New Roman" })] })] }),
+            new TableCell({ width: { size: 3200, type: WidthType.DXA }, margins: { top: 120, bottom: 120, left: 180, right: 180 }, children: [new Paragraph({ children: [new TextRun({ text: p.unvan, size: 20, font: "Times New Roman" })] })] }),
+            new TableCell({ width: { size: 1500, type: WidthType.DXA }, margins: { top: 120, bottom: 120, left: 180, right: 180 }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "İmza", size: 18, font: "Times New Roman", color: "888888" })] })] })
+          ]
+        }));
+      });
+
+      docElements.push(
+        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 240, after: 120 }, children: [new TextRun({ text: "TOPLANTIYA KATILANLAR", bold: true, size: 22, font: "Times New Roman" })] }),
+        new Table({ alignment: AlignmentType.CENTER, columnWidths: [1000, 4500, 3200, 1500], width: { size: 10200, type: WidthType.DXA }, rows: tableRows }),
+        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 300, after: 40 }, children: [new TextRun({ text: window.formData.tarih || '', bold: true, size: 22, font: "Times New Roman" })] }),
+        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 40 }, children: [new TextRun({ text: "UYGUNDUR", bold: true, size: 24, font: "Times New Roman" })] }),
+        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: window.formData.okulMuduru || '[Okul Müdürü Adı Soyadı]', bold: true, size: 22, font: "Times New Roman" })] }),
+        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Okul Müdürü", size: 20, font: "Times New Roman" })] })
+      );
+
+      var doc = new Document({
+        sections: [{
+          properties: {
+            page: {
+              margin: {
+                top: 850,
+                bottom: 850,
+                left: 850,
+                right: 850
+              }
+            }
+          },
+          children: docElements
+        }]
+      });
+
+      var fileName = "Zumre_Tutanagi_" + (window.formData.egitimYili || '2026-2027') + ".docx";
+      docx.Packer.toBlob(doc).then(function(blob) {
+        saveAs(blob, fileName);
+        window.saveToHistory(fileName);
+      });
+    };
+
+    window.togglePreviewVisibility = function() {
+      var wrapper = document.getElementById('preview-section-wrapper');
+      var textEl = document.getElementById('btn-toggle-pv-text');
+      var iconEl = document.getElementById('btn-toggle-pv-icon');
+      if (wrapper) {
+        if (wrapper.style.display === 'none') {
+          wrapper.style.display = 'block';
+          if (textEl) textEl.innerText = 'Ön Gösterimi Gizle';
+          if (iconEl) iconEl.innerText = '👁️';
+        } else {
+          wrapper.style.display = 'none';
+          if (textEl) textEl.innerText = 'Ön Gösterimi Aç';
+          if (iconEl) iconEl.innerText = '🙈';
+        }
+      }
+    };
+
+    window.setZoom = function(scale) {
+      var card = document.getElementById('a4-preview-card');
+      if (card) card.style.transform = "scale(" + scale + ")";
+    };
+
+    window.copyFieldText = function(fieldId) {
+      var el = document.getElementById(fieldId);
+      if (el) {
+        navigator.clipboard.writeText(el.value);
+        alert('Metin kopyalandı.');
+      }
+    };
+
+    window.saveFormState = function() {
+      localStorage.setItem('zumre_current_state_v6', JSON.stringify(window.formData));
+    };
+
+    window.saveToHistory = function(fileName) {
+      var history = [];
+      try { history = JSON.parse(localStorage.getItem('zumre_history_list_v6')) || []; } catch(e){}
+      history.unshift({ title: fileName, date: new Date().toLocaleString('tr-TR'), data: JSON.parse(JSON.stringify(window.formData)) });
+      if (history.length > 10) history = history.slice(0, 10);
+      localStorage.setItem('zumre_history_list_v6', JSON.stringify(history));
+    };
+
+    window.openHistoryModal = function() {
+      var history = [];
+      try { history = JSON.parse(localStorage.getItem('zumre_history_list_v6')) || []; } catch(e){}
+      var container = document.getElementById('history-items-container');
+      if (container) {
+        if (history.length === 0) {
+          container.innerHTML = '<div class="text-slate-400 text-center py-4">Henüz kayıtlı taslak bulunmuyor.</div>';
+        } else {
+          container.innerHTML = history.map(function(item, idx) {
+            return '<div class="p-3 border border-slate-200 rounded-lg flex items-center justify-between hover:bg-slate-50">' +
+              '<div><div class="font-bold text-blue-900">' + item.title + '</div><div class="text-[10px] text-slate-400">' + item.date + '</div></div>' +
+              '<button type="button" onclick="window.loadHistoryItem(' + idx + ')" class="px-3 py-1 bg-blue-600 text-white rounded font-bold text-xs">Yükle</button>' +
+            '</div>';
+          }).join('');
+        }
+      }
+      var modal = document.getElementById('history-modal');
+      if (modal) modal.classList.remove('hidden');
+    };
+
+    window.closeHistoryModal = function() {
+      var modal = document.getElementById('history-modal');
+      if (modal) modal.classList.add('hidden');
+    };
+
+    window.loadHistoryItem = function(idx) {
+      var history = [];
+      try { history = JSON.parse(localStorage.getItem('zumre_history_list_v6')) || []; } catch(e){}
+      if (history[idx]) {
+        window.formData = history[idx].data;
+        window.populateFormFromState();
+        window.triggerDebouncedUpdate();
+        window.closeHistoryModal();
+      }
+    };
+
+    window.populateFormFromState = function() {
+      var setVal = function(id, val) { var el = document.getElementById(id); if (el) el.value = val; };
+      setVal('inp-okul', window.formData.okul || '');
+      setVal('inp-ilce', window.formData.ilce || '');
+      setVal('inp-egitimYili', window.formData.egitimYili || '');
+      setVal('inp-brans', window.formData.brans || '');
+      setVal('inp-donem', window.formData.donem || '');
+      setVal('inp-toplantiYeri', window.formData.toplantiYeri || '');
+      setVal('inp-tarih', window.formData.tarih || '');
+      setVal('inp-saat', window.formData.saat || '');
+      setVal('inp-baskan', window.formData.baskan || '');
+      setVal('inp-baskanKriter', window.formData.baskanKriter || 'İstekli Öğretmenler Arasından Seçilmiştir');
+      setVal('inp-baskanMebbisNo', window.formData.baskanMebbisNo || '');
+      setVal('inp-okulMuduru', window.formData.okulMuduru || '');
+      setVal('txt-gundem', window.formData.gundemText || DEFAULT_GUNDEM);
+      setVal('txt-gorusmeler', window.formData.gorusmeler || DEFAULT_GORUSMELER);
+      setVal('txt-kararlar', window.formData.kararlar || DEFAULT_KARARLAR);
+      window.renderParticipantInputs();
+    };
+
+    function initApp() {
+      var savedState = localStorage.getItem('zumre_current_state_v6');
+      if (savedState) {
+        try { 
+          var parsed = JSON.parse(savedState);
+          if (parsed && parsed.gorusmeler && parsed.gorusmeler.length > 100) {
+            window.formData = parsed;
+          }
+        } catch(e){}
+      }
+      if (!window.formData.gundemText || window.formData.gundemText.trim() === '') window.formData.gundemText = DEFAULT_GUNDEM;
+      if (!window.formData.gorusmeler || window.formData.gorusmeler.trim() === '') window.formData.gorusmeler = DEFAULT_GORUSMELER;
+      if (!window.formData.kararlar || window.formData.kararlar.trim() === '') window.formData.kararlar = DEFAULT_KARARLAR;
+
+      window.populateFormFromState();
+      window.triggerDebouncedUpdate();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  </script>
+
+</body>
+</html>
