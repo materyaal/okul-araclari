@@ -25,17 +25,18 @@
         }
     </script>
     <style>
-        /* Çift kaydırma çubuğunu ve iframe içindeki taşmaları tamamen engeller */
+        /* İframe içi dikey taşma ve çubukları sıfırlar */
         html, body {
             background-color: transparent !important;
             height: auto !important;
             min-height: auto !important;
+            overflow-x: hidden !important;
             overflow-y: visible !important;
             margin: 0 !important;
             padding: 0 !important;
+            width: 100% !important;
         }
 
-        /* Modern Focus & Touch Input Styles */
         input:focus, select:focus, textarea:focus {
             outline: none;
             box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25);
@@ -58,7 +59,6 @@
             background: #94a3b8;
         }
 
-        /* Sayı kutucukları ok temizleme */
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
@@ -163,7 +163,6 @@
 </head>
 <body class="font-sans text-slate-800 antialiased p-0 m-0">
 
-    <!-- ANA İÇERİK (HEADER VE FOOTER TAMAMEN KALDIRILDI) -->
     <main class="w-full max-w-7xl mx-auto py-1 px-1 sm:px-2 main-container">
         
         <!-- ÜST UYARI BANDI (100 Puan Kontrolü) -->
@@ -396,6 +395,40 @@
         </div>
     </main>
 
+    <!-- ODOO İLE %100 UYUMLU DİNAMİK YÜKSEKLİK POSTMESSAGE MOTORU -->
+    <script>
+        function sendHeightToParent() {
+            var docHeight = Math.max(
+                document.body.scrollHeight,
+                document.documentElement.scrollHeight,
+                document.body.offsetHeight,
+                document.documentElement.offsetHeight,
+                document.body.clientHeight,
+                document.documentElement.clientHeight
+            );
+            
+            // Web sitenizdeki dinleyicinin beklediği format
+            window.parent.postMessage({
+                type: 'setHeight',
+                height: docHeight
+            }, '*');
+        }
+
+        window.addEventListener('load', function() {
+            sendHeightToParent();
+            setTimeout(sendHeightToParent, 300);
+            setTimeout(sendHeightToParent, 800);
+        });
+
+        window.addEventListener('resize', sendHeightToParent);
+
+        if (window.ResizeObserver) {
+            new ResizeObserver(function() {
+                sendHeightToParent();
+            }).observe(document.body);
+        }
+    </script>
+
     <!-- JAVASCRIPT / MOTOR MANTIĞI -->
     <script>
         function escapeHtml(str) {
@@ -443,6 +476,7 @@
         function saveToLocalStorage() {
             localStorage.setItem('materyaal_performance_pure_embed', JSON.stringify(state));
             checkTotalWeight();
+            setTimeout(sendHeightToParent, 100);
         }
 
         function loadFromLocalStorage() {
@@ -914,6 +948,7 @@
             if (state.students.length === 0) {
                 const colSpanCount = 3 + (state.criteria.length * split) + 2;
                 tbody.innerHTML = `<tr><td colspan="${colSpanCount}" class="py-8 text-center text-slate-400 italic">Henüz öğrenci eklenmedi.</td></tr>`;
+                setTimeout(sendHeightToParent, 100);
                 return;
             }
 
@@ -975,6 +1010,7 @@
                 tr.innerHTML = rowHTML;
                 tbody.appendChild(tr);
             });
+            setTimeout(sendHeightToParent, 100);
         }
 
         function handleKeyNavigation(e, r, c) {
