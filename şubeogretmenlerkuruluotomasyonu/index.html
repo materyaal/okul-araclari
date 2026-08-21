@@ -2,118 +2,303 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Şube Öğretmenler Kurulu Tutanağı Oluşturucu</title>
+    <!-- html2pdf Kütüphanesi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        * { box-sizing: border-box !important; }
+        body { 
+            background-color: #f1f5f9 !important; 
+            margin: 0 !important; 
+            padding: 10px !important; 
+            color: #0f172a !important; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        #sokAppWrapper { 
+            text-align: left !important; 
+            width: 100% !important; 
+            max-width: 1500px !important; 
+            margin: 0 auto !important; 
+        }
+        
+        #sokAppWrapper .main-layout { 
+            display: flex !important; 
+            flex-direction: column !important; 
+            gap: 20px !important; 
+            width: 100% !important; 
+        }
+        
+        #sokAppWrapper .form-container { 
+            flex: 1 !important; 
+            background: #ffffff !important; 
+            border: 1px solid #cbd5e1 !important; 
+            border-radius: 10px !important; 
+            padding: 15px !important; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1) !important; 
+            text-align: left !important; 
+            width: 100% !important;
+        }
+        
+        #sokAppWrapper h2 { 
+            color: #1e3a8a !important; 
+            margin-top: 0 !important; 
+            border-bottom: 2px solid #3b82f6 !important; 
+            padding-bottom: 8px !important; 
+            font-size: 14px !important; 
+            font-weight: 700 !important; 
+            text-align: left !important; 
+        }
+        
+        #sokAppWrapper .form-grid { 
+            display: grid !important; 
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important; 
+            gap: 10px !important; 
+            margin-bottom: 15px !important; 
+            text-align: left !important; 
+        }
+        
+        #sokAppWrapper .form-group { 
+            display: flex !important; 
+            flex-direction: column !important; 
+            margin-bottom: 10px !important; 
+            text-align: left !important; 
+            align-items: flex-start !important; 
+            width: 100% !important;
+        }
+        
+        #sokAppWrapper label { 
+            display: block !important; 
+            width: 100% !important; 
+            font-size: 11px !important; 
+            font-weight: 600 !important; 
+            color: #475569 !important; 
+            margin-bottom: 4px !important; 
+            text-align: left !important; 
+        }
+        
+        #sokAppWrapper input[type="text"], 
+        #sokAppWrapper select, 
+        #sokAppWrapper textarea { 
+            display: block !important; 
+            width: 100% !important; 
+            padding: 8px !important; 
+            border: 1px solid #cbd5e1 !important; 
+            border-radius: 5px !important; 
+            font-size: 13px !important; 
+            background-color: #f8fafc !important; 
+            color: #0f172a !important; 
+            text-align: left !important; 
+            margin: 0 !important; 
+        }
+        
+        #sokAppWrapper textarea { 
+            resize: vertical !important; 
+            min-height: 110px !important; 
+            font-family: inherit !important; 
+            line-height: 1.45 !important; 
+        }
+        
+        #sokAppWrapper .brans-header { 
+            display: flex !important; 
+            justify-content: space-between !important; 
+            align-items: center !important; 
+            margin-top: 15px !important; 
+            border-bottom: 2px solid #3b82f6 !important; 
+            padding-bottom: 5px !important; 
+        }
+
+        /* Mobil Uyumlu Tablo Taşıyıcıları */
+        .table-responsive {
+            width: 100% !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            margin-top: 8px !important;
+            margin-bottom: 12px !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 6px !important;
+        }
+        
+        #sokAppWrapper .custom-table { 
+            width: 100% !important; 
+            border-collapse: collapse !important; 
+            font-size: 12px !important; 
+            min-width: 550px !important; 
+        }
+        
+        #sokAppWrapper .custom-table th { 
+            background: #f8fafc !important; 
+            color: #64748b !important; 
+            text-align: left !important; 
+            padding: 8px !important; 
+            border-bottom: 1px solid #e2e8f0 !important; 
+        }
+        
+        #sokAppWrapper .custom-table td { 
+            padding: 5px 6px !important; 
+            border-bottom: 1px solid #f1f5f9 !important; 
+            text-align: left !important; 
+        }
+        
+        #sokAppWrapper .custom-table input { 
+            background: #ffffff !important; 
+            border: 1px solid #cbd5e1 !important; 
+            font-size: 12px !important;
+        }
+        
+        #sokAppWrapper .btn-group { 
+            display: flex !important; 
+            gap: 8px !important; 
+            margin-top: 20px !important; 
+            flex-wrap: wrap !important; 
+            justify-content: flex-start !important; 
+        }
+        
+        #sokAppWrapper .btn { 
+            background: #2563eb !important; 
+            color: #ffffff !important; 
+            border: none !important; 
+            padding: 9px 14px !important; 
+            border-radius: 6px !important; 
+            cursor: pointer !important; 
+            font-weight: 600 !important; 
+            font-size: 12px !important; 
+            text-decoration: none !important; 
+            display: inline-flex !important; 
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        
+        #sokAppWrapper .btn:hover { background: #1d4ed8 !important; }
+        #sokAppWrapper .btn-pdf { background: #dc2626 !important; }
+        #sokAppWrapper .btn-word { background: #1d4ed8 !important; }
+        #sokAppWrapper .btn-print { background: #16a34a !important; }
+        #sokAppWrapper .btn-reset { background: #64748b !important; }
+        #sokAppWrapper .btn-danger-sm { 
+            background: #dc2626 !important; 
+            color: #fff !important; 
+            padding: 5px 8px !important; 
+            font-size: 11px !important; 
+            border-radius: 4px !important; 
+            border: none !important; 
+            cursor: pointer !important; 
+        }
+
+        /* Ön İzleme A4 Sayfa Düzeni (Mobilde Yatay Kaydırma Desteği) */
+        #sokAppWrapper .preview-container { 
+            background: #475569 !important; 
+            border-radius: 10px !important; 
+            padding: 15px 5px !important; 
+            display: flex !important; 
+            flex-direction: column !important; 
+            align-items: center !important; 
+            gap: 20px !important; 
+            overflow-x: auto !important; 
+            width: 100% !important; 
+            margin-top: 15px !important; 
+            -webkit-overflow-scrolling: touch !important;
+        }
+        
+        #sokAppWrapper .a4-page { 
+            width: 210mm !important; 
+            min-height: 297mm !important; 
+            padding: 15mm 18mm !important; 
+            background: #ffffff !important; 
+            box-shadow: 0 0 12px rgba(0,0,0,0.35) !important; 
+            font-family: 'Times New Roman', Times, serif !important; 
+            font-size: 10.5pt !important; 
+            line-height: 1.45 !important; 
+            color: #000000 !important; 
+            box-sizing: border-box !important; 
+            text-align: left !important; 
+            flex-shrink: 0 !important;
+        }
+        
+        #sokAppWrapper .a4-page.landscape { 
+            width: 297mm !important; 
+            min-height: 210mm !important; 
+            padding: 12mm 15mm !important; 
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 5px !important; }
+            #sokAppWrapper .form-container { padding: 12px !important; }
+            #sokAppWrapper .btn-group .btn { width: 100% !important; margin-bottom: 4px; }
+            #sokAppWrapper .form-grid { grid-template-columns: 1fr !important; }
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            #sokAppWrapper .main-layout { display: block !important; }
+            #sokAppWrapper .preview-container { background: white !important; padding: 0 !important; margin: 0 !important; }
+            #sokAppWrapper .a4-page { box-shadow: none !important; width: 100% !important; padding: 10mm !important; }
+        }
+    </style>
 </head>
 <body>
-<!-- html2pdf Kütüphanesi -->
-                    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-                    <!-- Resmî Formatlı ve İzolasyonlu CSS -->
-                    <style>
-                        #sokAppWrapper { text-align: left !important; width: 100% !important; max-width: 1500px !important; margin: 0 auto !important; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
-                        #sokAppWrapper * { box-sizing: border-box !important; }
-                        
-                        #sokAppWrapper .main-layout { display: flex !important; flex-direction: column !important; gap: 20px !important; width: 100% !important; }
-                        #sokAppWrapper .form-container { flex: 1 !important; background: #ffffff !important; border: 1px solid #cbd5e1 !important; border-radius: 10px !important; padding: 20px !important; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1) !important; text-align: left !important; }
-                        #sokAppWrapper h2 { color: #1e3a8a !important; margin-top: 0 !important; border-bottom: 2px solid #3b82f6 !important; padding-bottom: 8px !important; font-size: 15px !important; font-weight: 700 !important; text-align: left !important; }
-                        
-                        #sokAppWrapper .form-grid { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important; gap: 12px !important; margin-bottom: 15px !important; text-align: left !important; }
-                        #sokAppWrapper .form-group { display: flex !important; flex-direction: column !important; margin-bottom: 10px !important; text-align: left !important; align-items: flex-start !important; }
-                        #sokAppWrapper label { display: block !important; width: 100% !important; font-size: 11px !important; font-weight: 600 !important; color: #475569 !important; margin-bottom: 4px !important; text-align: left !important; }
-                        
-                        #sokAppWrapper input[type="text"], 
-                        #sokAppWrapper select, 
-                        #sokAppWrapper textarea { display: block !important; width: 100% !important; padding: 8px !important; border: 1px solid #cbd5e1 !important; border-radius: 5px !important; font-size: 12px !important; background-color: #f8fafc !important; color: #0f172a !important; text-align: left !important; margin: 0 !important; }
-                        #sokAppWrapper textarea { resize: vertical !important; min-height: 120px !important; font-family: inherit !important; line-height: 1.4 !important; }
-                        
-                        #sokAppWrapper .brans-header { display: flex !important; justify-content: space-between !important; align-items: center !important; margin-top: 15px !important; border-bottom: 2px solid #3b82f6 !important; padding-bottom: 5px !important; }
-                        #sokAppWrapper .custom-table { width: 100% !important; border-collapse: collapse !important; margin-top: 8px !important; font-size: 12px !important; }
-                        #sokAppWrapper .custom-table th { background: #f8fafc !important; color: #64748b !important; text-align: left !important; padding: 8px !important; border-bottom: 1px solid #e2e8f0 !important; }
-                        #sokAppWrapper .custom-table td { padding: 4px 6px !important; border-bottom: 1px solid #f1f5f9 !important; text-align: left !important; }
-                        #sokAppWrapper .custom-table input { background: #ffffff !important; border: 1px solid #cbd5e1 !important; }
-                        
-                        #sokAppWrapper .btn-group { display: flex !important; gap: 8px !important; margin-top: 20px !important; flex-wrap: wrap !important; justify-content: flex-start !important; }
-                        #sokAppWrapper .btn { background: #2563eb !important; color: #ffffff !important; border: none !important; padding: 9px 14px !important; border-radius: 6px !important; cursor: pointer !important; font-weight: 600 !important; font-size: 12px !important; text-decoration: none !important; display: inline-block !important; }
-                        #sokAppWrapper .btn:hover { background: #1d4ed8 !important; }
-                        #sokAppWrapper .btn-pdf { background: #dc2626 !important; }
-                        #sokAppWrapper .btn-word { background: #1d4ed8 !important; }
-                        #sokAppWrapper .btn-print { background: #16a34a !important; }
-                        #sokAppWrapper .btn-reset { background: #64748b !important; }
-                        #sokAppWrapper .btn-danger-sm { background: #dc2626 !important; color: #fff !important; padding: 4px 8px !important; font-size: 11px !important; border-radius: 4px !important; border: none !important; cursor: pointer !important; }
+<div id="sokAppWrapper">
+    <div class="main-layout" id="sokMainLayout">
+        <!-- FORM ALANI -->
+        <div class="form-container no-print">
+            <h2>1. Okul ve Kurul Başlık Bilgileri</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Okul Adı *</label>
+                    <input type="text" id="sok_okulAdi" value="ATATÜRK"/>
+                </div>
+                <div class="form-group">
+                    <label>Okul Türü *</label>
+                    <select id="sok_okulTuru">
+                        <option value="ANADOLU LİSESİ" selected="selected">Anadolu Lisesi</option>
+                        <option value="FEN LİSESİ">Fen Lisesi</option>
+                        <option value="MESLEKİ VE TEKNİK ANADOLU LİSESİ">MTAL</option>
+                        <option value="ANADOLU İMAM HATİP LİSESİ">AİHL</option>
+                        <option value="ORTAOKULU">Ortaokulu</option>
+                        <option value="İLKOKULU">İlkokulu</option>
+                        <option value="OZEL">Özel / Diğer...</option>
+                    </select>
+                    <input type="text" id="sok_okulTuruOzel" placeholder="Özel Kurum Türü" style="display:none; margin-top:4px;"/>
+                </div>
+                <div class="form-group">
+                    <label>ŞÖK Toplantı Dönemi *</label>
+                    <select id="sok_sokNo">
+                        <option value="I. DÖNEM ŞÖK">I. Dönem ŞÖK</option>
+                        <option value="II. DÖNEM ŞÖK" selected="selected">II. Dönem ŞÖK</option>
+                        <option value="DÖNEM SONU ŞÖK">Dönem Sonu ŞÖK</option>
+                        <option value="OZEL">Özel Tanımlama...</option>
+                    </select>
+                    <input type="text" id="sok_sokNoOzel" placeholder="Özel Dönem Tanımı" style="display:none; margin-top:4px;"/>
+                </div>
+                <div class="form-group">
+                    <label>Eğitim-Öğretim Yılı *</label>
+                    <input type="text" id="sok_egitimYili" value="2025-2026"/>
+                </div>
+                <div class="form-group">
+                    <label>Sınıf / Şube *</label>
+                    <input type="text" id="sok_sube" value="11/A"/>
+                </div>
+                <div class="form-group">
+                    <label>Toplantı Tarihi ve Saati *</label>
+                    <input type="text" id="sok_tarihSaat" value="04.02.2026 - 13:30"/>
+                </div>
+                <div class="form-group">
+                    <label>Okul Müdürü *</label>
+                    <input type="text" id="sok_okulMuduru" value="Ahmet YILMAZ"/>
+                </div>
+                <div class="form-group">
+                    <label>Kurul Başkanı / Md. Yrd.</label>
+                    <input type="text" id="sok_mudurYardimcisi" value="Mehmet KAYA"/>
+                </div>
+            </div>
 
-                        /* Ön İzleme A4 Sayfa Düzeni */
-                        #sokAppWrapper .preview-container { background: #525659 !important; border-radius: 10px !important; padding: 25px 10px !important; display: flex !important; flex-direction: column !important; align-items: center !important; gap: 20px !important; overflow-x: auto !important; width: 100% !important; margin-top: 15px !important; }
-                        #sokAppWrapper .a4-page { width: 210mm !important; min-height: 297mm !important; padding: 15mm 18mm !important; background: #ffffff !important; box-shadow: 0 0 12px rgba(0,0,0,0.35) !important; font-family: 'Times New Roman', Times, serif !important; font-size: 10.5pt !important; line-height: 1.5 !important; color: #000000 !important; box-sizing: border-box !important; text-align: left !important; }
-                        #sokAppWrapper .a4-page.landscape { width: 297mm !important; min-height: 210mm !important; padding: 12mm 15mm !important; }
-
-                        @media print {
-                            .no-print { display: none !important; }
-                            #sokAppWrapper .main-layout { display: block !important; }
-                            #sokAppWrapper .preview-container { background: white !important; padding: 0 !important; margin: 0 !important; }
-                            #sokAppWrapper .a4-page { box-shadow: none !important; width: 100% !important; padding: 10mm !important; }
-                        }
-                    </style>
-
-                    <div id="sokAppWrapper">
-                        <div class="main-layout" id="sokMainLayout">
-                            <!-- FORM ALANI -->
-                            <div class="form-container no-print">
-                                <h2>1. Okul ve Kurul Başlık Bilgileri</h2>
-                                <div class="form-grid">
-                                    <div class="form-group">
-                                        <label>Okul Adı *</label>
-                                        <input type="text" id="sok_okulAdi" value="ATATÜRK"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Okul Türü *</label>
-                                        <select id="sok_okulTuru">
-                                            <option value="ANADOLU LİSESİ" selected="selected">Anadolu Lisesi</option>
-                                            <option value="FEN LİSESİ">Fen Lisesi</option>
-                                            <option value="MESLEKİ VE TEKNİK ANADOLU LİSESİ">MTAL</option>
-                                            <option value="ANADOLU İMAM HATİP LİSESİ">AİHL</option>
-                                            <option value="ORTAOKULU">Ortaokulu</option>
-                                            <option value="İLKOKULU">İlkokulu</option>
-                                            <option value="OZEL">Özel / Diğer...</option>
-                                        </select>
-                                        <input type="text" id="sok_okulTuruOzel" placeholder="Özel Kurum Türü" style="display:none; margin-top:4px;"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>ŞÖK Toplantı Dönemi *</label>
-                                        <select id="sok_sokNo">
-                                            <option value="I. DÖNEM ŞÖK">I. Dönem ŞÖK</option>
-                                            <option value="II. DÖNEM ŞÖK" selected="selected">II. Dönem ŞÖK</option>
-                                            <option value="DÖNEM SONU ŞÖK">Dönem Sonu ŞÖK</option>
-                                            <option value="OZEL">Özel Tanımlama...</option>
-                                        </select>
-                                        <input type="text" id="sok_sokNoOzel" placeholder="Özel Dönem Tanımı" style="display:none; margin-top:4px;"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Eğitim-Öğretim Yılı *</label>
-                                        <input type="text" id="sok_egitimYili" value="2025-2026"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Sınıf / Şube *</label>
-                                        <input type="text" id="sok_sube" value="11/A"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Toplantı Tarihi ve Saati *</label>
-                                        <input type="text" id="sok_tarihSaat" value="04.02.2026 - 13:30"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Okul Müdürü *</label>
-                                        <input type="text" id="sok_okulMuduru" value="Ahmet YILMAZ"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Kurul Başkanı / Md. Yrd.</label>
-                                        <input type="text" id="sok_mudurYardimcisi" value="Mehmet KAYA"/>
-                                    </div>
-                                </div>
-
-                                <h2>2. Gündem, Görüşmeler ve Alınan Kararlar</h2>
-                                <div class="form-group">
-                                    <label>Gündem Maddeleri</label>
-                                    <textarea id="sok_gundemMetni">1- Açılış ve yoklama.
+            <h2>2. Gündem, Görüşmeler ve Alınan Kararlar</h2>
+            <div class="form-group">
+                <label>Gündem Maddeleri</label>
+                <textarea id="sok_gundemMetni">1- Açılış ve yoklama.
 2- Bir önceki toplantıda alınan kararlar.
 3- Öğrencilerin başarı durumlarının incelenmesi ve başarıyı artırıcı önlemlerin alınması.
 4- Derslerin öğretim programlarıyla uyumlu olarak yürütülmesi.
@@ -128,57 +313,57 @@
 13- Değerler eğitimi çalışmalarına yer verilmesi.
 14- İş sağlığı ve güvenliği tedbirleri doğrultusunda eğitim ve öğretim faaliyetlerinin planlanması.
 15- Dilek ve temenniler.</textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label>Gündem Maddelerinin Görüşülmesi</label>
-                                    <textarea id="sok_gorusmeMetni" style="min-height:200px;">Madde 1: Açılış ve Yoklama
-Toplantı, belirtilen tarih ve saatte öğretmenler odasında kurul başkanının açılış konuşmasıyla başlatılmıştır. Yapılan yoklamada ilgili şubede derse giren tüm branş öğretmenlerinin toplantıda hazır bulunduğu tespit edilmiştir. Kurul başkanı, eğitim-öğretim sürecinin verimli geçmesi dileğiyle gündem maddelerinin görüşülmesine geçilmesini kararlaştırmıştır.
+            </div>
+            <div class="form-group">
+                <label>Gündem Maddelerinin Görüşülmesi</label>
+                <textarea id="sok_gorusmeMetni" style="min-height:200px;">Madde 1: Açılış ve Yoklama
+Toplantı belirtilen tarih ve saatte öğretmenler odasında başlatılmıştır. Yoklama alınmış, toplantıya katılan öğretmenlerin hazır bulunduğu tespit edilmiştir. Toplantının amacı; sınıf düzeyinde ikinci dönemde akademik hedeflerin netleştirilmesi, başarıyı artırıcı önlemlerin belirlenmesi ve öğrenci gelişiminin bütüncül değerlendirilmesi olarak ifade edilmiştir. Gündem maddeleri okunarak kabul edilmiştir.
 
 Madde 2: Bir Önceki Toplantıda Alınan Kararlar
-Bir önceki kurul toplantısında alınan kararlar tek tek okunarak uygulama durumları gözden geçirilmiştir. Devamsızlık takibi, ders içi ödev kontrolü ve veli bilgilendirmeleri konularında alınan kararların öğrenci başarısına olumlu yansıdığı ifade edilmiştir. Uygulamada süreklilik sağlanan çalışmaların aynen devam ettirilmesi, aksama görülen alanlarda ise takibin daha sıkı yapılması gerektiği vurgulanmıştır.
+Bir önceki toplantıda alınan kararlar maddeler halinde okunmuş ve uygulama durumu değerlendirilmiştir. Devamsızlık takibi, ödev kontrolü ve ölçme sonrası geri bildirim gibi kararların sınıf genelinde olumlu etkilerinin görüldüğü belirtilmiştir.
 
 Madde 3: Öğrencilerin Başarı Durumlarının İncelenmesi ve Başarıyı Artırıcı Önlemlerin Alınması
-Şubenin akademik başarı durumu yazılı sınav sonuçları, performans çalışmaları ve ders içi katılım ölçekleri üzerinden detaylıca incelenmiştir. Konu yoğunluğunun arttığı bu dönemde düzenli tekrar ve planlı çalışmanın belirleyici olduğu ifade edilmiştir. Başarı düşüklüğü tespit edilen öğrenciler için ders öğretmenleri koordinasyonunda eksik kazanım telafi planlarının hazırlanması, haftalık ders çalışma programlarının takip edilmesi ve motivasyonu artırıcı bireysel rehberlik görüşmelerinin yapılması uygun görülmüştür.
+Öğrencilerin başarı durumları ders bazında ele alınmış; yazılı sonuçları, performans çalışmaları ve ders içi gözlemler birlikte değerlendirilmiştir. Başarı düşüklüğü görülen öğrencilerde temel eksikler, düzensiz çalışma, sınav stratejisi ve zaman yönetimi sorunlarının öne çıktığı belirtilmiştir.
 
 Madde 4: Derslerin Öğretim Programlarıyla Uyumlu Olarak Yürütülmesi
-Tüm branşlarda derslerin MEB öğretim programlarındaki kazanımlara, yıllık planlara ve zümre kararlarına tam uyum içerisinde yürütüldüğü belirtilmiştir. Derslerde kazanım odaklı ilerlemenin kalıcı öğrenmeyi güçlendirdiği ifade edilerek; kavram haritaları, görsel materyaller ve beceri temelli soru örneklerine daha fazla yer verilmesi gerektiği kararlaştırılmıştır.
+Derslerin öğretim programındaki kazanımlara uygun yürütülmesi gerektiği vurgulanmıştır. Yıllık planların ve zümre kararlarının uygulanmasının ölçme-değerlendirmede ortaklık sağlayacağı ifade edilmiştir.
 
-Madde 5: Özel Eğitim İhtiyacı Olan / Kaynaştırma / Bütünleştirme Öğrencileri
-Sınıfta bulunan kaynaştırma ve bütünleştirme yoluyla eğitim alan öğrencilerin durumları görüşülmüştür. Bu öğrenciler için Bireyselleştirilmiş Eğitim Planlarının (BEP) hassasiyetle uygulanması; ders içi yönergelerin sadeleştirilmesi, sınav uyarlamalarının yapılması ve rehberlik servisiyle koordineli şekilde sosyal-duygusal gelişimlerinin desteklenmesi kararlaştırılmıştır.
+Madde 5: Özel Eğitim İhtiyacı Olan / Kaynaştırma Öğrencileri
+Bireysel gelişim raporu bulunan öğrenciler için öğretmenler tarafından Bireyselleştirilmiş Eğitim Planlarının (BEP) hazırlanması, rehberlik servisi ile iş birliği içinde sosyal-duygusal gelişimi destekleyici etkinlikler planlanması kararlaştırılmıştır.
 
-Madde 6: Eğitim Kaynaklarıyla Atölye, Laboratuvar ve Diğer Birimlerden Yararlanma
-Fen bilimleri laboratuvarı, bilişim sınıfları, kütüphane ve diğer uygulama alanlarının kullanımı değerlendirilmiştir. Derslerin özelliğine göre bu alanlardan disiplinler arası iş birliği ve adil bir kullanım planlaması dâhilinde, sorumlu öğretmen gözetiminde güvenli şekilde yararlanılması gerektiği vurgulanmıştır.
+Madde 6: Atölye ve Laboratuvarlardan Yararlanma
+Okulun laboratuvar, bilişim sınıfı ve diğer birimlerinin güvenli kullanımı ele alınmıştır. Kullanımların planlı yapılması ve sorumlu öğretmen gözetiminde yürütülmesi gerektiği vurgulanmıştır.
 
-Madde 7: Okul-Çevre İşbirliği
-Okul-çevre iş birliğinin öğrencilerin sosyal gelişimlerine katkısı ele alınmıştır. Sağlık kuruluşları, yerel yönetimler, kütüphaneler ve üniversitelerle iş birliği yapılarak seminer ve farkındalık etkinliklerinin düzenlenmesi; velilerin okul süreçlerine katılımının teşvik edilmesi kararlaştırılmıştır.
+Madde 7: Okul Çevre İşbirliği
+Yerel yönetimler, kütüphaneler, üniversiteler ve ilgili kurumlarla yapılabilecek seminer ve ziyaretler ele alınmıştır.
 
-Madde 8: Üretim Etkinliklerinin Eğitim ve Öğretimi Destekleyecek Şekilde Planlanması
-Öğrencilerin teorik bilgiyi pratiğe dönüştürmelerini sağlayacak proje, sergi, sunum ve ürün dosyası çalışmalarının ders kazanımlarıyla uyumlu planlanması gerektiği ifade edilmiştir. Üretilen ürünlerin Bilim Fuarı, TÜBİTAK ve benzeri platformlarda sergilenmesinin öğrenci motivasyonunu artıracağı belirtilmiştir.
+Madde 8: Üretim Etkinliklerinin Planlanması
+Proje, sunum, afiş, poster, rapor ve ürün dosyası gibi çalışmaların ders kazanımlarıyla ilişkilendirilerek planlanabileceği belirtilmiştir.
 
-Madde 9: Eğitim Kurumu, İlçe, İl ve Yurtdışında Düzenlenecek Etkinlikler
-İkinci dönem gerçekleştirilecek bilimsel, sosyal, kültürel, sanatsal ve sportif yarışma ile geziler görüşülmüştür. Kulüp ve topluma hizmet çalışmalarının öğrencilerin özgüvenini geliştirdiği vurgulanarak, sosyal etkinliklerin akademik sorumlulukları aksatmayacak şekilde takvimlendirilmesine karar verilmiştir.
+Madde 9: Bilimsel, Sosyal, Kültürel ve Sportif Etkinlikler
+İlçe ve il düzeyindeki yarışmalara katılımın öğrencilerin özgüvenini artırdığı belirtilmiştir. Kulüp çalışmalarının planlı yürütülmesi kararlaştırılmıştır.
 
-Madde 10: Öğrencilerde Girişimcilik Bilincinin Kazandırılması
-Öğrencilerin üretkenlik ve problem çözme becerilerini artırmak amacıyla sınıf içi görevlerde, grup çalışmalarında ve proje tasarım süreçlerinde aktif rol almaları desteklenecektir. Derslerde günlük hayattan alınan problemlere yönelik çözüm üretme egzersizleri yapılacaktır.
+Madde 10: Girişimcilik Bilinci
+Öğrencilere sınıf içi görevlerde, kulüp faaliyetlerinde ve sosyal sorumluluk projelerinde aktif görevler verilmesi uygun görülmüştür.
 
-Madde 11: Öğrencilerin Kişilik, Sosyal Gelişimi, Sağlık ve Dengeli Beslenmesi
-Öğrencilerin ergenlik dönemi gelişim özellikleri dikkate alınarak akran ilişkileri, iletişim dili ve empati becerilerinin desteklenmesi gerektiği vurgulanmıştır. Sabah kahvaltısı yapmadan gelen öğrenciler uyarılacak; ekran süresi, dijital bağımlılık ve dengeli beslenme hususlarında bilgilendirmeler yapılacaktır.
+Madde 11: Kişilik, Sosyal Gelişim ve Dengeli Beslenme
+Uyku düzeni, ekran süresi, hijyen ve fiziksel hareketin akademik başarıyla ilişkisi değerlendirilmiştir.
 
-Madde 12: Okul Sağlığı Çalışmalarına Yer Verilmesi
-Okul sağlığı kapsamında sınıf temizliği, kişisel hijyen, el yıkama alışkanlığı ve kantin alışkanlıkları üzerinden farkındalık oluşturulacaktır. Sağlık riski taşıyan durumlar rehberlik ve okul idaresiyle gizlilik ilkesi çerçevesinde paylaşılacaktır.
+Madde 12: Okul Sağlığı Çalışmaları
+Sınıf ve okul genelinde temizlik kurallarına uyulmasının önemine vurgu yapılmıştır.
 
-Madde 13: Değerler Eğitimi Çalışmalarına Yer Verilmesi
-Saygı, dürüstlük, sorumluluk, hoşgörü ve yardımseverlik gibi temel değerlerin sınıf içi sohbetler, pano çalışmaları ve örnek olay incelemeleriyle desteklenmesi; olumlu davranış sergileyen öğrencilerin takdir edilerek teşvik edilmesi kararlaştırılmıştır.
+Madde 13: Değerler Eğitimi Çalışmaları
+Saygı, sorumluluk, dürüstlük, hoşgörü ve yardımseverlik temalarının ikinci dönemde ortak dil ile desteklenmesi gerektiği belirtilmiştir.
 
-Madde 14: İş Sağlığı ve Güvenliği Tedbirleri Doğrultusunda Planlama
-Atölye, laboratuvar, spor alanları ve ortak alanlarda risk analizlerinin gözden geçirilmesi; acil durum tahliye planları, deprem ve yangın tatbikatlarının düzenli yapılması, koruyucu ekipman kullanımının ihmal edilmemesi vurgulanmıştır.
+Madde 14: İş Sağlığı ve Güvenliği Tedbirleri
+Laboratuvar, spor alanları ve ortak kullanım alanlarında güvenlik kurallarının öğrencilere hatırlatılması ve risk analizlerinin yapılması gerektiği vurgulanmıştır.
 
 Madde 15: Dilek ve Temenniler
-İkinci dönemin tüm öğretmen ve öğrenciler için sağlıklı, huzurlu ve başarılı geçmesi temennisiyle kurul başkanı tarafından toplantıya son verilmiştir.</textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label>Alınan Kararlar</label>
-                                    <textarea id="sok_kararMetni" style="min-height:120px;">1- Bir önceki toplantı kararlarının uygulanma durumunun takip edilmesine karar verildi.
+İyi dilek ve temennilerle toplantıya son verildi.</textarea>
+            </div>
+            <div class="form-group">
+                <label>Alınan Kararlar</label>
+                <textarea id="sok_kararMetni" style="min-height:120px;">1- Bir önceki toplantı kararlarının uygulanma durumunun takip edilmesine karar verildi.
 2- Ders bazında başarı analizlerinin yapılmasına ve kazanım eksikleri için telafi planı uygulanmasına karar verildi.
 3- Haftalık çalışma planı hazırlanmasına; düzenli ödev takibi ve yanlış analizi uygulamalarının desteklenmesine karar verildi.
 4- Derslerin öğretim programlarıyla uyumlu yürütülmesine karar verildi.
@@ -190,357 +375,361 @@ Madde 15: Dilek ve Temenniler
 10- Girişimcilik bilincini geliştirmek amacıyla ekip çalışması odaklı projelerin desteklenmesine karar verildi.
 11- Sağlıklı yaşam, hijyen ve dengeli beslenme konularında bilgilendirme yapılmasına karar verildi.
 12- Okul sağlığı ve İSG tedbirlerinin eksiksiz uygulanmasına karar verildi.</textarea>
-                                </div>
+            </div>
 
-                                <div class="brans-header">
-                                    <h2 style="margin:0; border:none;">3. Branşlar ve Katılımcı Öğretmenler</h2>
-                                    <button type="button" class="btn" id="sok_btn_add_brans" style="padding:4px 8px; font-size:11px;">⊕ Yeni Branş Ekle</button>
-                                </div>
-                                <table class="custom-table">
-                                    <colgroup>
-                                        <col style="width: 40%;"/>
-                                        <col style="width: 45%;"/>
-                                        <col style="width: 15%;"/>
-                                    </colgroup>
-                                    <thead>
-                                        <tr>
-                                            <th>Branş</th>
-                                            <th>Öğretmen Adı Soyadı</th>
-                                            <th>İşlem</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="sok_bransTbody"></tbody>
-                                </table>
+            <div class="brans-header">
+                <h2 style="margin:0; border:none;">3. Branşlar ve Katılımcı Öğretmenler</h2>
+                <button type="button" class="btn" id="sok_btn_add_brans" style="padding:4px 8px; font-size:11px;">⊕ Yeni Branş Ekle</button>
+            </div>
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <colgroup>
+                        <col style="width: 40%;"/>
+                        <col style="width: 45%;"/>
+                        <col style="width: 15%;"/>
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Branş</th>
+                            <th>Öğretmen Adı Soyadı</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sok_bransTbody"></tbody>
+                </table>
+            </div>
 
-                                <!-- BİREYSEL ÖĞRENCİ DEĞERLENDİRME ÇİZELGESİ FORM BÖLÜMÜ -->
-                                <div class="brans-header" style="margin-top:25px;">
-                                    <h2 style="margin:0; border:none;">4. Bireysel Öğrenci Değerlendirme Çizelgesi Veri Girişi</h2>
-                                    <button type="button" class="btn" id="sok_btn_add_student" style="padding:4px 8px; font-size:11px;">⊕ Yeni Öğrenci Ekle</button>
-                                </div>
-                                <table class="custom-table" style="font-size:11px;">
-                                    <thead>
-                                        <tr>
-                                            <th style="width:15%;">Öğrenci Adı Soyadı</th>
-                                            <th style="width:12%;">Kişilik Durumu</th>
-                                            <th style="width:12%;">Beslenme</th>
-                                            <th style="width:12%;">Sağlık Durumu</th>
-                                            <th style="width:12%;">Sosyal İlişkiler</th>
-                                            <th style="width:12%;">Ekonomik Durum</th>
-                                            <th style="width:15%;">Başarı &amp; Çözüm</th>
-                                            <th style="width:10%;">İşlem</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="sok_ogrenciTbody"></tbody>
-                                </table>
-                                
-                                <div class="btn-group">
-                                    <button type="button" class="btn" id="sok_btn_refresh">Ön İzlemeyi Yenile</button>
-                                    <button type="button" class="btn btn-pdf" id="sok_btn_pdf">📄 Resmî A4 PDF İndir</button>
-                                    <button type="button" class="btn btn-word" id="sok_btn_word">📝 Resmî Word (.doc) İndir</button>
-                                    <button type="button" class="btn btn-print" id="sok_btn_print">🖨️ Yazdır / Çıktı Al</button>
-                                    <button type="button" class="btn btn-reset" id="sok_btn_reset">Formu Sıfırla</button>
-                                </div>
-                            </div>
+            <!-- BİREYSEL ÖĞRENCİ DEĞERLENDİRME ÇİZELGESİ -->
+            <div class="brans-header" style="margin-top:25px;">
+                <h2 style="margin:0; border:none;">4. Bireysel Öğrenci Değerlendirme Çizelgesi Veri Girişi</h2>
+                <button type="button" class="btn" id="sok_btn_add_student" style="padding:4px 8px; font-size:11px;">⊕ Yeni Öğrenci Ekle</button>
+            </div>
+            <div class="table-responsive">
+                <table class="custom-table" style="font-size:11px; min-width: 750px !important;">
+                    <thead>
+                        <tr>
+                            <th style="width:15%;">Öğrenci Adı Soyadı</th>
+                            <th style="width:13%;">Kişilik Durumu</th>
+                            <th style="width:12%;">Beslenme</th>
+                            <th style="width:12%;">Sağlık Durumu</th>
+                            <th style="width:13%;">Sosyal İlişkiler</th>
+                            <th style="width:12%;">Ekonomik Durum</th>
+                            <th style="width:15%;">Başarı &amp; Çözüm</th>
+                            <th style="width:8%;">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sok_ogrenciTbody"></tbody>
+                </table>
+            </div>
+            
+            <div class="btn-group">
+                <button type="button" class="btn" id="sok_btn_refresh">Ön İzlemeyi Yenile</button>
+                <button type="button" class="btn btn-pdf" id="sok_btn_pdf">📄 Resmî A4 PDF İndir</button>
+                <button type="button" class="btn btn-word" id="sok_btn_word">📝 Resmî Word (.doc) İndir</button>
+                <button type="button" class="btn btn-print" id="sok_btn_print">🖨️ Yazdır / Çıktı Al</button>
+                <button type="button" class="btn btn-reset" id="sok_btn_reset">Formu Sıfırla</button>
+            </div>
+        </div>
 
-                            <!-- ÖN İZLEME ALANI -->
-                            <div class="preview-container" id="sokPreviewContainer">
-                                <div class="a4-page" id="sokA4Preview"></div>
-                                <div class="a4-page landscape" id="sokA4PreviewLandscape"></div>
-                            </div>
-                        </div>
-                    </div>
+        <!-- ÖN İZLEME ALANI -->
+        <div class="preview-container" id="sokPreviewContainer">
+            <div class="a4-page" id="sokA4Preview"></div>
+            <div class="a4-page landscape" id="sokA4PreviewLandscape"></div>
+        </div>
+    </div>
+</div>
 
-                    <!-- Entegre JS Motoru: Paragraf Düzenleyici Eklenmiş Sürüm -->
-                    <script type="text/javascript">
-                    //<![CDATA[
-                        (function() {
-                            function initSokApp() {
-                                var getEl = function(id) { return document.getElementById(id); };
-                                var varsayilanBranslar = [
-                                    "Türk Dili ve Edebiyatı", "Matematik", "Fizik", "Kimya", "Biyoloji",
-                                    "Tarih", "Coğrafya", "Felsefe", "İngilizce", "Almanca",
-                                    "Din Kültürü ve A.B.", "Beden Eğitimi ve Spor", "Görsel Sanatlar",
-                                    "Müzik", "Bilişim Teknolojileri", "Rehberlik Öğretmeni"
-                                ];
+<!-- Entegre JS Motoru + Iframe Otomatik Yükseklik Haberleşmesi -->
+<script type="text/javascript">
+//<![CDATA[
+    (function() {
+        function sendHeightToParent() {
+            var body = document.body, html = document.documentElement;
+            var height = Math.max( body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight );
+            if (window.parent !== window) {
+                window.parent.postMessage({ type: 'setHeight', height: height }, '*');
+            }
+        }
 
-                                var varsayilanOgrenciler = [
-                                    { ad: "Öğrenci 1", kisilik: "Sorumluluk sahibi, hareketli, konuşkan.", beslenme: "Düzenli beslenir.", saglik: "Şikâyeti yoktur.", sosyal: "Sınıf içerisinde dikkat çekmeye çalışıyor.", ekonomik: "İhtiyaçları kadar harçlığı veriliyor.", basari: "Başarılı ve yeterli düzeyde çalışır. Ailesiyle görüşülüp desteklenecek." },
-                                    { ad: "Öğrenci 2", kisilik: "Sorumluluk sahibi, uyumlu.", beslenme: "Düzenli ve sağlıklı beslenir.", saglik: "Şikâyeti yoktur.", sosyal: "Arkadaşlarıyla arası iyi.", ekonomik: "Gelir durumu normal.", basari: "Genel olarak derse katılımı var. Sınıf içi görevler verilebilir." },
-                                    { ad: "Öğrenci 3", kisilik: "Sessiz, sakin, uyumludur.", beslenme: "Düzenli ve sağlıklı beslenir.", saglik: "Şikâyeti yoktur.", sosyal: "Arkadaş ilişkileri zayıftır.", ekonomik: "İhtiyaçları kadar harçlığı verilir.", basari: "Başarı durumu düşük. Sistemli çalışmaya özendirilmeli." },
-                                    { ad: "Öğrenci 4", kisilik: "Dürüst, duygusal, çekingendir.", beslenme: "Sabah kahvaltısını yaparak gelir.", saglik: "Şikâyeti yoktur.", sosyal: "Arkadaşlarıyla iyi geçinir.", ekonomik: "İhtiyaçları kadar harçlık verilir.", basari: "Çalışma planına uyum göstermesi desteklenecek." },
-                                    { ad: "Öğrenci 5", kisilik: "Sessiz, içine kapanık, düzenli.", beslenme: "Sabah kahvaltısını yapar.", saglik: "Şikâyeti yoktur.", sosyal: "Pek arkadaşı yoktur.", ekonomik: "Maddi durumu orta.", basari: "Derslerinde gayretli fakat okuduğunu anlama çalışması yapmalı." }
-                                ];
+        function initSokApp() {
+            var getEl = function(id) { return document.getElementById(id); };
+            var varsayilanBranslar = [
+                "Türk Dili ve Edebiyatı", "Matematik", "Fizik", "Kimya", "Biyoloji",
+                "Tarih", "Coğrafya", "Felsefe", "İngilizce", "Almanca",
+                "Din Kültürü ve A.B.", "Beden Eğitimi ve Spor", "Görsel Sanatlar",
+                "Müzik", "Bilişim Teknolojileri", "Rehberlik Öğretmeni"
+            ];
 
-                                function escapeHTML(str) {
-                                    if (str === null || str === undefined) return '';
-                                    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;").replace(/\r/g, "");
-                                }
+            var varsayilanOgrenciler = [
+                { ad: "Öğrenci 1", kisilik: "Sorumluluk sahibi, hareketli, konuşkan.", beslenme: "Düzenli beslenir.", saglik: "Şikâyeti yoktur.", sosyal: "Sınıf içerisinde dikkat çekmeye çalışıyor.", ekonomik: "İhtiyaçları kadar harçlığı veriliyor.", basari: "Başarılı ve yeterli düzeyde çalışır. Ailesiyle görüşülüp desteklenecek." },
+                { ad: "Öğrenci 2", kisilik: "Sorumluluk sahibi, uyumlu.", beslenme: "Düzenli ve sağlıklı beslenir.", saglik: "Şikâyeti yoktur.", sosyal: "Arkadaşlarıyla arası iyi.", ekonomik: "Gelir durumu normal.", basari: "Genel olarak derse katılımı var. Sınıf içi görevler verilebilir." },
+                { ad: "Öğrenci 3", kisilik: "Sessiz, sakin, uyumludur.", beslenme: "Düzenli ve sağlıklı beslenir.", saglik: "Şikâyeti yoktur.", sosyal: "Arkadaş ilişkileri zayıftır.", ekonomik: "İhtiyaçları kadar harçlığı verilir.", basari: "Başarı durumu düşük. Sistemli çalışmaya özendirilmeli." },
+                { ad: "Öğrenci 4", kisilik: "Dürüst, duygusal, çekingendir.", beslenme: "Sabah kahvaltısını yaparak gelir.", saglik: "Şikâyeti yoktur.", sosyal: "Arkadaşlarıyla iyi geçinir.", ekonomik: "İhtiyaçları kadar harçlık verilir.", basari: "Çalışma planına uyum göstermesi desteklenecek." },
+                { ad: "Öğrenci 5", kisilik: "Sessiz, içine kapanık, düzenli.", beslenme: "Sabah kahvaltısını yapar.", saglik: "Şikâyeti yoktur.", sosyal: "Pek arkadaşı yoktur.", ekonomik: "Maddi durumu orta.", basari: "Derslerinde gayretli fakat okuduğunu anlama çalışması yapmalı." }
+            ];
 
-                                // HER BİR SATIRI AYRI BİR PARAGRAF KUTUSUNA DÖNÜŞTÜREN KRİTİK FONKSİYON
-                                function formatTextToParagraphs(rawText) {
-                                    if (!rawText || !rawText.trim()) return '';
-                                    var lines = rawText.split('\n');
-                                    var htmlResult = '';
-                                    lines.forEach(function(line) {
-                                        var trimmed = line.trim();
-                                        if (trimmed.length > 0) {
-                                            htmlResult += '<p style="margin: 0 0 7pt 0; text-align: justify; line-height: 1.5; font-size: 10pt; font-family:\'Times New Roman\', serif;">' + escapeHTML(trimmed) + '</p>';
-                                        }
-                                    });
-                                    return htmlResult;
-                                }
+            function escapeHTML(str) {
+                if (str === null || str === undefined) return '';
+                return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;").replace(/\r/g, "");
+            }
 
-                                function parseDate(tarihMetni) {
-                                    if (!tarihMetni || !tarihMetni.trim()) return "....................";
-                                    var match = tarihMetni.match(/\d{2}[\.\/-]\d{2}[\.\/-]\d{4}/);
-                                    if (match) return match[0];
-                                    var parcalar = tarihMetni.split(' - ');
-                                    return parcalar[0].trim();
-                                }
+            function formatTextToParagraphs(rawText) {
+                if (!rawText || !rawText.trim()) return '';
+                var lines = rawText.split('\n');
+                var htmlResult = '';
+                lines.forEach(function(line) {
+                    var trimmed = line.trim();
+                    if (trimmed.length > 0) {
+                        htmlResult += '<p style="margin: 0 0 6pt 0; text-align: justify; line-height: 1.45; font-size: 10pt; font-family:\'Times New Roman\', serif;">' + escapeHTML(trimmed) + '</p>';
+                    }
+                });
+                return htmlResult;
+            }
 
-                                function parseTime(tarihMetni) {
-                                    if (!tarihMetni || !tarihMetni.includes('-')) return tarihMetni || "13:30";
-                                    var parcalar = tarihMetni.split('-');
-                                    return parcalar.slice(1).join('-').trim();
-                                }
+            function parseDate(tarihMetni) {
+                if (!tarihMetni || !tarihMetni.trim()) return "....................";
+                var match = tarihMetni.match(/\d{2}[\.\/-]\d{2}[\.\/-]\d{4}/);
+                if (match) return match[0];
+                var parcalar = tarihMetni.split(' - ');
+                return parcalar[0].trim();
+            }
 
-                                function addBransRow(bransAdi, ogretmenAdi) {
-                                    var tbody = getEl("sok_bransTbody");
-                                    if (!tbody) return;
-                                    var tr = document.createElement("tr");
-                                    tr.innerHTML = '<td><input type="text" class="sok-brans-input" value="' + escapeHTML(bransAdi) + '"/></td>' +
-                                                   '<td><input type="text" class="sok-ogretmen-input" value="' + escapeHTML(ogretmenAdi) + '"/></td>' +
-                                                   '<td><button type="button" class="btn-danger-sm sok-btn-del">Sil</button></td>';
-                                    
-                                    tr.querySelectorAll("input").forEach(function(inp) { inp.addEventListener("input", updatePreview); });
-                                    tr.querySelector(".sok-btn-del").addEventListener("click", function() { tr.remove(); updatePreview(); });
-                                    tbody.appendChild(tr);
-                                }
+            function parseTime(tarihMetni) {
+                if (!tarihMetni || !tarihMetni.includes('-')) return tarihMetni || "13:30";
+                var parcalar = tarihMetni.split('-');
+                return parcalar.slice(1).join('-').trim();
+            }
 
-                                function addOgrenciRow(ad, kisilik, beslenme, saglik, sosyal, ekonomik, basari) {
-                                    var tbody = getEl("sok_ogrenciTbody");
-                                    if (!tbody) return;
-                                    var tr = document.createElement("tr");
-                                    tr.innerHTML = '<td><input type="text" class="sok-ogr-ad" value="' + escapeHTML(ad) + '" placeholder="Ögr. Adı Soyadı"/></td>' +
-                                                   '<td><input type="text" class="sok-ogr-kisilik" value="' + escapeHTML(kisilik) + '"/></td>' +
-                                                   '<td><input type="text" class="sok-ogr-beslenme" value="' + escapeHTML(beslenme) + '"/></td>' +
-                                                   '<td><input type="text" class="sok-ogr-saglik" value="' + escapeHTML(saglik) + '"/></td>' +
-                                                   '<td><input type="text" class="sok-ogr-sosyal" value="' + escapeHTML(sosyal) + '"/></td>' +
-                                                   '<td><input type="text" class="sok-ogr-ekonomik" value="' + escapeHTML(ekonomik) + '"/></td>' +
-                                                   '<td><input type="text" class="sok-ogr-basari" value="' + escapeHTML(basari) + '"/></td>' +
-                                                   '<td><button type="button" class="btn-danger-sm sok-btn-del-ogr">Sil</button></td>';
+            function addBransRow(bransAdi, ogretmenAdi) {
+                var tbody = getEl("sok_bransTbody");
+                if (!tbody) return;
+                var tr = document.createElement("tr");
+                tr.innerHTML = '<td><input type="text" class="sok-brans-input" value="' + escapeHTML(bransAdi) + '"/></td>' +
+                               '<td><input type="text" class="sok-ogretmen-input" value="' + escapeHTML(ogretmenAdi) + '"/></td>' +
+                               '<td><button type="button" class="btn-danger-sm sok-btn-del">Sil</button></td>';
+                
+                tr.querySelectorAll("input").forEach(function(inp) { inp.addEventListener("input", updatePreview); });
+                tr.querySelector(".sok-btn-del").addEventListener("click", function() { tr.remove(); updatePreview(); });
+                tbody.appendChild(tr);
+            }
 
-                                    tr.querySelectorAll("input").forEach(function(inp) { inp.addEventListener("input", updatePreview); });
-                                    tr.querySelector(".sok-btn-del-ogr").addEventListener("click", function() { tr.remove(); updatePreview(); });
-                                    tbody.appendChild(tr);
-                                }
+            function addOgrenciRow(ad, kisilik, beslenme, saglik, sosyal, ekonomik, basari) {
+                var tbody = getEl("sok_ogrenciTbody");
+                if (!tbody) return;
+                var tr = document.createElement("tr");
+                tr.innerHTML = '<td><input type="text" class="sok-ogr-ad" value="' + escapeHTML(ad) + '" placeholder="Ögr. Adı"/></td>' +
+                               '<td><input type="text" class="sok-ogr-kisilik" value="' + escapeHTML(kisilik) + '"/></td>' +
+                               '<td><input type="text" class="sok-ogr-beslenme" value="' + escapeHTML(beslenme) + '"/></td>' +
+                               '<td><input type="text" class="sok-ogr-saglik" value="' + escapeHTML(saglik) + '"/></td>' +
+                               '<td><input type="text" class="sok-ogr-sosyal" value="' + escapeHTML(sosyal) + '"/></td>' +
+                               '<td><input type="text" class="sok-ogr-ekonomik" value="' + escapeHTML(ekonomik) + '"/></td>' +
+                               '<td><input type="text" class="sok-ogr-basari" value="' + escapeHTML(basari) + '"/></td>' +
+                               '<td><button type="button" class="btn-danger-sm sok-btn-del-ogr">Sil</button></td>';
 
-                                function checkCustomSelects() {
-                                    if(getEl("sok_okulTuruOzel")) getEl("sok_okulTuruOzel").style.display = (getEl("sok_okulTuru").value === "OZEL") ? "block" : "none";
-                                    if(getEl("sok_sokNoOzel")) getEl("sok_sokNoOzel").style.display = (getEl("sok_sokNo").value === "OZEL") ? "block" : "none";
-                                }
+                tr.querySelectorAll("input").forEach(function(inp) { inp.addEventListener("input", updatePreview); });
+                tr.querySelector(".sok-btn-del-ogr").addEventListener("click", function() { tr.remove(); updatePreview(); });
+                tbody.appendChild(tr);
+            }
 
-                                function updatePreview() {
-                                    if (!getEl("sokA4Preview")) return;
-                                    checkCustomSelects();
+            function checkCustomSelects() {
+                if(getEl("sok_okulTuruOzel")) getEl("sok_okulTuruOzel").style.display = (getEl("sok_okulTuru").value === "OZEL") ? "block" : "none";
+                if(getEl("sok_sokNoOzel")) getEl("sok_sokNoOzel").style.display = (getEl("sok_sokNo").value === "OZEL") ? "block" : "none";
+            }
 
-                                    var okulAdi = getEl("sok_okulAdi").value.trim().toLocaleUpperCase('tr-TR') || "........................";
-                                    var okulTuru = (getEl("sok_okulTuru").value === "OZEL") ? getEl("sok_okulTuruOzel").value.trim().toLocaleUpperCase('tr-TR') : getEl("sok_okulTuru").value;
-                                    var sokNo = (getEl("sok_sokNo").value === "OZEL") ? getEl("sok_sokNoOzel").value.trim() : getEl("sok_sokNo").value;
-                                    
-                                    var egitimYili = getEl("sok_egitimYili").value.trim() || "2025-2026";
-                                    var sube = getEl("sok_sube").value.trim() || ".......";
-                                    var tarihSaat = getEl("sok_tarihSaat").value.trim() || "....................";
-                                    var mudur = getEl("sok_okulMuduru").value.trim() || "........................";
-                                    var mudurYrd = getEl("sok_mudurYardimcisi").value.trim() || "........................";
+            function updatePreview() {
+                if (!getEl("sokA4Preview")) return;
+                checkCustomSelects();
 
-                                    var katilimcilar = [
-                                        { ad: mudur, brans: "Okul Müdürü" },
-                                        { ad: mudurYrd, brans: "Okul Müdür Yardımcısı" }
-                                    ];
+                var okulAdi = getEl("sok_okulAdi").value.trim().toLocaleUpperCase('tr-TR') || "........................";
+                var okulTuru = (getEl("sok_okulTuru").value === "OZEL") ? getEl("sok_okulTuruOzel").value.trim().toLocaleUpperCase('tr-TR') : getEl("sok_okulTuru").value;
+                var sokNo = (getEl("sok_sokNo").value === "OZEL") ? getEl("sok_sokNoOzel").value.trim() : getEl("sok_sokNo").value;
+                
+                var egitimYili = getEl("sok_egitimYili").value.trim() || "2025-2026";
+                var sube = getEl("sok_sube").value.trim() || ".......";
+                var tarihSaat = getEl("sok_tarihSaat").value.trim() || "....................";
+                var mudur = getEl("sok_okulMuduru").value.trim() || "........................";
+                var mudurYrd = getEl("sok_mudurYardimcisi").value.trim() || "........................";
 
-                                    var bransInputs = document.querySelectorAll(".sok-brans-input");
-                                    var ogretmenInputs = document.querySelectorAll(".sok-ogretmen-input");
-                                    bransInputs.forEach(function(inp, idx) {
-                                        var b = inp.value.trim();
-                                        var o = ogretmenInputs[idx] ? ogretmenInputs[idx].value.trim() : "";
-                                        if (o !== "" || b !== "") {
-                                            katilimcilar.push({ ad: o, brans: b });
-                                        }
-                                    });
+                var katilimcilar = [
+                    { ad: mudur, brans: "Okul Müdürü" },
+                    { ad: mudurYrd, brans: "Okul Müdür Yardımcısı" }
+                ];
 
-                                    var imzaRows = "";
-                                    var minSatirSayisi = 14;
-                                    var toplamSatir = Math.max(minSatirSayisi, katilimcilar.length);
+                var bransInputs = document.querySelectorAll(".sok-brans-input");
+                var ogretmenInputs = document.querySelectorAll(".sok-ogretmen-input");
+                bransInputs.forEach(function(inp, idx) {
+                    var b = inp.value.trim();
+                    var o = ogretmenInputs[idx] ? ogretmenInputs[idx].value.trim() : "";
+                    if (o !== "" || b !== "") {
+                        katilimcilar.push({ ad: o, brans: b });
+                    }
+                });
 
-                                    for (var i = 1; i <= toplamSatir; i++) {
-                                        var kisi = katilimcilar[i - 1] || { ad: "", brans: "" };
-                                        imzaRows += '<tr style="height: 22px;">' +
-                                            '<td style="text-align:center; border:1px solid #000000; font-size:9.5pt; font-family:\'Times New Roman\', serif;">' + i + '</td>' +
-                                            '<td style="padding:4px 6px; border:1px solid #000000; font-size:9.5pt; font-family:\'Times New Roman\', serif;">' + escapeHTML(kisi.ad) + '</td>' +
-                                            '<td style="padding:4px 6px; border:1px solid #000000; font-size:9.5pt; font-family:\'Times New Roman\', serif;">' + escapeHTML(kisi.brans) + '</td>' +
-                                            '<td style="border:1px solid #000000;"></td>' +
-                                        '</tr>';
-                                    }
+                var imzaRows = "";
+                var minSatirSayisi = 14;
+                var toplamSatir = Math.max(minSatirSayisi, katilimcilar.length);
 
-                                    // DİKEY SAYFA TUTANAK METNİ (PARAGRAF FORMATI ENTEGRELİ)
-                                    var htmlPage1 = '<div style="text-align: center; font-weight: bold; line-height: 1.35; font-size: 11pt; margin-bottom: 12px; font-family:\'Times New Roman\', serif;">' +
-                                            escapeHTML(egitimYili) + ' EĞİTİM-ÖĞRETİM YILI<br/>' +
-                                            escapeHTML(okulAdi) + ' ' + escapeHTML(okulTuru) + ' MÜDÜRLÜĞÜ<br/>' +
-                                            escapeHTML(sube) + ' SINIFI ' + escapeHTML(String(sokNo).toLocaleUpperCase('tr-TR')) + ' TOPLANTI TUTANAĞI' +
-                                        '</div>' +
-                                        '<table style="width:100%; border:none; margin-bottom:12px; font-size:10pt; line-height: 1.45; font-family:\'Times New Roman\', serif;">' +
-                                            '<tr><td style="width:50%; padding:2px 0;"><b>Toplantı No:</b> ' + escapeHTML(sokNo) + '</td><td style="width:50%; padding:2px 0;"><b>Toplantı Tarihi:</b> ' + escapeHTML(parseDate(tarihSaat)) + '</td></tr>' +
-                                            '<tr><td style="width:50%; padding:2px 0;"><b>Toplantı Saati:</b> ' + escapeHTML(parseTime(tarihSaat)) + '</td><td style="width:50%; padding:2px 0;"><b>Toplantı Yeri:</b> Öğretmenler Odası</td></tr>' +
-                                        '</table>' +
-                                        '<div style="margin-bottom:12px; font-family:\'Times New Roman\', serif;"><div style="font-weight:bold; font-size:10.5pt; text-decoration:underline; margin-bottom:6px;">GÜNDEM MADDELERİ:</div>' + formatTextToParagraphs(getEl("sok_gundemMetni").value) + '</div>' +
-                                        '<div style="margin-bottom:12px; font-family:\'Times New Roman\', serif;"><div style="font-weight:bold; font-size:10.5pt; text-decoration:underline; margin-bottom:6px;">GÜNDEM MADDELERİNİN GÖRÜŞÜLMESİ:</div>' + formatTextToParagraphs(getEl("sok_gorusmeMetni").value) + '</div>' +
-                                        '<div style="margin-bottom:12px; font-family:\'Times New Roman\', serif;"><div style="font-weight:bold; font-size:10.5pt; text-decoration:underline; margin-bottom:6px;">ALINAN KARARLAR:</div>' + formatTextToParagraphs(getEl("sok_kararMetni").value) + '</div>' +
-                                        '<div style="margin-top:15px; font-family:\'Times New Roman\', serif;"><div style="font-weight:bold; font-size:10.5pt; text-align:center; margin-bottom:6px;">KATILIMCI İMZA SİRKÜSÜ</div>' +
-                                            '<table style="width:100%; border-collapse:collapse; margin-bottom:12px;" border="1"><thead><tr style="background:#f2f2f2; font-size:9.5pt; height:24px;"><th style="width:7%; text-align:center;">SIRA</th><th style="width:43%; padding:4px;">ÖĞRETMENİN ADI SOYADI</th><th style="width:35%; padding:4px;">BRANŞ / GÖREV</th><th style="width:15%; text-align:center;">İMZA</th></tr></thead><tbody>' + imzaRows + '</tbody></table>' +
-                                            '<div style="text-align: right; margin-top: 20px; font-size:10pt; line-height:1.4;">UYGUNDUR.<br/>' + escapeHTML(parseDate(tarihSaat)) + '<br/><br/><b>' + escapeHTML(String(mudur).toLocaleUpperCase('tr-TR')) + '</b><br/>OKUL MÜDÜRÜ</div>' +
-                                        '</div>';
+                for (var i = 1; i <= toplamSatir; i++) {
+                    var kisi = katilimcilar[i - 1] || { ad: "", brans: "" };
+                    imzaRows += '<tr style="height: 22px;">' +
+                        '<td style="text-align:center; border:1px solid #000000; font-size:9.5pt; font-family:\'Times New Roman\', serif;">' + i + '</td>' +
+                        '<td style="padding:4px 6px; border:1px solid #000000; font-size:9.5pt; font-family:\'Times New Roman\', serif;">' + escapeHTML(kisi.ad) + '</td>' +
+                        '<td style="padding:4px 6px; border:1px solid #000000; font-size:9.5pt; font-family:\'Times New Roman\', serif;">' + escapeHTML(kisi.brans) + '</td>' +
+                        '<td style="border:1px solid #000000;"></td>' +
+                    '</tr>';
+                }
 
-                                    getEl("sokA4Preview").innerHTML = htmlPage1;
+                // DİKEY SAYFA
+                var htmlPage1 = '<div style="text-align: center; font-weight: bold; line-height: 1.35; font-size: 11pt; margin-bottom: 12px; font-family:\'Times New Roman\', serif;">' +
+                        escapeHTML(egitimYili) + ' EĞİTİM-ÖĞRETİM YILI<br/>' +
+                        escapeHTML(okulAdi) + ' ' + escapeHTML(okulTuru) + ' MÜDÜRLÜĞÜ<br/>' +
+                        escapeHTML(sube) + ' SINIFI ' + escapeHTML(String(sokNo).toLocaleUpperCase('tr-TR')) + ' TOPLANTI TUTANAĞI' +
+                    '</div>' +
+                    '<table style="width:100%; border:none; margin-bottom:12px; font-size:10pt; line-height: 1.45; font-family:\'Times New Roman\', serif;">' +
+                        '<tr><td style="width:50%; padding:2px 0;"><b>Toplantı No:</b> ' + escapeHTML(sokNo) + '</td><td style="width:50%; padding:2px 0;"><b>Toplantı Tarihi:</b> ' + escapeHTML(parseDate(tarihSaat)) + '</td></tr>' +
+                        '<tr><td style="width:50%; padding:2px 0;"><b>Toplantı Saati:</b> ' + escapeHTML(parseTime(tarihSaat)) + '</td><td style="width:50%; padding:2px 0;"><b>Toplantı Yeri:</b> Öğretmenler Odası</td></tr>' +
+                    '</table>' +
+                    '<div style="margin-bottom:12px; font-family:\'Times New Roman\', serif;"><div style="font-weight:bold; font-size:10.5pt; text-decoration:underline; margin-bottom:6px;">GÜNDEM MADDELERİ:</div>' + formatTextToParagraphs(getEl("sok_gundemMetni").value) + '</div>' +
+                    '<div style="margin-bottom:12px; font-family:\'Times New Roman\', serif;"><div style="font-weight:bold; font-size:10.5pt; text-decoration:underline; margin-bottom:6px;">GÜNDEM MADDELERİNİN GÖRÜŞÜLMESİ:</div>' + formatTextToParagraphs(getEl("sok_gorusmeMetni").value) + '</div>' +
+                    '<div style="margin-bottom:12px; font-family:\'Times New Roman\', serif;"><div style="font-weight:bold; font-size:10.5pt; text-decoration:underline; margin-bottom:6px;">ALINAN KARARLAR:</div>' + formatTextToParagraphs(getEl("sok_kararMetni").value) + '</div>' +
+                    '<div style="margin-top:15px; font-family:\'Times New Roman\', serif;"><div style="font-weight:bold; font-size:10.5pt; text-align:center; margin-bottom:6px;">KATILIMCI İMZA SİRKÜSÜ</div>' +
+                        '<table style="width:100%; border-collapse:collapse; margin-bottom:12px;" border="1"><thead><tr style="background:#f2f2f2; font-size:9.5pt; height:24px;"><th style="width:7%; text-align:center;">SIRA</th><th style="width:43%; padding:4px;">ÖĞRETMENİN ADI SOYADI</th><th style="width:35%; padding:4px;">BRANŞ / GÖREV</th><th style="width:15%; text-align:center;">İMZA</th></tr></thead><tbody>' + imzaRows + '</tbody></table>' +
+                        '<div style="text-align: right; margin-top: 20px; font-size:10pt; line-height:1.4;">UYGUNDUR.<br/>' + escapeHTML(parseDate(tarihSaat)) + '<br/><br/><b>' + escapeHTML(String(mudur).toLocaleUpperCase('tr-TR')) + '</b><br/>OKUL MÜDÜRÜ</div>' +
+                    '</div>';
 
-                                    // YATAY SAYFA ÖĞRENCİ ÇİZELGESİ
-                                    var ogrTrList = document.querySelectorAll("#sok_ogrenciTbody tr");
-                                    var ogrRowsHtml = "";
+                getEl("sokA4Preview").innerHTML = htmlPage1;
 
-                                    ogrTrList.forEach(function(tr, index) {
-                                        var ad = tr.querySelector(".sok-ogr-ad") ? tr.querySelector(".sok-ogr-ad").value : "";
-                                        var kisilik = tr.querySelector(".sok-ogr-kisilik") ? tr.querySelector(".sok-ogr-kisilik").value : "";
-                                        var beslenme = tr.querySelector(".sok-ogr-beslenme") ? tr.querySelector(".sok-ogr-beslenme").value : "";
-                                        var saglik = tr.querySelector(".sok-ogr-saglik") ? tr.querySelector(".sok-ogr-saglik").value : "";
-                                        var sosyal = tr.querySelector(".sok-ogr-sosyal") ? tr.querySelector(".sok-ogr-sosyal").value : "";
-                                        var ekonomik = tr.querySelector(".sok-ogr-ekonomik") ? tr.querySelector(".sok-ogr-ekonomik").value : "";
-                                        var basari = tr.querySelector(".sok-ogr-basari") ? tr.querySelector(".sok-ogr-basari").value : "";
+                // YATAY SAYFA
+                var ogrTrList = document.querySelectorAll("#sok_ogrenciTbody tr");
+                var ogrRowsHtml = "";
 
-                                        if(ad.trim() !== "" || index < 5) {
-                                            ogrRowsHtml += '<tr style="height:26px;">' +
-                                                '<td style="border:1px solid #000; padding:4px; font-weight:bold; font-size:9pt;">' + escapeHTML(ad || (index + 1) + ". Öğrenci") + '</td>' +
-                                                '<td style="border:1px solid #000; padding:4px; font-size:8.5pt;">' + escapeHTML(kisilik) + '</td>' +
-                                                '<td style="border:1px solid #000; padding:4px; font-size:8.5pt;">' + escapeHTML(beslenme) + '</td>' +
-                                                '<td style="border:1px solid #000; padding:4px; font-size:8.5pt;">' + escapeHTML(saglik) + '</td>' +
-                                                '<td style="border:1px solid #000; padding:4px; font-size:8.5pt;">' + escapeHTML(sosyal) + '</td>' +
-                                                '<td style="border:1px solid #000; padding:4px; font-size:8.5pt;">' + escapeHTML(ekonomik) + '</td>' +
-                                                '<td style="border:1px solid #000; padding:4px; font-size:8.5pt;">' + escapeHTML(basari) + '</td>' +
-                                            '</tr>';
-                                        }
-                                    });
+                ogrTrList.forEach(function(tr, index) {
+                    var ad = tr.querySelector(".sok-ogr-ad") ? tr.querySelector(".sok-ogr-ad").value : "";
+                    var kisilik = tr.querySelector(".sok-ogr-kisilik") ? tr.querySelector(".sok-ogr-kisilik").value : "";
+                    var beslenme = tr.querySelector(".sok-ogr-beslenme") ? tr.querySelector(".sok-ogr-beslenme").value : "";
+                    var saglik = tr.querySelector(".sok-ogr-saglik") ? tr.querySelector(".sok-ogr-saglik").value : "";
+                    var sosyal = tr.querySelector(".sok-ogr-sosyal") ? tr.querySelector(".sok-ogr-sosyal").value : "";
+                    var ekonomik = tr.querySelector(".sok-ogr-ekonomik") ? tr.querySelector(".sok-ogr-ekonomik").value : "";
+                    var basari = tr.querySelector(".sok-ogr-basari") ? tr.querySelector(".sok-ogr-basari").value : "";
 
-                                    var htmlPage2 = '<div style="text-align: center; font-weight: bold; line-height: 1.3; font-size: 11pt; margin-bottom: 10px; font-family:\'Times New Roman\', serif;">' +
-                                            escapeHTML(okulAdi) + ' ' + escapeHTML(okulTuru) + ' MÜDÜRLÜĞÜ<br/>' +
-                                            escapeHTML(sube) + ' SINIFI BİREYSEL ÖĞRENCİ DEĞERLENDİRME ÇİZELGESİ' +
-                                        '</div>' +
-                                        '<table style="width:100%; border-collapse:collapse; font-family:\'Times New Roman\', serif;" border="1">' +
-                                            '<thead>' +
-                                                '<tr style="background:#e2e8f0; font-size:9pt; height:28px;">' +
-                                                    '<th style="width:15%; padding:4px;">Öğrenci Adı Soyadı</th>' +
-                                                    '<th style="width:14%; padding:4px;">Kişilik Durumu</th>' +
-                                                    '<th style="width:13%; padding:4px;">Beslenme</th>' +
-                                                    '<th style="width:13%; padding:4px;">Sağlık Durumu</th>' +
-                                                    '<th style="width:14%; padding:4px;">Sosyal İlişkiler</th>' +
-                                                    '<th style="width:13%; padding:4px;">Ekonomik Durum</th>' +
-                                                    '<th style="width:18%; padding:4px;">Başarı &amp; Çözüm Önerisi</th>' +
-                                                '</tr>' +
-                                            '</thead>' +
-                                            '<tbody>' + ogrRowsHtml + '</tbody>' +
-                                        '</table>';
+                    if(ad.trim() !== "" || index < 5) {
+                        ogrRowsHtml += '<tr style="height:26px;">' +
+                            '<td style="border:1px solid #000; padding:4px; font-weight:bold; font-size:9pt;">' + escapeHTML(ad || (index + 1) + ". Öğrenci") + '</td>' +
+                            '<td style="border:1px solid #000; padding:4px; font-size:8.5pt;">' + escapeHTML(kisilik) + '</td>' +
+                            '<td style="border:1px solid #000; padding:4px; font-size:8.5pt;">' + escapeHTML(beslenme) + '</td>' +
+                            '<td style="border:1px solid #000; padding:4px; font-size:8.5pt;">' + escapeHTML(saglik) + '</td>' +
+                            '<td style="border:1px solid #000; padding:4px; font-size:8.5pt;">' + escapeHTML(sosyal) + '</td>' +
+                            '<td style="border:1px solid #000; padding:4px; font-size:8.5pt;">' + escapeHTML(ekonomik) + '</td>' +
+                            '<td style="border:1px solid #000; padding:4px; font-size:8.5pt;">' + escapeHTML(basari) + '</td>' +
+                        '</tr>';
+                    }
+                });
 
-                                    getEl("sokA4PreviewLandscape").innerHTML = htmlPage2;
-                                }
+                var htmlPage2 = '<div style="text-align: center; font-weight: bold; line-height: 1.3; font-size: 11pt; margin-bottom: 10px; font-family:\'Times New Roman\', serif;">' +
+                        escapeHTML(okulAdi) + ' ' + escapeHTML(okulTuru) + ' MÜDÜRLÜĞÜ<br/>' +
+                        escapeHTML(sube) + ' SINIFI BİREYSEL ÖĞRENCİ DEĞERLENDİRME ÇİZELGESİ' +
+                    '</div>' +
+                    '<table style="width:100%; border-collapse:collapse; font-family:\'Times New Roman\', serif;" border="1">' +
+                        '<thead>' +
+                            '<tr style="background:#e2e8f0; font-size:9pt; height:28px;">' +
+                                '<th style="width:15%; padding:4px;">Öğrenci Adı Soyadı</th>' +
+                                '<th style="width:14%; padding:4px;">Kişilik Durumu</th>' +
+                                '<th style="width:13%; padding:4px;">Beslenme</th>' +
+                                '<th style="width:13%; padding:4px;">Sağlık Durumu</th>' +
+                                '<th style="width:14%; padding:4px;">Sosyal İlişkiler</th>' +
+                                '<th style="width:13%; padding:4px;">Ekonomik Durum</th>' +
+                                '<th style="width:18%; padding:4px;">Başarı &amp; Çözüm Önerisi</th>' +
+                            '</tr>' +
+                        '</thead>' +
+                        '<tbody>' + ogrRowsHtml + '</tbody>' +
+                    '</table>';
 
-                                // Dinleyicileri Bağlama
-                                var inputs = document.querySelectorAll("#sokAppWrapper input, #sokAppWrapper select, #sokAppWrapper textarea");
-                                inputs.forEach(function(inp) {
-                                    inp.addEventListener("input", updatePreview);
-                                    inp.addEventListener("change", updatePreview);
-                                });
+                getEl("sokA4PreviewLandscape").innerHTML = htmlPage2;
+                
+                // Ön izleme her güncellendiğinde iframe yüksekliğini anlık üst siteye bildir
+                setTimeout(sendHeightToParent, 100);
+            }
 
-                                getEl("sok_btn_add_brans").addEventListener("click", function() { addBransRow("", ""); updatePreview(); });
-                                getEl("sok_btn_add_student").addEventListener("click", function() { addOgrenciRow("", "", "", "", "", "", ""); updatePreview(); });
-                                getEl("sok_btn_refresh").addEventListener("click", updatePreview);
-                                getEl("sok_btn_print").addEventListener("click", function() { window.print(); });
-                                getEl("sok_btn_reset").addEventListener("click", function() {
-                                    if(confirm("Tüm form varsayılan değerlere sıfırlanacak?")) location.reload();
-                                });
+            var inputs = document.querySelectorAll("#sokAppWrapper input, #sokAppWrapper select, #sokAppWrapper textarea");
+            inputs.forEach(function(inp) {
+                inp.addEventListener("input", updatePreview);
+                inp.addEventListener("change", updatePreview);
+            });
 
-                                // PDF Çıktısı Al
-                                getEl("sok_btn_pdf").addEventListener("click", function() {
-                                    if (typeof html2pdf === "undefined") { alert("PDF kütüphanesi yüklenemedi!"); return; }
-                                    var element = getEl("sokPreviewContainer");
-                                    var sube = getEl("sok_sube").value.trim() || "11_A";
-                                    
-                                    var opt = { 
-                                        margin: [0, 0, 0, 0], 
-                                        filename: sube.replace(/[/\\?%*:|"<>]/g, '_') + "_SOK_Resmi_Tutanak.pdf", 
-                                        image: { type: 'jpeg', quality: 0.98 }, 
-                                        html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 }, 
-                                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }, 
-                                        pagebreak: { mode: ['css', 'legacy'] } 
-                                    };
-                                    html2pdf().set(opt).from(element).save();
-                                });
+            getEl("sok_btn_add_brans").addEventListener("click", function() { addBransRow("", ""); updatePreview(); });
+            getEl("sok_btn_add_student").addEventListener("click", function() { addOgrenciRow("", "", "", "", "", "", ""); updatePreview(); });
+            getEl("sok_btn_refresh").addEventListener("click", updatePreview);
+            getEl("sok_btn_print").addEventListener("click", function() { window.print(); });
+            getEl("sok_btn_reset").addEventListener("click", function() {
+                if(confirm("Tüm form varsayılan değerlere sıfırlanacak?")) location.reload();
+            });
 
-                                // Çift Yönlendirmeli (Portrait + Landscape) Resmî Word Aktarımı
-                                getEl("sok_btn_word").addEventListener("click", function() {
-                                    var p1 = getEl("sokA4Preview").innerHTML;
-                                    var p2 = getEl("sokA4PreviewLandscape").innerHTML;
-                                    var sube = getEl("sok_sube").value.trim() || "11_A";
-                                    
-                                    var wordHTML = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>" +
-                                        "<head><meta charset='utf-8'/><title>ŞÖK Tutanak</title>" +
-                                        "<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->" +
-                                        "<style>" +
-                                            "@page WordSection1 { size: 595.3pt 841.9pt; margin: 42.55pt 40pt 42.55pt 40pt; }" +
-                                            "@page WordSection2 { size: 841.9pt 595.3pt; mso-page-orientation: landscape; margin: 24pt 18pt 24pt 18pt; }" +
-                                            "div.WordSection1 { page: WordSection1; }" +
-                                            "div.WordSection2 { page: WordSection2; }" +
-                                            "body { font-family: 'Times New Roman', serif; font-size: 11pt; line-height: 1.35; color: #000000; text-align: left; }" +
-                                            "p { margin: 0 0 6pt 0; text-align: justify; font-size: 11pt; line-height: 1.35; font-family: 'Times New Roman', serif; }" +
-                                            "table { border-collapse: collapse; width: 100%; margin-top: 8pt; margin-bottom: 12pt; }" +
-                                            "th, td { border: 1pt solid #000000; padding: 5pt 6pt; font-size: 10pt; font-family: 'Times New Roman', serif; }" +
-                                            "th { background-color: #f2f2f2; font-weight: bold; text-align: center; }" +
-                                        "</style></head><body>" +
-                                        "<div class='WordSection1'>" + p1 + "</div>" +
-                                        "<br clear='all' style='page-break-before:always; mso-break-type:section-break'/>" +
-                                        "<div class='WordSection2'>" + p2 + "</div>" +
-                                        "</body></html>";
+            getEl("sok_btn_pdf").addEventListener("click", function() {
+                if (typeof html2pdf === "undefined") { alert("PDF kütüphanesi yüklenemedi!"); return; }
+                var element = getEl("sokPreviewContainer");
+                var sube = getEl("sok_sube").value.trim() || "11_A";
+                
+                var opt = { 
+                    margin: [0, 0, 0, 0], 
+                    filename: sube.replace(/[/\\?%*:|"<>]/g, '_') + "_SOK_Resmi_Tutanak.pdf", 
+                    image: { type: 'jpeg', quality: 0.98 }, 
+                    html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 }, 
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }, 
+                    pagebreak: { mode: ['css', 'legacy'] } 
+                };
+                html2pdf().set(opt).from(element).save();
+            });
 
-                                    var blob = new Blob(['\ufeff', wordHTML], { type: 'application/msword' });
-                                    var link = document.createElement('a');
-                                    link.href = URL.createObjectURL(blob);
-                                    link.download = sube.replace(/[/\\?%*:|"<>]/g, '_') + "_SOK_Resmi_Tutanak.doc";
-                                    document.body.appendChild(link);
-                                    link.click();
-                                    document.body.removeChild(link);
-                                });
+            getEl("sok_btn_word").addEventListener("click", function() {
+                var p1 = getEl("sokA4Preview").innerHTML;
+                var p2 = getEl("sokA4PreviewLandscape").innerHTML;
+                var sube = getEl("sok_sube").value.trim() || "11_A";
+                
+                var wordHTML = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>" +
+                    "<head><meta charset='utf-8'/><title>ŞÖK Tutanak</title>" +
+                    "<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->" +
+                    "<style>" +
+                        "@page WordSection1 { size: 595.3pt 841.9pt; margin: 42.55pt 40pt 42.55pt 40pt; }" +
+                        "@page WordSection2 { size: 841.9pt 595.3pt; mso-page-orientation: landscape; margin: 24pt 18pt 24pt 18pt; }" +
+                        "div.WordSection1 { page: WordSection1; }" +
+                        "div.WordSection2 { page: WordSection2; }" +
+                        "body { font-family: 'Times New Roman', serif; font-size: 11pt; line-height: 1.35; color: #000000; text-align: left; }" +
+                        "p { margin: 0 0 6pt 0; text-align: justify; font-size: 11pt; line-height: 1.35; font-family: 'Times New Roman', serif; }" +
+                        "table { border-collapse: collapse; width: 100%; margin-top: 8pt; margin-bottom: 12pt; }" +
+                        "th, td { border: 1pt solid #000000; padding: 5pt 6pt; font-size: 10pt; font-family: 'Times New Roman', serif; }" +
+                        "th { background-color: #f2f2f2; font-weight: bold; text-align: center; }" +
+                    "</style></head><body>" +
+                    "<div class='WordSection1'>" + p1 + "</div>" +
+                    "<br clear='all' style='page-break-before:always; mso-break-type:section-break'/>" +
+                    "<div class='WordSection2'>" + p2 + "</div>" +
+                    "</body></html>";
 
-                                // Branşları ve Örnek Öğrencileri Yükle
-                                varsayilanBranslar.forEach(function(b) { addBransRow(b, ""); });
-                                varsayilanOgrenciler.forEach(function(o) { addOgrenciRow(o.ad, o.kisilik, o.beslenme, o.saglik, o.sosyal, o.ekonomik, o.basari); });
-                                updatePreview();
-                            }
+                var blob = new Blob(['\ufeff', wordHTML], { type: 'application/msword' });
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = sube.replace(/[/\\?%*:|"<>]/g, '_') + "_SOK_Resmi_Tutanak.doc";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
 
-                            if (document.readyState === "complete" || document.readyState === "interactive") {
-                                setTimeout(initSokApp, 300);
-                            } else {
-                                document.addEventListener("DOMContentLoaded", initSokApp);
-                            }
+            varsayilanBranslar.forEach(function(b) { addBransRow(b, ""); });
+            varsayilanOgrenciler.forEach(function(o) { addOgrenciRow(o.ad, o.kisilik, o.beslenme, o.saglik, o.sosyal, o.ekonomik, o.basari); });
+            updatePreview();
+        }
 
-                            // --- IFRAME YÜKSEKLİK BİLDİRİMİ (Odoo'daki iframe'in otomatik büyümesi için) ---
-                            function notifyParentHeight() {
-                                var height = document.documentElement.scrollHeight || document.body.scrollHeight;
-                                window.parent.postMessage({ type: 'setHeight', height: height + 30 }, '*');
-                            }
-                            window.addEventListener('load', function () { setTimeout(notifyParentHeight, 400); });
-                            window.addEventListener('resize', notifyParentHeight);
-                            if (window.ResizeObserver) {
-                                new ResizeObserver(notifyParentHeight).observe(document.body);
-                            }
-                        })();
-                    //]]>
-                    </script>
+        window.addEventListener('load', function() {
+            setTimeout(sendHeightToParent, 300);
+            setInterval(sendHeightToParent, 1000);
+        });
+
+        if (document.readyState === "complete" || document.readyState === "interactive") {
+            setTimeout(initSokApp, 200);
+        } else {
+            document.addEventListener("DOMContentLoaded", initSokApp);
+        }
+    })();
+//]]>
+</script>
 </body>
 </html>
