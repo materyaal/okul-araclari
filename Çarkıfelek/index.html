@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Rastgele Öğrenci Seçici & Çok Amaçlı Çarkıfelek</title>
   <style>
-    /* ==========================================================
-       TEMA DEĞİŞKENLERİ (CSS Variables)
-    ========================================================== */
     :root[data-theme="navy"] {
       --bg-main: #0b1329;
       --bg-panel: #16203c;
@@ -52,7 +49,6 @@
       --accent-success: #10b981;
       --accent-warning: #f59e0b;
       --radius: 12px;
-      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
     }
 
     * {
@@ -62,37 +58,34 @@
       user-select: none;
       -webkit-user-select: none;
       -webkit-tap-highlight-color: transparent;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
-    body {
+    html, body {
+      width: 100%;
+      min-height: 100%;
       background-color: var(--bg-main);
       color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
       overflow-x: hidden;
-      transition: background-color 0.25s ease, color 0.25s ease;
     }
 
     header {
       background-color: var(--bg-panel);
       border-bottom: 1px solid var(--border-color);
-      padding: 0.75rem 1.25rem;
+      padding: 0.75rem 1rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: var(--shadow);
-      z-index: 10;
-      flex-wrap: wrap;
-      gap: 0.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 20;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 1.15rem;
+      gap: 0.4rem;
+      font-size: 1.1rem;
       font-weight: 800;
       color: var(--text-main);
     }
@@ -101,56 +94,39 @@
       color: var(--accent);
     }
 
-    .theme-selector-box {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
     .theme-select {
       background-color: var(--bg-input);
       color: var(--text-main);
       border: 1px solid var(--border-color);
-      padding: 0.4rem 0.75rem;
+      padding: 0.4rem 0.6rem;
       border-radius: 8px;
       font-size: 0.85rem;
       font-weight: 600;
       outline: none;
-      cursor: pointer;
     }
 
     .btn {
       background-color: var(--accent);
       color: #fff;
       border: none;
-      padding: 0.65rem 1.2rem;
+      padding: 0.65rem 1rem;
       border-radius: var(--radius);
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
-      transition: all 0.15s ease;
+      gap: 0.4rem;
       touch-action: manipulation;
     }
 
-    .btn:hover {
-      background-color: var(--accent-hover);
-      transform: translateY(-1px);
-    }
-
     .btn:active {
-      transform: translateY(1px);
+      transform: scale(0.98);
     }
 
     .btn-danger {
       background-color: var(--accent-danger);
-    }
-
-    .btn-danger:hover {
-      background-color: var(--accent-danger-hover);
     }
 
     .btn-secondary {
@@ -158,21 +134,25 @@
       color: var(--text-main);
     }
 
-    .btn-secondary:hover {
-      opacity: 0.9;
-    }
-
-    /* Ana Taşıyıcı: Mobilde doğal akış ve scroll için min-height kullanımı */
+    /* Ana Taşıyıcı: Masaüstünde 2 Sütun, Mobilde Tek Sütun */
     .main-container {
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      flex: 1;
+      display: flex;
+      flex-direction: column;
       width: 100%;
-      position: relative;
+      max-width: 1400px;
+      margin: 0 auto;
     }
 
-    /* Sol Sütun - Çark Alanı */
+    @media (min-width: 901px) {
+      .main-container {
+        flex-direction: row;
+        align-items: flex-start;
+      }
+    }
+
+    /* Sol / Üst: Çark Alanı */
     .wheel-section {
+      width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -181,52 +161,69 @@
       position: relative;
     }
 
+    @media (min-width: 901px) {
+      .wheel-section {
+        flex: 1.1;
+        position: sticky;
+        top: 60px;
+        padding: 2rem;
+      }
+    }
+
     .wheel-container {
       position: relative;
-      width: min(65vh, 88vw);
-      height: min(65vh, 88vw);
-      max-width: 560px;
-      max-height: 560px;
+      width: min(84vw, 360px);
+      height: min(84vw, 360px);
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+
+    @media (min-width: 901px) {
+      .wheel-container {
+        width: min(65vh, 520px);
+        height: min(65vh, 520px);
+        max-width: 520px;
+        max-height: 520px;
+      }
     }
 
     #wheelCanvas {
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      box-shadow: 0 0 30px rgba(0,0,0,0.35);
+      box-shadow: 0 0 25px rgba(0,0,0,0.4);
+      display: block;
     }
 
     .pointer {
       position: absolute;
-      top: -14px;
+      top: -12px;
       left: 50%;
-      margin-left: -18px;
-      width: 36px;
-      height: 46px;
+      margin-left: -16px;
+      width: 32px;
+      height: 42px;
       z-index: 5;
       transform-origin: 50% 0%;
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+      filter: drop-shadow(0 3px 5px rgba(0,0,0,0.5));
       transition: transform 0.05s ease-out;
     }
 
     .pointer-shape {
       width: 0;
       height: 0;
-      border-left: 18px solid transparent;
-      border-right: 18px solid transparent;
-      border-top: 38px solid var(--accent-warning);
+      border-left: 16px solid transparent;
+      border-right: 16px solid transparent;
+      border-top: 34px solid var(--accent-warning);
     }
 
     .pointer-hub {
       position: absolute;
-      top: -6px;
+      top: -5px;
       left: 50%;
       transform: translateX(-50%);
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
       background: #fff;
       border-radius: 50%;
       border: 3px solid var(--accent-warning);
@@ -237,23 +234,29 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 82px;
-      height: 82px;
+      width: 72px;
+      height: 72px;
       border-radius: 50%;
       background: radial-gradient(circle, #ffffff 0%, #cbd5e1 100%);
       color: #0b1329;
-      border: 6px solid var(--bg-panel);
+      border: 5px solid var(--bg-panel);
       font-weight: 850;
-      font-size: 1rem;
-      letter-spacing: 0.5px;
+      font-size: 0.85rem;
       cursor: pointer;
       z-index: 6;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.15s ease;
       touch-action: manipulation;
+    }
+
+    @media (min-width: 901px) {
+      .center-spin-btn {
+        width: 84px;
+        height: 84px;
+        font-size: 1rem;
+      }
     }
 
     .center-spin-btn:active {
@@ -267,14 +270,20 @@
       border-color: var(--border-color);
     }
 
-    /* Sağ Sütun - Kontrol Paneli */
+    /* Sağ / Alt: Kontrol Paneli */
     .controls-section {
-      background-color: var(--bg-panel);
-      border-left: 1px solid var(--border-color);
-      padding: 1.25rem;
+      width: 100%;
+      padding: 1rem;
       display: flex;
       flex-direction: column;
       gap: 1rem;
+    }
+
+    @media (min-width: 901px) {
+      .controls-section {
+        flex: 0.9;
+        padding: 2rem 1.5rem 3rem 0;
+      }
     }
 
     .card {
@@ -288,7 +297,7 @@
     }
 
     .card-title {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 700;
       color: var(--text-main);
       display: flex;
@@ -300,7 +309,7 @@
       background: var(--accent);
       color: white;
       font-size: 0.75rem;
-      padding: 0.2rem 0.55rem;
+      padding: 0.15rem 0.5rem;
       border-radius: 9999px;
       font-weight: 700;
     }
@@ -311,20 +320,14 @@
       border: 1px solid var(--border-color);
       border-radius: 8px;
       color: var(--text-main);
-      padding: 0.65rem 0.8rem;
-      font-size: 0.95rem;
+      padding: 0.65rem 0.75rem;
+      font-size: 0.9rem;
       outline: none;
-      transition: border-color 0.2s ease;
-    }
-
-    select:focus, input[type="text"]:focus, textarea:focus {
-      border-color: var(--accent);
     }
 
     textarea {
       resize: vertical;
-      min-height: 120px;
-      max-height: 240px;
+      min-height: 110px;
       line-height: 1.4;
       user-select: text;
       -webkit-user-select: text;
@@ -352,7 +355,6 @@
       font-size: 0.85rem;
       font-weight: 500;
       color: var(--text-main);
-      cursor: pointer;
     }
 
     .switch {
@@ -399,12 +401,12 @@
       transform: translateX(20px);
     }
 
-    /* Kazanan Modalı */
+    /* Modal */
     .modal-backdrop {
       position: fixed;
       top: 0; left: 0; width: 100vw; height: 100vh;
       background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(5px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -423,13 +425,13 @@
     .modal-box {
       background: var(--bg-panel);
       border: 2px solid var(--accent);
-      border-radius: 18px;
-      padding: 2rem 1.5rem;
-      max-width: 480px;
+      border-radius: 16px;
+      padding: 1.5rem;
+      max-width: 420px;
       width: 100%;
       text-align: center;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-      transform: scale(0.85);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      transform: scale(0.9);
       transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
@@ -440,29 +442,34 @@
     .modal-tag {
       color: var(--accent-warning);
       font-weight: 800;
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       text-transform: uppercase;
       letter-spacing: 1px;
-      margin-bottom: 0.5rem;
     }
 
     .winner-name {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 800;
       color: var(--text-main);
-      margin: 1rem 0 1.5rem;
-      padding: 1rem;
+      margin: 1rem 0;
+      padding: 0.8rem;
       background: var(--bg-main);
-      border-radius: 12px;
+      border-radius: 10px;
       border: 1px solid var(--border-color);
       word-break: break-word;
     }
 
     .modal-actions {
       display: flex;
-      gap: 0.8rem;
+      gap: 0.6rem;
       justify-content: center;
-      flex-wrap: wrap;
+      flex-direction: column;
+    }
+
+    @media (min-width: 480px) {
+      .modal-actions {
+        flex-direction: row;
+      }
     }
 
     #confettiCanvas {
@@ -474,57 +481,35 @@
       pointer-events: none;
       z-index: 99;
     }
-
-    /* Mobil ve Tablet Uyumluluk Kuralı */
-    @media (max-width: 900px) {
-      .main-container {
-        grid-template-columns: 1fr;
-        height: auto;
-        display: flex;
-        flex-direction: column;
-      }
-      .controls-section {
-        border-left: none;
-        border-top: 1px solid var(--border-color);
-        padding-bottom: 2.5rem;
-      }
-      .wheel-container {
-        width: 84vw;
-        height: 84vw;
-        margin: 0.5rem auto;
-      }
-    }
   </style>
 </head>
 <body>
 
   <header>
     <div class="brand">
-      🎯 <span>Materyaal</span> Akıllı Çarkıfelek
+      🎯 <span>Materyaal</span> Çarkıfelek
     </div>
-    <div class="theme-selector-box">
-      <select id="themeSelector" class="theme-select" aria-label="Tema Seçimi">
-        <option value="navy">🌌 Koyu Lacivert</option>
-        <option value="dark">🌑 Gece Siyahı</option>
-        <option value="light">☀️ Aydınlık (Açık)</option>
-      </select>
-    </div>
+    <select id="themeSelector" class="theme-select" aria-label="Tema Seçimi">
+      <option value="navy">🌌 Koyu Lacivert</option>
+      <option value="dark">🌑 Gece Siyahı</option>
+      <option value="light">☀️ Aydınlık (Açık)</option>
+    </select>
   </header>
 
   <div class="main-container">
-    <!-- Sol Sütun: Çark Alanı -->
+    <!-- Çark Alanı -->
     <section class="wheel-section">
       <div class="wheel-container">
         <div class="pointer" id="wheelPointer">
           <div class="pointer-hub"></div>
           <div class="pointer-shape"></div>
         </div>
-        <canvas id="wheelCanvas" width="900" height="900"></canvas>
+        <canvas id="wheelCanvas" width="800" height="800"></canvas>
         <button class="center-spin-btn" id="spinBtn">DÖNDÜR</button>
       </div>
     </section>
 
-    <!-- Sağ Sütun: Kontrol Paneli -->
+    <!-- Kontrol Paneli -->
     <section class="controls-section">
       
       <!-- Hazır Şablonlar -->
@@ -549,7 +534,7 @@
           <select id="savedListsSelect" style="flex: 1;">
             <option value="" disabled selected>Kayıtlı liste seçin...</option>
           </select>
-          <button class="btn btn-danger" id="deleteListBtn" title="Seçili Listeyi Sil">Sil</button>
+          <button class="btn btn-danger" id="deleteListBtn" title="Listeyi Sil">Sil</button>
         </div>
         <div class="button-group">
           <input type="text" id="listNameInput" placeholder="Örn: 9-A Sınıfı" maxlength="30">
@@ -584,7 +569,7 @@
         </div>
 
         <div class="button-group">
-          <button class="btn btn-secondary" id="resetOriginalBtn" style="flex: 1;">Orijinal Listeyi Sıfırla</button>
+          <button class="btn btn-secondary" id="resetOriginalBtn" style="flex: 1;">Listeyi Sıfırla</button>
           <button class="btn btn-danger" id="clearBtn">Temizle</button>
         </div>
       </div>
@@ -595,7 +580,7 @@
   <!-- Kazanan Modalı -->
   <div class="modal-backdrop" id="winnerModal">
     <div class="modal-box">
-      <div class="modal-tag">🎉 Günün Şanslı Öğresi / Görevi</div>
+      <div class="modal-tag">🎉 Günün Şanslı Öğesi / Görevi</div>
       <div class="winner-name" id="winnerDisplay">...</div>
       <div class="modal-actions">
         <button class="btn btn-secondary" id="modalCloseBtn">Kapat</button>
@@ -604,13 +589,9 @@
     </div>
   </div>
 
-  <!-- Konfeti Efekti -->
   <canvas id="confettiCanvas"></canvas>
 
   <script>
-    /* ==========================================================
-       1. VERİ TANIMLARI & GLOBAL DURUM
-    ========================================================== */
     const PRESET_TEMPLATES = {
       homework: [
         "Evde bir deney yap",
@@ -650,7 +631,6 @@
     let currentRotation = 0;
     let lastWinner = null;
 
-    // DOM Referansları
     const canvas = document.getElementById('wheelCanvas');
     const ctx = canvas.getContext('2d');
     const pointer = document.getElementById('wheelPointer');
@@ -674,9 +654,6 @@
     const modalCloseBtn = document.getElementById('modalCloseBtn');
     const modalRemoveBtn = document.getElementById('modalRemoveBtn');
 
-    /* ==========================================================
-       2. TEMA YÖNETİMİ
-    ========================================================== */
     function initTheme() {
       const savedTheme = localStorage.getItem('materyaal_wheel_theme') || 'navy';
       document.documentElement.setAttribute('data-theme', savedTheme);
@@ -690,11 +667,7 @@
       drawWheel();
     });
 
-    /* ==========================================================
-       3. SES MOTORU (Web Audio API)
-    ========================================================== */
     let audioCtx = null;
-
     function initAudio() {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -712,7 +685,7 @@
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(520, audioCtx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.035);
-        gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.035);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
@@ -732,24 +705,21 @@
           osc.type = 'sine';
           osc.frequency.setValueAtTime(freq, start);
           gain.gain.setValueAtTime(0, start);
-          gain.gain.linearRampToValueAtTime(0.35, start + 0.02);
-          gain.gain.exponentialRampToValueAtTime(0.001, start + 0.4);
+          gain.gain.linearRampToValueAtTime(0.3, start + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, start + 0.35);
           osc.connect(gain);
           gain.connect(audioCtx.destination);
           osc.start(start);
-          osc.stop(start + 0.4);
+          osc.stop(start + 0.35);
         });
       } catch (e) {}
     }
 
-    /* ==========================================================
-       4. ÇARK ÇİZİMİ (Canvas)
-    ========================================================== */
     function drawWheel() {
       const w = canvas.width;
       const h = canvas.height;
       const center = w / 2;
-      const radius = center - 30;
+      const radius = center - 25;
       const style = getComputedStyle(document.documentElement);
       const canvasBg = style.getPropertyValue('--canvas-bg').trim() || '#16203c';
       const ringBg = style.getPropertyValue('--canvas-ring').trim() || '#1f2d52';
@@ -768,7 +738,7 @@
         ctx.stroke();
 
         ctx.fillStyle = textMuted;
-        ctx.font = 'bold 28px system-ui';
+        ctx.font = 'bold 26px system-ui';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('Listeye Eleman Ekleyin', center, center);
@@ -792,7 +762,7 @@
         ctx.closePath();
         ctx.fillStyle = PALETTE[i % PALETTE.length];
         ctx.fill();
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 2;
         ctx.strokeStyle = 'rgba(0,0,0,0.15)';
         ctx.stroke();
 
@@ -802,14 +772,14 @@
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#ffffff';
 
-        let fontSize = Math.min(26, Math.max(12, Math.floor(460 / items.length)));
-        if (items.length <= 4) fontSize = 30;
+        let fontSize = Math.min(24, Math.max(12, Math.floor(440 / items.length)));
+        if (items.length <= 4) fontSize = 28;
         ctx.font = `700 ${fontSize}px system-ui`;
-        ctx.shadowColor = "rgba(0,0,0,0.7)";
-        ctx.shadowBlur = 5;
+        ctx.shadowColor = "rgba(0,0,0,0.6)";
+        ctx.shadowBlur = 4;
 
         let text = isMystery ? "???" : items[i];
-        const maxTextLen = radius - 90;
+        const maxTextLen = radius - 80;
         
         if (ctx.measureText(text).width > maxTextLen) {
           while (ctx.measureText(text + '...').width > maxTextLen && text.length > 0) {
@@ -818,23 +788,20 @@
           text += '...';
         }
 
-        ctx.fillText(text, radius - 40, 0);
+        ctx.fillText(text, radius - 35, 0);
         ctx.restore();
       }
 
       ctx.restore();
       ctx.beginPath();
       ctx.arc(center, center, radius, 0, 2 * Math.PI);
-      ctx.lineWidth = 16;
+      ctx.lineWidth = 14;
       ctx.strokeStyle = ringBg;
       ctx.stroke();
     }
 
-    /* ==========================================================
-       5. DÖNÜŞ FİZİĞİ & ANİMASYON
-    ========================================================== */
     function triggerPointerFlick() {
-      pointer.style.transform = 'rotate(-18deg)';
+      pointer.style.transform = 'rotate(-16deg)';
       setTimeout(() => {
         pointer.style.transform = 'rotate(0deg)';
       }, 50);
@@ -865,7 +832,7 @@
       const totalSpinAngle = (minRounds * 2 * Math.PI) + diff;
 
       const startAngle = currentRotation;
-      const duration = 4200 + Math.random() * 1600;
+      const duration = 4000 + Math.random() * 1500;
       let startTime = null;
       let lastTickSlice = -1;
 
@@ -910,9 +877,6 @@
       requestAnimationFrame(animate);
     }
 
-    /* ==========================================================
-       6. KONFETİ VE KAZANAN MODALI
-    ========================================================== */
     let confettiParticles = [];
     let confettiAnimationId = null;
 
@@ -925,20 +889,20 @@
 
     function launchConfetti() {
       confettiParticles = [];
-      const colors = ['#f59e0b', '#f43f5e', '#10b981', '#6366f1', '#ec4899', '#38bdf8', '#fbbf24'];
-      for (let i = 0; i < 150; i++) {
+      const colors = ['#f59e0b', '#f43f5e', '#10b981', '#6366f1', '#ec4899', '#38bdf8'];
+      for (let i = 0; i < 120; i++) {
         confettiParticles.push({
           x: window.innerWidth / 2,
           y: window.innerHeight / 2,
-          w: Math.random() * 10 + 6,
-          h: Math.random() * 6 + 4,
+          w: Math.random() * 8 + 4,
+          h: Math.random() * 5 + 3,
           color: colors[Math.floor(Math.random() * colors.length)],
-          vx: (Math.random() - 0.5) * 24,
-          vy: (Math.random() - 0.5) * 24 - 6,
+          vx: (Math.random() - 0.5) * 20,
+          vy: (Math.random() - 0.5) * 20 - 5,
           gravity: 0.35,
           opacity: 1,
           rot: Math.random() * 360,
-          rotSpeed: (Math.random() - 0.5) * 14
+          rotSpeed: (Math.random() - 0.5) * 12
         });
       }
 
@@ -955,7 +919,7 @@
         p.y += p.vy;
         p.vy += p.gravity;
         p.rot += p.rotSpeed;
-        p.opacity -= 0.008;
+        p.opacity -= 0.009;
 
         if (p.opacity > 0) {
           alive = true;
@@ -985,9 +949,6 @@
       winnerModal.classList.remove('active');
     }
 
-    /* ==========================================================
-       7. VERİ VE LİSTE YÖNETİMİ
-    ========================================================== */
     function cleanAndParseInput(rawText) {
       return rawText
         .split(/[\n,]+/)
@@ -1045,9 +1006,6 @@
       }
     }
 
-    /* ==========================================================
-       8. ETKİNLİK BAĞLANTILARI
-    ========================================================== */
     function attachFastClick(element, handler) {
       element.addEventListener('click', handler);
       element.addEventListener('touchend', (e) => {
@@ -1062,7 +1020,6 @@
     });
 
     mysteryToggle.addEventListener('change', drawWheel);
-
     attachFastClick(spinBtn, spinWheel);
 
     templatesSelect.addEventListener('change', (e) => {
